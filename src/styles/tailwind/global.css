@@ -1,0 +1,58 @@
+/* 🌿 GLOBAL STYLES FOR NEWECO */
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Fancy gradient background */
+body {
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+  font-family: 'Poppins', sans-serif;
+  color: #1f2937;
+}
+
+/* Subtle card animation */
+.card {
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Glow effect for buttons */
+.glow-btn {
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+}
+.glow-btn:hover {
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  transform: scale(1.03);
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-in-up {
+  animation: fadeInUp 1s ease forwards;
+}
+
+/* Footer wave line */
+footer::before {
+  content: '';
+  display: block;
+  height: 4px;
+  width: 100px;
+  margin: 0 auto 10px auto;
+  background-color: #ffffff;
+  border-radius: 9999px;
+}

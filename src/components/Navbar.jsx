@@ -1,30 +1,72 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 
-export default function Navbar() {
+const Navbar = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  const links = [
+    { name: "Home", path: "/" },
+    { name: "Shop", path: "/shop" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
+    { name: "Sign Up", path: "/signup" },
+    { name: "Login", path: "/login" },
+    { name: "Profile", path: "/profile" },
+  ];
+
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+    <nav className="bg-white shadow-md sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+        {/* Logo */}
         <Link
           to="/"
-          className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+          className="text-2xl font-extrabold text-emerald-700 hover:text-emerald-600"
         >
-          QuantumKit
+          EcoStore
         </Link>
 
-        <ul className="hidden md:flex space-x-8 text-gray-700 font-medium">
-          <li><Link to="/" className="hover:text-indigo-600">Home</Link></li>
-          <li><Link to="/products" className="hover:text-indigo-600">Shop</Link></li>
-          <li><Link to="/contact" className="hover:text-indigo-600">Contact</Link></li>
-        </ul>
+        {/* Desktop Links */}
+        <div className="hidden md:flex space-x-6">
+          {links.map((link) => (
+            <Link
+              key={link.name}
+              to={link.path}
+              className="text-gray-700 font-medium hover:text-emerald-600 hover:scale-105"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
 
-        <Link
-          to="/cart"
-          className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-indigo-700"
+        {/* Mobile Menu Button */}
+        <button
+          onClick={toggleMenu}
+          className="md:hidden p-2 rounded-lg hover:bg-emerald-100"
         >
-          Cart
-        </Link>
-      </nav>
-    </header>
+          {menuOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
+      </div>
+
+      {/* Mobile Dropdown */}
+      {menuOpen && (
+        <div className="md:hidden bg-white shadow-md border-t border-emerald-100">
+          {links.map((link) => (
+            <Link
+              key={link.name}
+              to={link.path}
+              onClick={() => setMenuOpen(false)}
+              className="block px-6 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
+      )}
+    </nav>
   );
-}
+};
+
+export default Navbar;
