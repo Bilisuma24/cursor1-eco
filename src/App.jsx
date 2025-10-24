@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { Search, ShoppingCart, Heart, User, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Globe, MapPin } from "lucide-react";
 import { useState, useContext } from "react";
+import productsData from "./data/products.json";
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -23,28 +24,32 @@ function NavbarContent() {
   const { getCartItemsCount, wishlist } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchCategory, setSearchCategory] = useState("");
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      window.location.href = `/shop?search=${encodeURIComponent(searchTerm)}`;
-    }
+    const params = new URLSearchParams();
+    if (searchTerm.trim()) params.set("search", searchTerm);
+    if (searchCategory) params.set("category", searchCategory);
+    const qs = params.toString();
+    window.location.href = `/shop${qs ? `?${qs}` : ""}`;
   };
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4">
         {/* Top Bar */}
-        <div className="flex items-center justify-between py-3 text-sm text-gray-600">
-          <div className="flex items-center space-x-6">
-            <span>Free shipping on orders over $50</span>
-            <span>•</span>
-            <span>30-day return policy</span>
+        <div className="flex items-center justify-between py-2 text-xs text-gray-600">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /><span>Ship to</span><span className="font-medium text-gray-800">United States</span></div>
+            <div className="hidden sm:flex items-center gap-1"><Globe className="w-3.5 h-3.5" /><span>English</span><ChevronDown className="w-3 h-3" /></div>
+            <span className="hidden sm:inline">Trade Assurance</span>
+            <span className="hidden md:inline">Secure payments</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <span>Customer Service: 1-800-ECO-SHOP</span>
-            <span>•</span>
-            <span>Help Center</span>
+          <div className="flex items-center gap-4">
+            <span>Help</span>
+            <span>Buyer Protection</span>
+            <span>App</span>
           </div>
         </div>
 
@@ -52,38 +57,63 @@ function NavbarContent() {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">E</span>
+            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-xl">A</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">EcoShop</span>
+            <span className="text-2xl font-bold text-gray-900">AliStyle</span>
           </Link>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-8">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search for products, brands, and more..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+          <div className="flex-1 max-w-3xl mx-6">
+            <form onSubmit={handleSearch} className="flex">
+              <div className="hidden md:block">
+                <select
+                  value={searchCategory}
+                  onChange={(e) => setSearchCategory(e.target.value)}
+                  className="h-[44px] border border-r-0 border-gray-300 rounded-l-lg px-3 text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="">All Categories</option>
+                  {productsData.categories.map((c) => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search for products, brands, and more..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-28 h-[44px] border border-gray-300 md:border-l-0 md:rounded-none rounded-l-lg md:rounded-r-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Search
+                </button>
+              </div>
             </form>
+            <div className="hidden md:flex gap-3 text-xs text-gray-500 mt-2">
+              <span className="hover:text-gray-700 cursor-pointer">Top deals</span>
+              <span className="hover:text-gray-700 cursor-pointer">New arrivals</span>
+              <span className="hover:text-gray-700 cursor-pointer">Free shipping</span>
+            </div>
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium">
+          <div className="hidden lg:flex items-center space-x-6">
+            <Link to="/" className="text-gray-700 hover:text-orange-600 font-medium">
               Home
             </Link>
-            <Link to="/shop" className="text-gray-700 hover:text-blue-600 font-medium">
+            <Link to="/shop" className="text-gray-700 hover:text-orange-600 font-medium">
               Shop
             </Link>
-            <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium">
+            <Link to="/about" className="text-gray-700 hover:text-orange-600 font-medium">
               About
             </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-blue-600 font-medium">
+            <Link to="/contact" className="text-gray-700 hover:text-orange-600 font-medium">
               Contact
             </Link>
           </div>
@@ -101,10 +131,10 @@ function NavbarContent() {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors duration-200">
+            <Link to="/cart" className="relative p-2 text-gray-700 hover:text-orange-600 transition-colors duration-200">
               <ShoppingCart className="w-6 h-6" />
               {getCartItemsCount() > 0 && (
-                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {getCartItemsCount()}
                 </span>
               )}
@@ -115,13 +145,13 @@ function NavbarContent() {
               <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-blue-600 font-medium"
+                  className="text-gray-700 hover:text-orange-600 font-medium"
                 >
                   Login
                 </Link>
                 <Link
                   to="/signup"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                  className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200 font-medium"
                 >
                   Sign Up
                 </Link>
@@ -130,14 +160,14 @@ function NavbarContent() {
               <div className="flex items-center space-x-2">
                 <Link
                   to="/profile"
-                  className="flex items-center space-x-2 text-gray-700 hover:text-blue-600"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-orange-600"
                 >
                   <User className="w-5 h-5" />
                   <span className="hidden sm:inline">Profile</span>
                 </Link>
                 <Link
                   to="/orders"
-                  className="text-gray-700 hover:text-blue-600 font-medium"
+                  className="text-gray-700 hover:text-orange-600 font-medium"
                 >
                   Orders
                 </Link>
@@ -156,7 +186,7 @@ function NavbarContent() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-gray-700 hover:text-blue-600"
+              className="md:hidden p-2 text-gray-700 hover:text-orange-600"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -167,24 +197,24 @@ function NavbarContent() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 py-4">
             <div className="flex flex-col space-y-4">
-              <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium">
+              <Link to="/" className="text-gray-700 hover:text-orange-600 font-medium">
                 Home
               </Link>
-              <Link to="/shop" className="text-gray-700 hover:text-blue-600 font-medium">
+              <Link to="/shop" className="text-gray-700 hover:text-orange-600 font-medium">
                 Shop
               </Link>
-              <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium">
+              <Link to="/about" className="text-gray-700 hover:text-orange-600 font-medium">
                 About
               </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-blue-600 font-medium">
+              <Link to="/contact" className="text-gray-700 hover:text-orange-600 font-medium">
                 Contact
               </Link>
               {user && (
                 <>
-                  <Link to="/profile" className="text-gray-700 hover:text-blue-600 font-medium">
+                  <Link to="/profile" className="text-gray-700 hover:text-orange-600 font-medium">
                     Profile
                   </Link>
-                  <Link to="/orders" className="text-gray-700 hover:text-blue-600 font-medium">
+                  <Link to="/orders" className="text-gray-700 hover:text-orange-600 font-medium">
                     Orders
                   </Link>
                 </>

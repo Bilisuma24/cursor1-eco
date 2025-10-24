@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   Package, 
   Truck, 
@@ -13,74 +13,87 @@ import {
 
 export default function Orders() {
   const [activeTab, setActiveTab] = useState('all');
-  const [orders] = useState([
-    {
-      id: 'ORD-2024-001',
-      date: '2024-01-15',
-      status: 'delivered',
-      total: 189.98,
-      items: [
-        {
-          id: 1,
-          name: 'Wireless Bluetooth Earbuds Pro',
-          image: 'https://images.unsplash.com/photo-1606220838315-056192d5e927?w=100&h=100&fit=crop',
-          price: 89.99,
-          quantity: 1,
-          seller: 'TechWorld Store'
-        },
-        {
-          id: 2,
-          name: 'Smart Fitness Watch Series 8',
-          image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop',
-          price: 199.99,
-          quantity: 1,
-          seller: 'Fitness Gear Pro'
-        }
-      ],
-      tracking: {
-        number: 'TRK123456789',
-        carrier: 'FedEx',
-        estimatedDelivery: '2024-01-18'
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    // Load orders from localStorage or fallback to samples
+    try {
+      const saved = JSON.parse(localStorage.getItem('orders') || '[]');
+      if (saved.length > 0) {
+        setOrders(saved);
+        return;
       }
-    },
-    {
-      id: 'ORD-2024-002',
-      date: '2024-01-12',
-      status: 'shipped',
-      total: 79.99,
-      items: [
-        {
-          id: 6,
-          name: 'Smart Home Security Camera',
-          image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop',
-          price: 79.99,
-          quantity: 1,
-          seller: 'Smart Home Solutions'
+    } catch {}
+    // Fallback sample orders
+    setOrders([
+      {
+        id: 'ORD-2024-001',
+        date: '2024-01-15',
+        status: 'delivered',
+        total: 189.98,
+        items: [
+          {
+            id: 1,
+            name: 'Wireless Bluetooth Earbuds Pro',
+            image: 'https://images.unsplash.com/photo-1606220838315-056192d5e927?w=100&h=100&fit=crop',
+            price: 89.99,
+            quantity: 1,
+            seller: 'TechWorld Store'
+          },
+          {
+            id: 2,
+            name: 'Smart Fitness Watch Series 8',
+            image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop',
+            price: 199.99,
+            quantity: 1,
+            seller: 'Fitness Gear Pro'
+          }
+        ],
+        tracking: {
+          number: 'TRK123456789',
+          carrier: 'FedEx',
+          estimatedDelivery: '2024-01-18'
         }
-      ],
-      tracking: {
-        number: 'TRK987654321',
-        carrier: 'UPS',
-        estimatedDelivery: '2024-01-20'
+      },
+      {
+        id: 'ORD-2024-002',
+        date: '2024-01-12',
+        status: 'shipped',
+        total: 79.99,
+        items: [
+          {
+            id: 6,
+            name: 'Smart Home Security Camera',
+            image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop',
+            price: 79.99,
+            quantity: 1,
+            seller: 'Smart Home Solutions'
+          }
+        ],
+        tracking: {
+          number: 'TRK987654321',
+          carrier: 'UPS',
+          estimatedDelivery: '2024-01-20'
+        }
+      },
+      {
+        id: 'ORD-2024-003',
+        date: '2024-01-10',
+        status: 'processing',
+        total: 159.99,
+        items: [
+          {
+            id: 3,
+            name: 'Premium Leather Handbag',
+            image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=100&h=100&fit=crop',
+            price: 159.99,
+            quantity: 1,
+            seller: 'Fashion Forward'
+          }
+        ]
       }
-    },
-    {
-      id: 'ORD-2024-003',
-      date: '2024-01-10',
-      status: 'processing',
-      total: 159.99,
-      items: [
-        {
-          id: 3,
-          name: 'Premium Leather Handbag',
-          image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=100&h=100&fit=crop',
-          price: 159.99,
-          quantity: 1,
-          seller: 'Fashion Forward'
-        }
-      ]
-    }
-  ]);
+    ]);
+  }, []);
 
   const getStatusIcon = (status) => {
     switch (status) {

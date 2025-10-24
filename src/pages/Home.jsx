@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   Search, 
-  ShoppingCart, 
-  Heart, 
   Star, 
   Truck, 
   Shield, 
   Award,
   TrendingUp,
-  Clock,
-  Users
+  Users,
+  ChevronRight,
+  ChevronLeft
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
@@ -21,13 +20,8 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price);
-  };
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const bannerTimer = useRef(null);
 
   useEffect(() => {
     // Get featured products (high rating, good sales)
@@ -75,119 +69,79 @@ export default function Home() {
     }
   ];
 
+  const banners = [
+    {
+      title: "Global Shopping Festival",
+      subtitle: "Up to 60% off electronics",
+      image: productsData.products[1]?.images?.[0],
+      cta: { label: "Shop Electronics", to: "/shop?category=Electronics" }
+    },
+    {
+      title: "Fashion Week Deals",
+      subtitle: "Trending styles and accessories",
+      image: productsData.products[4]?.images?.[0],
+      cta: { label: "Shop Fashion", to: "/shop?category=Fashion" }
+    },
+    {
+      title: "Home & Garden Savings",
+      subtitle: "Everything for your space",
+      image: productsData.products[9]?.images?.[0],
+      cta: { label: "Shop Home", to: "/shop?category=Home%20%26%20Garden" }
+    }
+  ];
+
+  useEffect(() => {
+    bannerTimer.current = setInterval(() => {
+      setBannerIndex((i) => (i + 1) % banners.length);
+    }, 5000);
+    return () => bannerTimer.current && clearInterval(bannerTimer.current);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat'
-          }}></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <h1 className="text-6xl font-bold leading-tight">
-                  Discover Amazing Products
-                  <span className="block text-yellow-300 mt-2">at Unbeatable Prices</span>
-                </h1>
-                <p className="text-xl text-blue-100 leading-relaxed max-w-lg">
-                  Shop from millions of products with fast shipping, secure payments, and excellent customer service. Join over 1 million satisfied customers worldwide.
-                </p>
-              </div>
-              
-              {/* Search Bar */}
-              <div className="relative max-w-2xl">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
-                <input
-                  type="text"
-                  placeholder="Search for products, brands, and more..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-14 pr-32 py-4 text-gray-900 rounded-xl focus:ring-4 focus:ring-yellow-400/50 focus:outline-none shadow-2xl text-lg"
-                />
-                <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-yellow-400 text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition-all duration-200 shadow-lg">
-                  Search
-                </button>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/shop"
-                  className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition-all duration-200 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
-                >
-                  Shop Now
-                </Link>
-                <Link
-                  to="/about"
-                  className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 hover:border-white/50 transition-all duration-200 backdrop-blur-sm"
-                >
-                  Learn More
-                </Link>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="flex items-center space-x-8 pt-4">
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-5 h-5 text-yellow-300" />
-                  <span className="text-sm font-medium">Secure Payment</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Truck className="w-5 h-5 text-yellow-300" />
-                  <span className="text-sm font-medium">Free Shipping</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Award className="w-5 h-5 text-yellow-300" />
-                  <span className="text-sm font-medium">Quality Guarantee</span>
-                </div>
-              </div>
+      {/* Hero Section with left categories and banner carousel */}
+      <div className="bg-orange-50">
+        <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Categories */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="px-4 py-3 font-semibold text-gray-800 border-b">Categories</div>
+              <ul className="divide-y">
+                {productsData.categories.map((cat) => (
+                  <li key={cat.id}>
+                    <Link to={`/shop?category=${encodeURIComponent(cat.name)}`} className="flex items-center justify-between px-4 py-3 text-sm hover:bg-gray-50">
+                      <span>{cat.name}</span>
+                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
+          </div>
 
-            {/* Hero Product Showcase */}
-            <div className="relative">
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
-                <div className="grid grid-cols-2 gap-6">
-                  {productsData.products.slice(0, 4).map((product, index) => (
-                    <div key={product.id} className="bg-white rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-                      <div className="aspect-square mb-3 overflow-hidden rounded-xl">
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">
-                        {product.name}
-                      </h3>
-                      <div className="flex items-center space-x-1 mb-2">
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${
-                              i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                        <span className="text-xs text-gray-600 ml-1">{product.rating}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="text-lg font-bold text-red-600">
-                          {formatPrice(product.price)}
-                        </div>
-                        {product.discount && (
-                          <div className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-bold">
-                            -{product.discount}%
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+          {/* Banner Carousel */}
+          <div className="lg:col-span-3 relative">
+            <div className="relative overflow-hidden rounded-xl h-64 md:h-80">
+              {banners.map((b, i) => (
+                <div key={i} className={`absolute inset-0 transition-opacity duration-700 ${i === bannerIndex ? 'opacity-100' : 'opacity-0'}`}>
+                  <img src={b.image} alt={b.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30" />
+                  <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-center text-white">
+                    <h2 className="text-2xl md:text-4xl font-bold mb-2">{b.title}</h2>
+                    <p className="text-sm md:text-lg text-white/90 mb-4">{b.subtitle}</p>
+                    <Link to={b.cta.to} className="w-max bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-md text-sm font-medium">{b.cta.label}</Link>
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
+            {/* Controls */}
+            <button onClick={() => setBannerIndex((bannerIndex - 1 + banners.length) % banners.length)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center"><ChevronLeft className="w-5 h-5" /></button>
+            <button onClick={() => setBannerIndex((bannerIndex + 1) % banners.length)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center"><ChevronRight className="w-5 h-5" /></button>
+            {/* Dots */}
+            <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-2">
+              {banners.map((_, i) => (
+                <button key={i} onClick={() => setBannerIndex(i)} className={`w-2.5 h-2.5 rounded-full ${i === bannerIndex ? 'bg-white' : 'bg-white/60'}`} />
+              ))}
             </div>
           </div>
         </div>
@@ -228,7 +182,7 @@ export default function Home() {
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">Handpicked products with excellent ratings and unbeatable value</p>
             <Link
               to="/shop"
-              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
             >
               <span>View All Products</span>
               <TrendingUp className="w-5 h-5" />
@@ -251,7 +205,7 @@ export default function Home() {
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">Discover what's popular and trending among our customers</p>
             <Link
               to="/shop"
-              className="inline-flex items-center space-x-2 bg-red-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-red-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
             >
               <span>Explore Trending</span>
               <TrendingUp className="w-5 h-5" />

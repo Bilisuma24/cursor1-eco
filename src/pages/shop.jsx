@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Grid, List, Filter, SortAsc } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import SearchAndFilter from "../components/SearchAndFilter";
@@ -12,11 +12,23 @@ export default function Shop() {
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
+  const location = useLocation();
 
   useEffect(() => {
     setProducts(productsData.products);
     setFilteredProducts(productsData.products);
   }, []);
+
+  // Initialize from query string
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('search') || '';
+    const cat = params.get('category') || '';
+    setSearchTerm(q);
+    if (cat) {
+      setFilters((prev) => ({ ...prev, category: cat }));
+    }
+  }, [location.search]);
 
   useEffect(() => {
     let filtered = [...products];
@@ -33,6 +45,16 @@ export default function Shop() {
     // Apply category filter
     if (filters.category) {
       filtered = filtered.filter(product => product.category === filters.category);
+    }
+
+    // Apply subcategory filter
+    if (filters.subcategory) {
+      filtered = filtered.filter(product => product.subcategory === filters.subcategory);
+    }
+
+    // Apply brand filter
+    if (filters.brand) {
+      filtered = filtered.filter(product => product.brand === filters.brand);
     }
 
     // Apply price range filter
@@ -56,6 +78,11 @@ export default function Shop() {
     // Apply free shipping filter
     if (filters.freeShipping) {
       filtered = filtered.filter(product => product.shipping?.free);
+    }
+
+    // Apply express shipping filter
+    if (filters.express) {
+      filtered = filtered.filter(product => product.shipping?.express);
     }
 
     // Apply sorting

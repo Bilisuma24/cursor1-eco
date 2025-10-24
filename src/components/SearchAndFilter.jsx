@@ -74,6 +74,21 @@ export default function SearchAndFilter({
                 ))}
               </select>
             </div>
+            {/* Subcategory (dependent) */}
+            <div className="hidden md:flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-700">Subcategory:</span>
+              <select
+                value={localFilters.subcategory || ''}
+                onChange={(e) => handleFilterChange('subcategory', e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">All</option>
+                {categories
+                  .find(c => c.name === (localFilters.category || ''))?.subcategories?.map((sub) => (
+                    <option key={sub} value={sub}>{sub}</option>
+                  ))}
+              </select>
+            </div>
 
             {/* Price Range */}
             <div className="flex items-center space-x-2">
@@ -118,6 +133,27 @@ export default function SearchAndFilter({
                 />
                 <span className="text-sm text-gray-700">Free Shipping</span>
               </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={localFilters.express || false}
+                  onChange={(e) => handleFilterChange('express', e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Express</span>
+              </label>
+            </div>
+
+            {/* Brand */}
+            <div className="hidden lg:flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-700">Brand:</span>
+              <input
+                type="text"
+                placeholder="e.g. FitTech"
+                value={localFilters.brand || ''}
+                onChange={(e) => handleFilterChange('brand', e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
           </div>
 
@@ -165,6 +201,8 @@ export default function SearchAndFilter({
                 displayValue = `${value}+ Stars`;
               } else if (key === 'freeShipping') {
                 displayValue = 'Free Shipping';
+              } else if (key === 'express') {
+                displayValue = 'Express Shipping';
               } else if (key === 'sortBy') {
                 const sortLabels = {
                   'price-low': 'Price: Low to High',
