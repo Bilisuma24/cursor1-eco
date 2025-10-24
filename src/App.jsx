@@ -13,6 +13,7 @@ import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
 import Wishlist from "./pages/Wishlist";
+import ScrollToTop from "./components/ScrollToTop";
 
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { AuthProvider, AuthContext } from "./contexts/AuthContext";
@@ -40,7 +41,7 @@ function NavbarContent() {
             <span>•</span>
             <span>30-day return policy</span>
           </div>
-      <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             <span>Customer Service: 1-800-ECO-SHOP</span>
             <span>•</span>
             <span>Help Center</span>
@@ -85,7 +86,7 @@ function NavbarContent() {
             <Link to="/contact" className="text-gray-700 hover:text-blue-600 font-medium">
               Contact
             </Link>
-      </div>
+          </div>
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
@@ -110,7 +111,7 @@ function NavbarContent() {
             </Link>
 
             {/* User Menu */}
-        {!user ? (
+            {!user ? (
               <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
@@ -140,11 +141,11 @@ function NavbarContent() {
                 >
                   Orders
                 </Link>
-            <button
-              onClick={() => {
-                logout();
-                window.location.href = "/login";
-              }}
+                <button
+                  onClick={() => {
+                    logout();
+                    window.location.href = "/login";
+                  }}
                   className="text-gray-700 hover:text-red-600 font-medium"
                 >
                   Logout
@@ -202,6 +203,7 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <Router>
+          <ScrollToTop />
           {/* Header (simple horizontal navbar) */}
           <header className="bg-white shadow-md sticky top-0 z-50">
             <NavbarContent />
