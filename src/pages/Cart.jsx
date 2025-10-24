@@ -40,6 +40,37 @@ export default function Cart() {
     setIsCheckingOut(true);
     // Simulate checkout process
     setTimeout(() => {
+      // Build order payload and persist
+      try {
+        const existing = JSON.parse(localStorage.getItem('orders') || '[]');
+        const orderId = `ORD-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(Math.random()*900)+100}`;
+        const items = cartItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          image: item.images?.[0],
+          price: item.price,
+          quantity: item.quantity,
+          seller: item.seller?.name || 'Unknown Seller',
+          selectedColor: item.selectedColor || null,
+          selectedSize: item.selectedSize || null,
+        }));
+
+        const order = {
+          id: orderId,
+          date: new Date().toISOString(),
+          status: 'processing',
+          subtotal,
+          shipping,
+          tax,
+          total,
+          items,
+          tracking: null,
+        };
+        const updated = [order, ...existing];
+        localStorage.setItem('orders', JSON.stringify(updated));
+      } catch (e) {
+        console.error('Failed to save order', e);
+      }
       alert('Order placed successfully!');
       clearCart();
       navigate('/orders');

@@ -153,7 +153,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         
         {/* Discount Badge */}
         {product.discount && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+          <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
             -{product.discount}%
           </div>
         )}
@@ -163,8 +163,8 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           onClick={handleWishlistToggle}
           className={`absolute top-2 right-2 p-2 rounded-full transition-all duration-200 ${
             isInWishlist(product.id)
-              ? 'bg-red-500 text-white'
-              : 'bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white'
+              ? 'bg-orange-500 text-white'
+              : 'bg-white/80 text-gray-600 hover:bg-orange-500 hover:text-white'
           }`}
         >
           <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
@@ -192,10 +192,10 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               onClick={handleAddToCart}
-              className="bg-white text-gray-800 px-4 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors duration-200 flex items-center space-x-2"
+              className="bg-orange-500 text-white px-4 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors duration-200 flex items-center space-x-2"
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>Quick Add</span>
+              <span>Add to Cart</span>
             </button>
           </div>
         )}
@@ -219,7 +219,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         {/* Price */}
         <div className="mb-3">
           <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-red-600">
+            <span className="text-lg font-bold text-orange-600">
               {formatPrice(product.price)}
             </span>
             {product.originalPrice && (
@@ -256,7 +256,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
-          className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2"
         >
           <ShoppingCart className="w-4 h-4" />
           <span>Add to Cart</span>

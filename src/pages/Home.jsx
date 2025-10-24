@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   Search, 
-  ShoppingCart, 
-  Heart, 
   Star, 
   Truck, 
   Shield, 
   Award,
   TrendingUp,
-  Clock,
-  Users
+  Users,
+  ChevronRight,
+  ChevronLeft
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
@@ -21,6 +20,8 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const bannerTimer = useRef(null);
 
   useEffect(() => {
     // Get featured products (high rating, good sales)
@@ -68,83 +69,79 @@ export default function Home() {
     }
   ];
 
+  const banners = [
+    {
+      title: "Global Shopping Festival",
+      subtitle: "Up to 60% off electronics",
+      image: productsData.products[1]?.images?.[0],
+      cta: { label: "Shop Electronics", to: "/shop?category=Electronics" }
+    },
+    {
+      title: "Fashion Week Deals",
+      subtitle: "Trending styles and accessories",
+      image: productsData.products[4]?.images?.[0],
+      cta: { label: "Shop Fashion", to: "/shop?category=Fashion" }
+    },
+    {
+      title: "Home & Garden Savings",
+      subtitle: "Everything for your space",
+      image: productsData.products[9]?.images?.[0],
+      cta: { label: "Shop Home", to: "/shop?category=Home%20%26%20Garden" }
+    }
+  ];
+
+  useEffect(() => {
+    bannerTimer.current = setInterval(() => {
+      setBannerIndex((i) => (i + 1) % banners.length);
+    }, 5000);
+    return () => bannerTimer.current && clearInterval(bannerTimer.current);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl font-bold mb-6">
-                Discover Amazing Products
-                <span className="block text-yellow-300">at Unbeatable Prices</span>
-              </h1>
-              <p className="text-xl text-blue-100 mb-8">
-                Shop from millions of products with fast shipping, secure payments, and excellent customer service.
-              </p>
-              
-              {/* Search Bar */}
-              <div className="relative mb-8">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search for products, brands, and more..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 text-gray-900 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-                />
-                <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-yellow-400 text-gray-900 px-6 py-2 rounded-md font-medium hover:bg-yellow-300 transition-colors duration-200">
-                  Search
-                </button>
-              </div>
-
-              <div className="flex space-x-4">
-                <Link
-                  to="/shop"
-                  className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition-colors duration-200"
-                >
-                  Shop Now
-                </Link>
-                <Link
-                  to="/about"
-                  className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200"
-                >
-                  Learn More
-                </Link>
-              </div>
+      {/* Hero Section with left categories and banner carousel */}
+      <div className="bg-orange-50">
+        <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Categories */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="px-4 py-3 font-semibold text-gray-800 border-b">Categories</div>
+              <ul className="divide-y">
+                {productsData.categories.map((cat) => (
+                  <li key={cat.id}>
+                    <Link to={`/shop?category=${encodeURIComponent(cat.name)}`} className="flex items-center justify-between px-4 py-3 text-sm hover:bg-gray-50">
+                      <span>{cat.name}</span>
+                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
+          </div>
 
-            {/* Hero Image */}
-            <div className="relative">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
-                <div className="grid grid-cols-2 gap-4">
-                  {productsData.products.slice(0, 4).map((product, index) => (
-                    <div key={product.id} className="bg-white rounded-lg p-4 shadow-lg">
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="w-full h-24 object-cover rounded mb-2"
-                      />
-                      <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <div className="flex items-center space-x-1 mt-1">
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${
-                              i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <div className="text-lg font-bold text-red-600 mt-1">
-                        ${product.price}
-                      </div>
-                    </div>
-                  ))}
+          {/* Banner Carousel */}
+          <div className="lg:col-span-3 relative">
+            <div className="relative overflow-hidden rounded-xl h-64 md:h-80">
+              {banners.map((b, i) => (
+                <div key={i} className={`absolute inset-0 transition-opacity duration-700 ${i === bannerIndex ? 'opacity-100' : 'opacity-0'}`}>
+                  <img src={b.image} alt={b.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30" />
+                  <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-center text-white">
+                    <h2 className="text-2xl md:text-4xl font-bold mb-2">{b.title}</h2>
+                    <p className="text-sm md:text-lg text-white/90 mb-4">{b.subtitle}</p>
+                    <Link to={b.cta.to} className="w-max bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-md text-sm font-medium">{b.cta.label}</Link>
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
+            {/* Controls */}
+            <button onClick={() => setBannerIndex((bannerIndex - 1 + banners.length) % banners.length)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center"><ChevronLeft className="w-5 h-5" /></button>
+            <button onClick={() => setBannerIndex((bannerIndex + 1) % banners.length)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center"><ChevronRight className="w-5 h-5" /></button>
+            {/* Dots */}
+            <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-2">
+              {banners.map((_, i) => (
+                <button key={i} onClick={() => setBannerIndex(i)} className={`w-2.5 h-2.5 rounded-full ${i === bannerIndex ? 'bg-white' : 'bg-white/60'}`} />
+              ))}
             </div>
           </div>
         </div>
@@ -184,7 +181,7 @@ export default function Home() {
             </div>
             <Link
               to="/shop"
-              className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1"
+              className="text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
             >
               <span>View All</span>
               <TrendingUp className="w-4 h-4" />
@@ -209,7 +206,7 @@ export default function Home() {
             </div>
             <Link
               to="/shop"
-              className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1"
+              className="text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
             >
               <span>View All</span>
               <TrendingUp className="w-4 h-4" />

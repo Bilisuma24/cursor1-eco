@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   Heart, 
@@ -23,6 +23,8 @@ export default function ProductDetail() {
   
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const autoplayRef = useRef(null);
+  const [isAutoplaying, setIsAutoplaying] = useState(true);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -43,6 +45,20 @@ export default function ProductDetail() {
       setSuggestedProducts(suggested);
     }
   }, [id]);
+
+  // Autoplay carousel
+  useEffect(() => {
+    if (!product || !isAutoplaying) return;
+    autoplayRef.current = setInterval(() => {
+      setSelectedImage((prev) => {
+        const next = (prev + 1) % (product?.images?.length || 1);
+        return next;
+      });
+    }, 4000);
+    return () => {
+      if (autoplayRef.current) clearInterval(autoplayRef.current);
+    };
+  }, [product, isAutoplaying]);
 
   if (!product) {
     return (
@@ -118,15 +134,50 @@ export default function ProductDetail() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Product Images */}
+          {/* Product Images with Carousel */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="aspect-square bg-white rounded-lg overflow-hidden border">
+            <div className="relative aspect-square bg-white rounded-lg overflow-hidden border group">
               <img
                 src={product.images[selectedImage]}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                onMouseEnter={() => setIsAutoplaying(false)}
+                onMouseLeave={() => setIsAutoplaying(true)}
               />
+
+              {/* Prev/Next Controls */}
+              {product.images.length > 1 && (
+                <>
+                  <button
+                    aria-label="Previous image"
+                    onClick={() => setSelectedImage((selectedImage - 1 + product.images.length) % product.images.length)}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    aria-label="Next image"
+                    onClick={() => setSelectedImage((selectedImage + 1) % product.images.length)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
+              {/* Dots */}
+              {product.images.length > 1 && (
+                <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-2">
+                  {product.images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImage(idx)}
+                      className={`w-2.5 h-2.5 rounded-full ${idx === selectedImage ? 'bg-white' : 'bg-white/50 hover:bg-white/80'}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Thumbnail Images */}
