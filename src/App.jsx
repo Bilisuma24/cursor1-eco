@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Globe, MapPin } from "lucide-react";
 import { useState, useContext } from "react";
-import productsData from "./data/products.json";
+import productsData from "./data/products.js";
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
