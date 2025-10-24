@@ -12,13 +12,14 @@ import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
+import Wishlist from "./pages/Wishlist";
 
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { AuthProvider, AuthContext } from "./contexts/AuthContext";
 
 function NavbarContent() {
   const { user, logout } = useContext(AuthContext);
-  const { getCartItemsCount } = useCart();
+  const { getCartItemsCount, wishlist } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -39,7 +40,7 @@ function NavbarContent() {
             <span>•</span>
             <span>30-day return policy</span>
           </div>
-          <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4">
             <span>Customer Service: 1-800-ECO-SHOP</span>
             <span>•</span>
             <span>Help Center</span>
@@ -84,16 +85,18 @@ function NavbarContent() {
             <Link to="/contact" className="text-gray-700 hover:text-blue-600 font-medium">
               Contact
             </Link>
-          </div>
+      </div>
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
             {/* Wishlist */}
             <Link to="/wishlist" className="relative p-2 text-gray-700 hover:text-red-600 transition-colors duration-200">
               <Heart className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                0
-              </span>
+              {wishlist.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {wishlist.length}
+                </span>
+              )}
             </Link>
 
             {/* Cart */}
@@ -107,7 +110,7 @@ function NavbarContent() {
             </Link>
 
             {/* User Menu */}
-            {!user ? (
+        {!user ? (
               <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
@@ -137,11 +140,11 @@ function NavbarContent() {
                 >
                   Orders
                 </Link>
-                <button
-                  onClick={() => {
-                    logout();
-                    window.location.href = "/login";
-                  }}
+            <button
+              onClick={() => {
+                logout();
+                window.location.href = "/login";
+              }}
                   className="text-gray-700 hover:text-red-600 font-medium"
                 >
                   Logout
@@ -212,6 +215,7 @@ function App() {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<Orders />} />
+              <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/signup" element={<SignUp />} />
@@ -221,8 +225,77 @@ function App() {
           </main>
 
           {/* Footer */}
-          <footer className="bg-emerald-700 text-white py-10 text-center mt-auto">
-            <p>© {new Date().getFullYear()} Neweco. All rights reserved.</p>
+          <footer className="bg-gray-900 text-white mt-auto">
+            <div className="max-w-7xl mx-auto px-4 py-16">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {/* Company Info */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-xl">E</span>
+                    </div>
+                    <span className="text-2xl font-bold">EcoShop</span>
+                  </div>
+                  <p className="text-gray-400 leading-relaxed">
+                    Your trusted partner for quality products at unbeatable prices. Join millions of satisfied customers worldwide.
+                  </p>
+                  <div className="flex space-x-4">
+                    <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
+                      <span className="text-sm">f</span>
+                    </div>
+                    <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
+                      <span className="text-sm">t</span>
+                    </div>
+                    <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
+                      <span className="text-sm">i</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Links */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Quick Links</h3>
+                  <ul className="space-y-2">
+                    <li><Link to="/" className="text-gray-400 hover:text-white transition-colors duration-200">Home</Link></li>
+                    <li><Link to="/shop" className="text-gray-400 hover:text-white transition-colors duration-200">Shop</Link></li>
+                    <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors duration-200">About Us</Link></li>
+                    <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors duration-200">Contact</Link></li>
+                  </ul>
+                </div>
+
+                {/* Customer Service */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Customer Service</h3>
+                  <ul className="space-y-2">
+                    <li><Link to="/orders" className="text-gray-400 hover:text-white transition-colors duration-200">My Orders</Link></li>
+                    <li><Link to="/wishlist" className="text-gray-400 hover:text-white transition-colors duration-200">Wishlist</Link></li>
+                    <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Help Center</a></li>
+                    <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Returns</a></li>
+                  </ul>
+                </div>
+
+                {/* Contact Info */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Contact Info</h3>
+                  <div className="space-y-2 text-gray-400">
+                    <p>📧 support@ecoshop.com</p>
+                    <p>📞 1-800-ECO-SHOP</p>
+                    <p>📍 123 Commerce St, Business City, BC 12345</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-800 mt-12 pt-8">
+                <div className="flex flex-col md:flex-row justify-between items-center">
+                  <p className="text-gray-400">© {new Date().getFullYear()} EcoShop. All rights reserved.</p>
+                  <div className="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Privacy Policy</a>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Terms of Service</a>
+                    <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Cookie Policy</a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </footer>
         </Router>
       </CartProvider>

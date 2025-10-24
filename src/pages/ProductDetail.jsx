@@ -14,7 +14,7 @@ import {
   MessageCircle
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
-import productsData from "../data/products.json";
+import productsData from "../data/products.js";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -387,8 +387,8 @@ export default function ProductDetail() {
                 </div>
               </div>
             )}
-          </div>
         </div>
+      </div>
 
         {/* Suggested Products */}
         {suggestedProducts.length > 0 && (
@@ -432,7 +432,7 @@ export default function ProductDetail() {
             </div>
           </div>
         )}
-      </div>
+        </div>
     </div>
   );
 }

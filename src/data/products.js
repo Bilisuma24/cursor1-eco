@@ -1,0 +1,133 @@
+// Canonical product and category data used across the app
+// Exported as a JS module to avoid JSON import issues across tooling versions
+
+const products = [
+  {
+    id: 1,
+    name: "Wireless Bluetooth Earbuds Pro",
+    description:
+      "Premium wireless earbuds with ANC, 30-hour battery life and crystal clear sound.",
+    category: "Electronics",
+    brand: "SoundTech",
+    price: 89.99,
+    originalPrice: 149.99,
+    discount: 40,
+    currency: "USD",
+    rating: 4.6,
+    reviewCount: 2847,
+    sold: 15420,
+    seller: { name: "TechWorld Store", rating: 4.8, followers: 125000, verified: true },
+    shipping: { free: true, estimatedDays: "3-5", express: true },
+    images: [
+      "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=800&h=800&fit=crop",
+    ],
+    colors: ["Black", "White", "Blue"],
+    sizes: ["One Size"],
+    specifications: {
+      Battery: "30 hours",
+      Connectivity: "Bluetooth 5.3",
+      WaterResistance: "IPX7",
+    },
+    features: ["Active Noise Cancellation", "Quick Charge", "Water Resistant"],
+    reviews: [
+      {
+        id: 1,
+        user: "John D.",
+        rating: 5,
+        date: "2024-01-15",
+        title: "Amazing sound!",
+        comment: "Exceeded expectations. Battery life is legit.",
+        verified: true,
+        helpful: 23,
+      },
+    ],
+    inStock: true,
+    stock: 150,
+  },
+  {
+    id: 2,
+    name: "Smart Fitness Watch Series 8",
+    description:
+      "Advanced fitness tracking with HR monitor, GPS, sleep tracking, 7-day battery.",
+    category: "Electronics",
+    brand: "FitTech",
+    price: 199.99,
+    originalPrice: 299.99,
+    discount: 33,
+    currency: "USD",
+    rating: 4.7,
+    reviewCount: 3421,
+    sold: 8920,
+    seller: { name: "Fitness Gear Pro", rating: 4.9, followers: 89000, verified: true },
+    shipping: { free: true, estimatedDays: "2-4", express: true },
+    images: [
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800&h=800&fit=crop",
+    ],
+    colors: ["Black", "Silver", "Rose Gold"],
+    sizes: ["42mm", "46mm"],
+    specifications: {
+      Display: "1.9\" AMOLED",
+      Battery: "7 days",
+      WaterResistance: "5ATM",
+      GPS: "Built-in",
+    },
+    features: ["Heart Rate", "GPS Tracking", "Sleep Analysis", "Notifications"],
+    reviews: [],
+    inStock: true,
+    stock: 75,
+  },
+  {
+    id: 3,
+    name: "Premium Leather Handbag",
+    description: "Handcrafted genuine leather handbag with multiple compartments.",
+    category: "Fashion",
+    brand: "Luxury Leather Co.",
+    price: 159.99,
+    originalPrice: 249.99,
+    discount: 36,
+    currency: "USD",
+    rating: 4.5,
+    reviewCount: 1234,
+    sold: 3420,
+    seller: { name: "Fashion Forward", rating: 4.7, followers: 67000, verified: true },
+    shipping: { free: true, estimatedDays: "5-7", express: false },
+    images: [
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&h=800&fit=crop",
+    ],
+    colors: ["Brown", "Black", "Tan"],
+    sizes: ["One Size"],
+    specifications: { Material: "Genuine Leather", Weight: "800g" },
+    features: ["Multiple Compartments", "Adjustable Strap"],
+    reviews: [],
+    inStock: true,
+    stock: 45,
+  },
+];
+
+const categories = [
+  {
+    id: 1,
+    name: "Electronics",
+    subcategories: ["Audio", "Wearables", "Photography", "Security"],
+  },
+  {
+    id: 2,
+    name: "Fashion",
+    subcategories: ["Clothing", "Bags", "Shoes", "Accessories"],
+  },
+  {
+    id: 3,
+    name: "Home & Garden",
+    subcategories: ["Furniture", "Decor", "Kitchen", "Garden"],
+  },
+];
+
+const productsData = { products, categories };
+
+export default productsData;
+
+

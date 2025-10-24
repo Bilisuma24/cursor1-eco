@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Grid, List, Filter, SortAsc } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import SearchAndFilter from "../components/SearchAndFilter";
-import productsData from "../data/products.json";
+import productsData from "../data/products.js";
 
 export default function Shop() {
   const [products, setProducts] = useState([]);
@@ -117,11 +117,11 @@ export default function Shop() {
             <p className="text-gray-600">
               {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
             </p>
-          </div>
+                </div>
 
           <div className="flex items-center space-x-4">
             {/* Sort Dropdown */}
-            <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2">
               <SortAsc className="w-4 h-4 text-gray-500" />
               <select
                 value={sortBy}
@@ -135,8 +135,8 @@ export default function Shop() {
                 <option value="bestselling">Best Selling</option>
                 <option value="newest">Newest</option>
               </select>
-            </div>
-
+                  </div>
+                  
             {/* View Mode Toggle */}
             <div className="flex items-center space-x-1 border border-gray-300 rounded-md">
               <button
@@ -151,19 +151,19 @@ export default function Shop() {
               >
                 <List className="w-4 h-4" />
               </button>
-            </div>
-          </div>
-        </div>
+                    </div>
+                  </div>
+                </div>
 
         {/* Products Grid/List */}
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
               <Filter className="w-16 h-16 mx-auto" />
-            </div>
+                </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
             <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
-            <button
+                <button
               onClick={() => {
                 setSearchTerm('');
                 setFilters({});
@@ -172,8 +172,8 @@ export default function Shop() {
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               Clear all filters
-            </button>
-          </div>
+                </button>
+              </div>
         ) : (
           <div className={
             viewMode === 'grid'
@@ -186,8 +186,8 @@ export default function Shop() {
                 product={product}
                 viewMode={viewMode}
               />
-            ))}
-          </div>
+          ))}
+        </div>
         )}
 
         {/* Load More Button */}

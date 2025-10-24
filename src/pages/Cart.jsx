@@ -185,11 +185,11 @@ export default function Cart() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            </div>
+            </div>
+          </div>
+        ))}
+      </div>
               </div>
             ))}
 
@@ -277,7 +277,7 @@ export default function Cart() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
     </div>
   );
 }

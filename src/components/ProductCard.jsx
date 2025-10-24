@@ -184,7 +184,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
           src={product.images[selectedImage]}
-          alt={product.name}
+        alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         
