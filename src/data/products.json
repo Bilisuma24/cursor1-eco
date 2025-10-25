@@ -32,6 +32,24 @@
         "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop"
       ],
       "colors": ["Black", "White", "Blue", "Red"],
+      "colorImages": {
+        "Black": [
+          "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop"
+        ],
+        "White": [
+          "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop"
+        ],
+        "Blue": [
+          "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=500&h=500&fit=crop"
+        ],
+        "Red": [
+          "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop"
+        ]
+      },
       "sizes": ["One Size"],
       "specifications": {
         "Battery Life": "30 hours",
@@ -106,6 +124,20 @@
         "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop"
       ],
       "colors": ["Black", "Silver", "Rose Gold"],
+      "colorImages": {
+        "Black": [
+          "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop"
+        ],
+        "Silver": [
+          "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop"
+        ],
+        "Rose Gold": [
+          "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop"
+        ]
+      },
       "sizes": ["42mm", "46mm"],
       "specifications": {
         "Display": "1.9\" AMOLED",
@@ -170,6 +202,20 @@
         "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop"
       ],
       "colors": ["Brown", "Black", "Tan"],
+      "colorImages": {
+        "Brown": [
+          "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop"
+        ],
+        "Black": [
+          "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop"
+        ],
+        "Tan": [
+          "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop"
+        ]
+      },
       "sizes": ["One Size"],
       "specifications": {
         "Material": "Genuine Leather",
@@ -298,6 +344,28 @@
         "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop"
       ],
       "colors": ["White", "Black", "Navy", "Gray", "Green"],
+      "colorImages": {
+        "White": [
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop"
+        ],
+        "Black": [
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop"
+        ],
+        "Navy": [
+          "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop"
+        ],
+        "Gray": [
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop"
+        ],
+        "Green": [
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop"
+        ]
+      },
       "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
       "specifications": {
         "Material": "100% Organic Cotton",
@@ -397,7 +465,7 @@
     },
     {
       "id": 7,
-      "name": "Ultra-Thin 15.6" 4K Laptop",
+      "name": "Ultra-Thin 15.6\" 4K Laptop",
       "description": "Aluminum body, Intel i7, 16GB RAM, 1TB SSD, backlit keyboard, fingerprint unlock.",
       "category": "Electronics",
       "subcategory": "Computers",
@@ -478,6 +546,20 @@
         "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop"
       ],
       "colors": ["Black", "White", "Blue"],
+      "colorImages": {
+        "Black": [
+          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop"
+        ],
+        "White": [
+          "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop"
+        ],
+        "Blue": [
+          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop"
+        ]
+      },
       "sizes": ["40", "41", "42", "43", "44", "45"],
       "specifications": { "Upper": "Mesh", "Sole": "Rubber" },
       "features": ["Breathable", "Lightweight", "Cushioning"],
