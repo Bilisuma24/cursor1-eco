@@ -5,7 +5,38 @@ import { useCart } from "../contexts/CartContext";
 export default function ProductCard({ product, onAddToCart, viewMode = 'grid' }) {
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Get current images based on selected color
+  const getCurrentImages = () => {
+    if (product.colorImages && selectedColor && product.colorImages[selectedColor]) {
+      return product.colorImages[selectedColor];
+    }
+    return product.images || [];
+  };
+
+  const currentImages = getCurrentImages();
+
+  // Convert color name to actual color value
+  const getColorValue = (colorName) => {
+    const colorMap = {
+      'Black': '#000000',
+      'White': '#FFFFFF',
+      'Blue': '#3B82F6',
+      'Red': '#EF4444',
+      'Silver': '#C0C0C0',
+      'Rose Gold': '#E8B4B8',
+      'Brown': '#8B4513',
+      'Tan': '#D2B48C',
+      'Gray': '#6B7280',
+      'Navy': '#1E3A8A',
+      'Green': '#10B981',
+      'Orange': '#F97316',
+      'Space Gray': '#6B7280'
+    };
+    return colorMap[colorName] || '#6B7280';
+  };
 
   const handleAddToCart = () => {
     addToCart(product, 1);
@@ -46,7 +77,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           {/* Image Container */}
           <div className="relative w-48 h-48 flex-shrink-0 bg-gray-50">
             <img
-              src={product.images[selectedImage]}
+              src={currentImages[selectedImage] || currentImages[0]}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -183,8 +214,8 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
-          src={product.images[selectedImage]}
-        alt={product.name}
+          src={currentImages[selectedImage] || currentImages[0]}
+          alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         
@@ -208,9 +239,9 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         </button>
 
         {/* Image Thumbnails */}
-        {product.images.length > 1 && (
+        {currentImages.length > 1 && (
           <div className="absolute bottom-3 left-3 right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {product.images.slice(0, 3).map((image, index) => (
+            {currentImages.slice(0, 3).map((image, index) => (
               <button
                 key={index}
                 onClick={(e) => {
@@ -247,6 +278,31 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200 min-h-[2.5rem]">
           {product.name}
         </h3>
+
+        {/* Color Selection */}
+        {product.colors && product.colors.length > 1 && (
+          <div className="mb-3">
+            <div className="flex flex-wrap gap-1">
+              {product.colors.map((color) => (
+                <button
+                  key={color}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedColor(color);
+                    setSelectedImage(0);
+                  }}
+                  className={`w-6 h-6 rounded-full border-2 transition-all duration-200 ${
+                    selectedColor === color
+                      ? 'border-blue-500 scale-110'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  style={{ backgroundColor: getColorValue(color) }}
+                  title={color}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Rating and Reviews */}
         <div className="flex items-center space-x-2 mb-3">

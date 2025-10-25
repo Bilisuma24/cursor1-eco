@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
+import ColorImageDemo from "../components/ColorImageDemo";
 import productsData from "../data/products.js";
 
 export default function Home() {
@@ -239,6 +240,19 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Color Image Demo Section */}
+      <div className="bg-white py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">Color-Based Image Selection</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Experience our new feature that shows different product images based on selected colors
+            </p>
+          </div>
+          <ColorImageDemo />
         </div>
       </div>
 

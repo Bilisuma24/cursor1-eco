@@ -31,6 +31,36 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState('description');
   const [suggestedProducts, setSuggestedProducts] = useState([]);
 
+  // Get current images based on selected color
+  const getCurrentImages = () => {
+    if (product?.colorImages && selectedColor && product.colorImages[selectedColor]) {
+      return product.colorImages[selectedColor];
+    }
+    return product?.images || [];
+  };
+
+  const currentImages = getCurrentImages();
+
+  // Convert color name to actual color value
+  const getColorValue = (colorName) => {
+    const colorMap = {
+      'Black': '#000000',
+      'White': '#FFFFFF',
+      'Blue': '#3B82F6',
+      'Red': '#EF4444',
+      'Silver': '#C0C0C0',
+      'Rose Gold': '#E8B4B8',
+      'Brown': '#8B4513',
+      'Tan': '#D2B48C',
+      'Gray': '#6B7280',
+      'Navy': '#1E3A8A',
+      'Green': '#10B981',
+      'Orange': '#F97316',
+      'Space Gray': '#6B7280'
+    };
+    return colorMap[colorName] || '#6B7280';
+  };
+
   useEffect(() => {
     const foundProduct = productsData.products.find(p => p.id === parseInt(id));
     if (foundProduct) {
@@ -51,14 +81,14 @@ export default function ProductDetail() {
     if (!product || !isAutoplaying) return;
     autoplayRef.current = setInterval(() => {
       setSelectedImage((prev) => {
-        const next = (prev + 1) % (product?.images?.length || 1);
+        const next = (prev + 1) % (currentImages.length || 1);
         return next;
       });
     }, 4000);
     return () => {
       if (autoplayRef.current) clearInterval(autoplayRef.current);
     };
-  }, [product, isAutoplaying]);
+  }, [product, isAutoplaying, currentImages]);
 
   if (!product) {
     return (
@@ -139,7 +169,7 @@ export default function ProductDetail() {
             {/* Main Image */}
             <div className="relative aspect-square bg-white rounded-lg overflow-hidden border group">
               <img
-                src={product.images[selectedImage]}
+                src={currentImages[selectedImage] || currentImages[0]}
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onMouseEnter={() => setIsAutoplaying(false)}
@@ -147,18 +177,18 @@ export default function ProductDetail() {
               />
 
               {/* Prev/Next Controls */}
-              {product.images.length > 1 && (
+              {currentImages.length > 1 && (
                 <>
                   <button
                     aria-label="Previous image"
-                    onClick={() => setSelectedImage((selectedImage - 1 + product.images.length) % product.images.length)}
+                    onClick={() => setSelectedImage((selectedImage - 1 + currentImages.length) % currentImages.length)}
                     className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     ‹
                   </button>
                   <button
                     aria-label="Next image"
-                    onClick={() => setSelectedImage((selectedImage + 1) % product.images.length)}
+                    onClick={() => setSelectedImage((selectedImage + 1) % currentImages.length)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     ›
@@ -167,9 +197,9 @@ export default function ProductDetail() {
               )}
 
               {/* Dots */}
-              {product.images.length > 1 && (
+              {currentImages.length > 1 && (
                 <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-2">
-                  {product.images.map((_, idx) => (
+                  {currentImages.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(idx)}
@@ -181,9 +211,9 @@ export default function ProductDetail() {
             </div>
 
             {/* Thumbnail Images */}
-            {product.images.length > 1 && (
+            {currentImages.length > 1 && (
               <div className="flex space-x-2 overflow-x-auto">
-                {product.images.map((image, index) => (
+                {currentImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -251,14 +281,21 @@ export default function ProductDetail() {
                   {product.colors.map((color) => (
                     <button
                       key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border rounded-md text-sm ${
+                      onClick={() => {
+                        setSelectedColor(color);
+                        setSelectedImage(0);
+                      }}
+                      className={`flex items-center space-x-2 px-4 py-2 border rounded-md text-sm transition-all duration-200 ${
                         selectedColor === color
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      {color}
+                      <div 
+                        className="w-4 h-4 rounded-full border border-gray-300"
+                        style={{ backgroundColor: getColorValue(color) }}
+                      />
+                      <span>{color}</span>
                     </button>
                   ))}
                 </div>

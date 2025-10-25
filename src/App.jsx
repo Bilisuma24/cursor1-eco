@@ -4,12 +4,12 @@ import { useState, useContext } from "react";
 import productsData from "./data/products.js";
 
 import Home from "./pages/Home";
-import Shop from "./pages/Shop";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import SignUp from "./pages/SignUp";
+import Shop from "./pages/shop";
+import About from "./pages/about";
+import Contact from "./pages/contact";
+import SignUp from "./pages/Signup";
 import Login from "./pages/Login";
-import Profile from "./pages/Profile";
+import Profile from "./pages/profile";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
