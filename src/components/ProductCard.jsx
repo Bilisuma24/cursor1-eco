@@ -6,6 +6,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
   const [selectedImage, setSelectedImage] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [currentImages, setCurrentImages] = useState([]);
 
   const handleAddToCart = () => {
     addToCart(product, 1);
@@ -19,6 +20,43 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
     } else {
       addToWishlist(product);
     }
+  };
+
+  // Set initial images based on first color or fallback to array
+  React.useEffect(() => {
+    if (product.images && typeof product.images === 'object') {
+      const firstColor = product.colors?.[0];
+      setCurrentImages(product.images[firstColor] || Object.values(product.images)[0] || []);
+    } else if (Array.isArray(product.images)) {
+      setCurrentImages(product.images);
+    }
+  }, [product]);
+
+  const handleColorChange = (color) => {
+    if (product.images && typeof product.images === 'object' && product.images[color]) {
+      setCurrentImages(product.images[color]);
+      setSelectedImage(0); // Reset to first image when color changes
+    }
+  };
+
+  const getColorValue = (colorName) => {
+    const colorMap = {
+      'Black': '#000000',
+      'White': '#FFFFFF',
+      'Blue': '#3B82F6',
+      'Red': '#EF4444',
+      'Green': '#10B981',
+      'Gray': '#6B7280',
+      'Silver': '#C0C0C0',
+      'Rose Gold': '#E8B4B8',
+      'Brown': '#8B4513',
+      'Tan': '#D2B48C',
+      'Navy': '#1E3A8A',
+      'Space Gray': '#4B5563',
+      'Orange': '#F97316',
+      'Standard': '#6B7280'
+    };
+    return colorMap[colorName] || '#6B7280';
   };
 
   const formatPrice = (price) => {
@@ -46,7 +84,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           {/* Image Container */}
           <div className="relative w-48 h-48 flex-shrink-0 bg-gray-50">
             <img
-              src={product.images[selectedImage]}
+              src={currentImages[selectedImage]}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -79,6 +117,34 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
                   {product.name}
                 </h3>
                 <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+                
+                {/* Color Selection for List View */}
+                {product.colors && product.colors.length > 1 && product.images && typeof product.images === 'object' && (
+                  <div className="mb-4">
+                    <div className="flex space-x-2 flex-wrap">
+                      {product.colors.slice(0, 6).map((color) => (
+                        <button
+                          key={color}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleColorChange(color);
+                          }}
+                          className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors duration-200"
+                          style={{
+                            backgroundColor: getColorValue(color),
+                            boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)'
+                          }}
+                          title={color}
+                        />
+                      ))}
+                      {product.colors.length > 6 && (
+                        <span className="text-sm text-gray-500 flex items-center">
+                          +{product.colors.length - 6}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
                 
                 {/* Rating and Reviews */}
                 <div className="flex items-center space-x-3 mb-3">
@@ -183,7 +249,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
-          src={product.images[selectedImage]}
+          src={currentImages[selectedImage]}
         alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -208,9 +274,9 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         </button>
 
         {/* Image Thumbnails */}
-        {product.images.length > 1 && (
+        {currentImages.length > 1 && (
           <div className="absolute bottom-3 left-3 right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {product.images.slice(0, 3).map((image, index) => (
+            {currentImages.slice(0, 3).map((image, index) => (
               <button
                 key={index}
                 onClick={(e) => {
@@ -247,6 +313,34 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200 min-h-[2.5rem]">
           {product.name}
         </h3>
+
+        {/* Color Selection */}
+        {product.colors && product.colors.length > 1 && product.images && typeof product.images === 'object' && (
+          <div className="mb-2">
+            <div className="flex space-x-1 flex-wrap">
+              {product.colors.slice(0, 4).map((color) => (
+                <button
+                  key={color}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleColorChange(color);
+                  }}
+                  className="w-6 h-6 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors duration-200"
+                  style={{
+                    backgroundColor: getColorValue(color),
+                    boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)'
+                  }}
+                  title={color}
+                />
+              ))}
+              {product.colors.length > 4 && (
+                <span className="text-xs text-gray-500 flex items-center">
+                  +{product.colors.length - 4}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Rating and Reviews */}
         <div className="flex items-center space-x-2 mb-3">

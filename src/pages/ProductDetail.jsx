@@ -30,6 +30,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [currentImages, setCurrentImages] = useState([]);
 
   useEffect(() => {
     const foundProduct = productsData.products.find(p => p.id === parseInt(id));
@@ -37,6 +38,14 @@ export default function ProductDetail() {
       setProduct(foundProduct);
       setSelectedColor(foundProduct.colors?.[0] || null);
       setSelectedSize(foundProduct.sizes?.[0] || null);
+      
+      // Set initial images based on first color
+      const firstColor = foundProduct.colors?.[0];
+      if (firstColor && foundProduct.images && typeof foundProduct.images === 'object') {
+        setCurrentImages(foundProduct.images[firstColor] || []);
+      } else if (Array.isArray(foundProduct.images)) {
+        setCurrentImages(foundProduct.images);
+      }
       
       // Get suggested products (same category, different products)
       const suggested = productsData.products
@@ -46,19 +55,27 @@ export default function ProductDetail() {
     }
   }, [id]);
 
+  // Update images when color changes
+  useEffect(() => {
+    if (product && selectedColor && product.images && typeof product.images === 'object') {
+      setCurrentImages(product.images[selectedColor] || []);
+      setSelectedImage(0); // Reset to first image when color changes
+    }
+  }, [selectedColor, product]);
+
   // Autoplay carousel
   useEffect(() => {
-    if (!product || !isAutoplaying) return;
+    if (!currentImages || !isAutoplaying) return;
     autoplayRef.current = setInterval(() => {
       setSelectedImage((prev) => {
-        const next = (prev + 1) % (product?.images?.length || 1);
+        const next = (prev + 1) % (currentImages.length || 1);
         return next;
       });
     }, 4000);
     return () => {
       if (autoplayRef.current) clearInterval(autoplayRef.current);
     };
-  }, [product, isAutoplaying]);
+  }, [currentImages, isAutoplaying]);
 
   if (!product) {
     return (
@@ -139,7 +156,7 @@ export default function ProductDetail() {
             {/* Main Image */}
             <div className="relative aspect-square bg-white rounded-lg overflow-hidden border group">
               <img
-                src={product.images[selectedImage]}
+                src={currentImages[selectedImage]}
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onMouseEnter={() => setIsAutoplaying(false)}
@@ -147,18 +164,18 @@ export default function ProductDetail() {
               />
 
               {/* Prev/Next Controls */}
-              {product.images.length > 1 && (
+              {currentImages.length > 1 && (
                 <>
                   <button
                     aria-label="Previous image"
-                    onClick={() => setSelectedImage((selectedImage - 1 + product.images.length) % product.images.length)}
+                    onClick={() => setSelectedImage((selectedImage - 1 + currentImages.length) % currentImages.length)}
                     className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     ‹
                   </button>
                   <button
                     aria-label="Next image"
-                    onClick={() => setSelectedImage((selectedImage + 1) % product.images.length)}
+                    onClick={() => setSelectedImage((selectedImage + 1) % currentImages.length)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     ›
@@ -167,9 +184,9 @@ export default function ProductDetail() {
               )}
 
               {/* Dots */}
-              {product.images.length > 1 && (
+              {currentImages.length > 1 && (
                 <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-2">
-                  {product.images.map((_, idx) => (
+                  {currentImages.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(idx)}
@@ -181,9 +198,9 @@ export default function ProductDetail() {
             </div>
 
             {/* Thumbnail Images */}
-            {product.images.length > 1 && (
+            {currentImages.length > 1 && (
               <div className="flex space-x-2 overflow-x-auto">
-                {product.images.map((image, index) => (
+                {currentImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -454,7 +471,9 @@ export default function ProductDetail() {
                 >
                   <div className="aspect-square overflow-hidden">
                     <img
-                      src={suggestedProduct.images[0]}
+                      src={suggestedProduct.images && typeof suggestedProduct.images === 'object' 
+                        ? Object.values(suggestedProduct.images)[0]?.[0] || Object.values(suggestedProduct.images)[0]
+                        : suggestedProduct.images[0]}
                       alt={suggestedProduct.name}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
