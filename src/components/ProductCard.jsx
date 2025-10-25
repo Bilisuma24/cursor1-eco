@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Heart, ShoppingCart, Star, Truck, Shield } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
+import ImageGallery from "./ImageGallery";
 
 export default function ProductCard({ product, onAddToCart, viewMode = 'grid' }) {
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
@@ -44,16 +45,20 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
       <div className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group">
         <div className="flex">
           {/* Image Container */}
-          <div className="relative w-48 h-48 flex-shrink-0 bg-gray-50">
-            <img
-              src={product.images[selectedImage]}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          <div className="relative w-48 h-48 flex-shrink-0">
+            <ImageGallery
+              images={product.images}
+              selectedImage={selectedImage}
+              onImageSelect={setSelectedImage}
+              showThumbnails={false}
+              showNavigation={false}
+              className="w-full h-full"
+              mainImageSize="w-full h-full"
             />
             
             {/* Discount Badge */}
             {product.discount && (
-              <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg">
+              <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg z-10">
                 -{product.discount}%
               </div>
             )}
@@ -61,7 +66,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
             {/* Wishlist Button */}
             <button
               onClick={handleWishlistToggle}
-              className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 shadow-lg ${
+              className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 shadow-lg z-10 ${
                 isInWishlist(product.id)
                   ? 'bg-red-500 text-white'
                   : 'bg-white/90 text-gray-600 hover:bg-red-500 hover:text-white'
@@ -182,15 +187,19 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
     >
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
-        <img
-          src={product.images[selectedImage]}
-        alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        <ImageGallery
+          images={product.images}
+          selectedImage={selectedImage}
+          onImageSelect={setSelectedImage}
+          showThumbnails={false}
+          showNavigation={false}
+          className="w-full h-full"
+          mainImageSize="w-full h-full"
         />
         
         {/* Discount Badge */}
         {product.discount && (
-          <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
+          <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
             -{product.discount}%
           </div>
         )}
@@ -209,7 +218,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
         {/* Image Thumbnails */}
         {product.images.length > 1 && (
-          <div className="absolute bottom-3 left-3 right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="absolute bottom-3 left-3 right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
             {product.images.slice(0, 3).map((image, index) => (
               <button
                 key={index}
@@ -229,7 +238,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
         {/* Quick Add to Cart (appears on hover) */}
         {isHovered && (
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
             <button
               onClick={handleAddToCart}
               className="bg-orange-500 text-white px-4 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors duration-200 flex items-center space-x-2"

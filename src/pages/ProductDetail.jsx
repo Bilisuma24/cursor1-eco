@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import productsData from "../data/products.js";
+import ImageGallery from "../components/ImageGallery";
+import ColorImageFilter from "../components/ColorImageFilter";
+import ImagePreviewGrid from "../components/ImagePreviewGrid";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -134,68 +137,27 @@ export default function ProductDetail() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Product Images with Carousel */}
+          {/* Product Images with Enhanced Gallery */}
           <div className="space-y-4">
-            {/* Main Image */}
-            <div className="relative aspect-square bg-white rounded-lg overflow-hidden border group">
-              <img
-                src={product.images[selectedImage]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                onMouseEnter={() => setIsAutoplaying(false)}
-                onMouseLeave={() => setIsAutoplaying(true)}
-              />
-
-              {/* Prev/Next Controls */}
-              {product.images.length > 1 && (
-                <>
-                  <button
-                    aria-label="Previous image"
-                    onClick={() => setSelectedImage((selectedImage - 1 + product.images.length) % product.images.length)}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    aria-label="Next image"
-                    onClick={() => setSelectedImage((selectedImage + 1) % product.images.length)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    ›
-                  </button>
-                </>
-              )}
-
-              {/* Dots */}
-              {product.images.length > 1 && (
-                <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-2">
-                  {product.images.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImage(idx)}
-                      className={`w-2.5 h-2.5 rounded-full ${idx === selectedImage ? 'bg-white' : 'bg-white/50 hover:bg-white/80'}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Thumbnail Images */}
-            {product.images.length > 1 && (
-              <div className="flex space-x-2 overflow-x-auto">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                      selectedImage === index ? 'border-blue-500' : 'border-gray-200'
-                    }`}
-                  >
-                    <img src={image} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+            <ImageGallery
+              images={product.images}
+              selectedImage={selectedImage}
+              onImageSelect={setSelectedImage}
+              showThumbnails={true}
+              showNavigation={true}
+              autoplay={isAutoplaying}
+              autoplayInterval={4000}
+              className=""
+              thumbnailSize="w-20 h-20"
+              mainImageSize="aspect-square"
+            />
+            
+            {/* Image Preview Grid Toggle */}
+            <ImagePreviewGrid
+              images={product.images}
+              selectedImage={selectedImage}
+              onImageSelect={setSelectedImage}
+            />
           </div>
 
           {/* Product Info */}
@@ -243,27 +205,14 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Color Selection */}
-            {product.colors && product.colors.length > 1 && (
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Color</h3>
-                <div className="flex space-x-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border rounded-md text-sm ${
-                        selectedColor === color
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Color Selection with Image Filtering */}
+            <ColorImageFilter
+              product={product}
+              selectedColor={selectedColor}
+              onColorSelect={setSelectedColor}
+              selectedImage={selectedImage}
+              onImageSelect={setSelectedImage}
+            />
 
             {/* Size Selection */}
             {product.sizes && product.sizes.length > 1 && (
