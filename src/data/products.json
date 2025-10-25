@@ -25,12 +25,24 @@
         "estimatedDays": "3-5",
         "express": true
       },
-      "images": [
-        "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Black": [
+          "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop"
+        ],
+        "White": [
+          "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop"
+        ],
+        "Blue": [
+          "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=500&h=500&fit=crop"
+        ],
+        "Red": [
+          "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Black", "White", "Blue", "Red"],
       "sizes": ["One Size"],
       "specifications": {
@@ -100,11 +112,20 @@
         "estimatedDays": "2-4",
         "express": true
       },
-      "images": [
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Black": [
+          "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop"
+        ],
+        "Silver": [
+          "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop"
+        ],
+        "Rose Gold": [
+          "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Black", "Silver", "Rose Gold"],
       "sizes": ["42mm", "46mm"],
       "specifications": {
@@ -164,11 +185,20 @@
         "estimatedDays": "5-7",
         "express": false
       },
-      "images": [
-        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Brown": [
+          "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop"
+        ],
+        "Black": [
+          "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop"
+        ],
+        "Tan": [
+          "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Brown", "Black", "Tan"],
       "sizes": ["One Size"],
       "specifications": {
@@ -228,11 +258,12 @@
         "estimatedDays": "3-5",
         "express": true
       },
-      "images": [
-        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Black": [
+          "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Black"],
       "sizes": ["85mm"],
       "specifications": {
@@ -292,11 +323,28 @@
         "estimatedDays": "4-6",
         "express": false
       },
-      "images": [
-        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "White": [
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop"
+        ],
+        "Black": [
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop"
+        ],
+        "Navy": [
+          "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop"
+        ],
+        "Gray": [
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop"
+        ],
+        "Green": [
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["White", "Black", "Navy", "Gray", "Green"],
       "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
       "specifications": {
@@ -356,11 +404,16 @@
         "estimatedDays": "2-3",
         "express": true
       },
-      "images": [
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "White": [
+          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop"
+        ],
+        "Black": [
+          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["White", "Black"],
       "sizes": ["One Size"],
       "specifications": {
@@ -397,7 +450,7 @@
     },
     {
       "id": 7,
-      "name": "Ultra-Thin 15.6" 4K Laptop",
+      "name": "Ultra-Thin 15.6\" 4K Laptop",
       "description": "Aluminum body, Intel i7, 16GB RAM, 1TB SSD, backlit keyboard, fingerprint unlock.",
       "category": "Electronics",
       "subcategory": "Computers",
@@ -411,10 +464,16 @@
       "sold": 5340,
       "seller": { "name": "Global Tech Mall", "rating": 4.8, "followers": 210000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "3-7", "express": true },
-      "images": [
-        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Silver": [
+          "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop"
+        ],
+        "Space Gray": [
+          "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Silver", "Space Gray"],
       "sizes": ["15.6"],
       "specifications": { "CPU": "Intel i7", "RAM": "16GB", "Storage": "1TB SSD", "Display": "4K" },
@@ -442,10 +501,16 @@
       "sold": 9800,
       "seller": { "name": "Home Essentials Store", "rating": 4.6, "followers": 68000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "4-6", "express": false },
-      "images": [
-        "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Red": [
+          "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop"
+        ],
+        "Blue": [
+          "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Red", "Blue"],
       "sizes": ["One Size"],
       "specifications": { "Runtime": "60 min", "Filter": "HEPA", "Weight": "2.7kg" },
@@ -473,10 +538,20 @@
       "sold": 12890,
       "seller": { "name": "Sporty Outlet", "rating": 4.5, "followers": 52000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "5-8", "express": false },
-      "images": [
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Black": [
+          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop"
+        ],
+        "White": [
+          "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop"
+        ],
+        "Blue": [
+          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Black", "White", "Blue"],
       "sizes": ["40", "41", "42", "43", "44", "45"],
       "specifications": { "Upper": "Mesh", "Sole": "Rubber" },
@@ -504,10 +579,12 @@
       "sold": 6200,
       "seller": { "name": "Kitchen Bazaar", "rating": 4.7, "followers": 74000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "3-5", "express": true },
-      "images": [
-        "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Silver": [
+          "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Silver"],
       "sizes": ["10pcs"],
       "specifications": { "Material": "Stainless Steel", "Compatibility": "Induction" },
@@ -535,10 +612,16 @@
       "sold": 15000,
       "seller": { "name": "Gamer Hub", "rating": 4.6, "followers": 99000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "4-7", "express": false },
-      "images": [
-        "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Black": [
+          "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop"
+        ],
+        "White": [
+          "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Black", "White"],
       "sizes": ["One Size"],
       "specifications": { "Sound": "7.1", "Mic": "Noise Cancel" },
@@ -566,10 +649,12 @@
       "sold": 4100,
       "seller": { "name": "Projector Planet", "rating": 4.5, "followers": 42000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "6-10", "express": false },
-      "images": [
-        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "White": [
+          "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["White"],
       "sizes": ["One Size"],
       "specifications": { "Resolution": "1080p", "WiFi": "2.4G/5G" },
@@ -597,10 +682,12 @@
       "sold": 7200,
       "seller": { "name": "Beauty Market", "rating": 4.7, "followers": 83000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "4-6", "express": false },
-      "images": [
-        "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Standard": [
+          "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Standard"],
       "sizes": ["2pcs"],
       "specifications": { "Serum": "30ml", "Moisturizer": "50ml" },
@@ -628,10 +715,16 @@
       "sold": 3500,
       "seller": { "name": "Outdoor King", "rating": 4.6, "followers": 56000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "5-8", "express": false },
-      "images": [
-        "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Green": [
+          "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop"
+        ],
+        "Orange": [
+          "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Green", "Orange"],
       "sizes": ["4-Person"],
       "specifications": { "Waterproof": "3000mm", "Layers": "2" },
@@ -659,10 +752,16 @@
       "sold": 4600,
       "seller": { "name": "Office Direct", "rating": 4.7, "followers": 47000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "3-7", "express": true },
-      "images": [
-        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Black": [
+          "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop"
+        ],
+        "Gray": [
+          "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Black", "Gray"],
       "sizes": ["One Size"],
       "specifications": { "Material": "Mesh", "Base": "Aluminum" },
@@ -690,10 +789,16 @@
       "sold": 2700,
       "seller": { "name": "Family Store", "rating": 4.6, "followers": 35000, "verified": true },
       "shipping": { "free": true, "estimatedDays": "6-10", "express": false },
-      "images": [
-        "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop"
-      ],
+      "images": {
+        "Gray": [
+          "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop"
+        ],
+        "Navy": [
+          "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop",
+          "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop"
+        ]
+      },
       "colors": ["Gray", "Navy"],
       "sizes": ["One Size"],
       "specifications": { "Weight": "6.5kg", "Fold": "One-hand" },
