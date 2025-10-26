@@ -12,6 +12,8 @@ import {
   CreditCard
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
+import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
+import { useCart as useSupabaseCart } from "../hooks/useCart";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -25,8 +27,13 @@ export default function Cart() {
     getCartItemsBySeller,
     addToWishlist
   } = useCart();
+  
+  // Use Supabase auth and cart hooks for Supabase integration
+  const { user } = useSupabaseAuth();
+  const { checkout: supabaseCheckout } = useSupabaseCart(user?.id);
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleQuantityChange = (item, newQuantity) => {
     updateQuantity(item.id, item.selectedColor, item.selectedSize, newQuantity);
@@ -36,46 +43,31 @@ export default function Cart() {
     removeFromCart(item.id, item.selectedColor, item.selectedSize);
   };
 
-  const handleCheckout = () => {
-    setIsCheckingOut(true);
-    // Simulate checkout process
-    setTimeout(() => {
-      // Build order payload and persist
-      try {
-        const existing = JSON.parse(localStorage.getItem('orders') || '[]');
-        const orderId = `ORD-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(Math.random()*900)+100}`;
-        const items = cartItems.map((item) => ({
-          id: item.id,
-          name: item.name,
-          image: item.images?.[0],
-          price: item.price,
-          quantity: item.quantity,
-          seller: item.seller?.name || 'Unknown Seller',
-          selectedColor: item.selectedColor || null,
-          selectedSize: item.selectedSize || null,
-        }));
+  const handleCheckout = async () => {
+    if (!user) {
+      setError('Please log in to checkout');
+      // Redirect to login or show login modal
+      navigate('/login');
+      return;
+    }
 
-        const order = {
-          id: orderId,
-          date: new Date().toISOString(),
-          status: 'processing',
-          subtotal,
-          shipping,
-          tax,
-          total,
-          items,
-          tracking: null,
-        };
-        const updated = [order, ...existing];
-        localStorage.setItem('orders', JSON.stringify(updated));
-      } catch (e) {
-        console.error('Failed to save order', e);
+    setIsCheckingOut(true);
+    setError(null);
+
+    try {
+      // Use Supabase checkout if user is logged in
+      if (user) {
+        await supabaseCheckout();
+        alert('Order placed successfully!');
+        clearCart();
+        navigate('/orders');
       }
-      alert('Order placed successfully!');
-      clearCart();
-      navigate('/orders');
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setError(err.message || 'Failed to place order. Please try again.');
+    } finally {
       setIsCheckingOut(false);
-    }, 2000);
+    }
   };
 
   const formatPrice = (price) => {
@@ -308,7 +300,14 @@ export default function Cart() {
             </div>
           </div>
         </div>
-        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-800 text-sm">{error}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

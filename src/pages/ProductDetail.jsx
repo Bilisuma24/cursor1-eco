@@ -18,6 +18,7 @@ import productsData from "../data/products.js";
 import ImageGallery from "../components/ImageGallery";
 import ColorImageFilter from "../components/ColorImageFilter";
 import ImagePreviewGrid from "../components/ImagePreviewGrid";
+import ProductImageDetailModal from "../components/ProductImageDetailModal";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -30,9 +31,12 @@ export default function ProductDetail() {
   const [isAutoplaying, setIsAutoplaying] = useState(true);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [selectedStyle, setSelectedStyle] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     const foundProduct = productsData.products.find(p => p.id === parseInt(id));
@@ -40,6 +44,8 @@ export default function ProductDetail() {
       setProduct(foundProduct);
       setSelectedColor(foundProduct.colors?.[0] || null);
       setSelectedSize(foundProduct.sizes?.[0] || null);
+      setSelectedMaterial(foundProduct.materials?.[0] || null);
+      setSelectedStyle(foundProduct.styles?.[0] || null);
       
       // Get suggested products (same category, different products)
       const suggested = productsData.products
@@ -136,21 +142,37 @@ export default function ProductDetail() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Product Images with Enhanced Gallery */}
           <div className="space-y-4">
-            <ImageGallery
-              images={product.images}
-              selectedImage={selectedImage}
-              onImageSelect={setSelectedImage}
-              showThumbnails={true}
-              showNavigation={true}
-              autoplay={isAutoplaying}
-              autoplayInterval={4000}
-              className=""
-              thumbnailSize="w-20 h-20"
-              mainImageSize="aspect-square"
-            />
+            <div className="relative">
+              <div onClick={() => setShowDetailModal(true)} className="cursor-pointer">
+                <ImageGallery
+                  images={product.images}
+                  selectedImage={selectedImage}
+                  onImageSelect={setSelectedImage}
+                  showThumbnails={true}
+                  showNavigation={true}
+                  autoplay={isAutoplaying}
+                  autoplayInterval={4000}
+                  className=""
+                  thumbnailSize="w-20 h-20"
+                  mainImageSize="aspect-square"
+                />
+              </div>
+              
+              {/* Enhanced Detail Button Overlay */}
+              <button
+                onClick={() => setShowDetailModal(true)}
+                className="absolute top-4 right-4 bg-white/95 hover:bg-blue-500 hover:text-white text-gray-700 p-3 rounded-full shadow-xl transition-all duration-300 z-10 hover:scale-110 backdrop-blur-sm"
+                title="Quick View Details"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+            </div>
             
             {/* Image Preview Grid Toggle */}
             <ImagePreviewGrid
@@ -205,36 +227,145 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Color Selection with Image Filtering */}
-            <ColorImageFilter
-              product={product}
-              selectedColor={selectedColor}
-              onColorSelect={setSelectedColor}
-              selectedImage={selectedImage}
-              onImageSelect={setSelectedImage}
-            />
-
-            {/* Size Selection */}
-            {product.sizes && product.sizes.length > 1 && (
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Size</h3>
-                <div className="flex space-x-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border rounded-md text-sm ${
-                        selectedSize === size
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+            {/* Enhanced Product Choices */}
+            <div className="space-y-6">
+              {/* Color Selection */}
+              {product.colors && product.colors.length > 1 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">Color</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.colors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          selectedColor === color
+                            ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
+                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedColor && (
+                    <p className="text-xs text-gray-600 mt-2">
+                      Selected: <span className="font-medium">{selectedColor}</span>
+                    </p>
+                  )}
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Size Selection */}
+              {product.sizes && product.sizes.length > 1 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">Size</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.sizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          selectedSize === size
+                            ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
+                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedSize && (
+                    <p className="text-xs text-gray-600 mt-2">
+                      Selected: <span className="font-medium">{selectedSize}</span>
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Material Selection */}
+              {product.materials && product.materials.length > 1 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">Material</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.materials.map((material) => (
+                      <button
+                        key={material}
+                        onClick={() => setSelectedMaterial(material)}
+                        className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          selectedMaterial === material
+                            ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
+                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                      >
+                        {material}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedMaterial && (
+                    <p className="text-xs text-gray-600 mt-2">
+                      Selected: <span className="font-medium">{selectedMaterial}</span>
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Style Selection */}
+              {product.styles && product.styles.length > 1 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">Style</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.styles.map((style) => (
+                      <button
+                        key={style}
+                        onClick={() => setSelectedStyle(style)}
+                        className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          selectedStyle === style
+                            ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
+                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                      >
+                        {style}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedStyle && (
+                    <p className="text-xs text-gray-600 mt-2">
+                      Selected: <span className="font-medium">{selectedStyle}</span>
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Selected Choices Summary */}
+              {(selectedColor || selectedSize || selectedMaterial || selectedStyle) && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-blue-900 mb-2">Your Selections:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedColor && (
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                        Color: {selectedColor}
+                      </span>
+                    )}
+                    {selectedSize && (
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                        Size: {selectedSize}
+                      </span>
+                    )}
+                    {selectedMaterial && (
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                        Material: {selectedMaterial}
+                      </span>
+                    )}
+                    {selectedStyle && (
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                        Style: {selectedStyle}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Quantity */}
             <div>
@@ -303,7 +434,7 @@ export default function ProductDetail() {
         <div className="mt-12">
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8">
-              {['description', 'specifications', 'reviews'].map((tab) => (
+              {['description', 'choices', 'specifications', 'reviews'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -326,16 +457,110 @@ export default function ProductDetail() {
                 {product.features && (
                   <div className="mt-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Key Features</h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {product.features.map((feature, index) => (
-                        <li key={index} className="flex items-center space-x-2">
-                          <Check className="w-4 h-4 text-green-500" />
-                          <span className="text-gray-700">{feature}</span>
-                        </li>
+                        <div key={index} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                          <Check className="w-5 h-5 text-green-600 shrink-0" />
+                          <span className="text-gray-700 font-medium">{feature}</span>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'choices' && (
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-6">Available Choices</h3>
+                  
+                  {/* Colors */}
+                  {product.colors && product.colors.length > 1 && (
+                    <div className="mb-8">
+                      <h4 className="text-lg font-medium text-gray-900 mb-4">Colors ({product.colors.length} options)</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {product.colors.map((color) => (
+                          <div key={color} className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                            <div className="text-center">
+                              <div className="w-8 h-8 bg-gray-200 rounded-full mx-auto mb-2"></div>
+                              <span className="text-sm font-medium text-gray-900">{color}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sizes */}
+                  {product.sizes && product.sizes.length > 1 && (
+                    <div className="mb-8">
+                      <h4 className="text-lg font-medium text-gray-900 mb-4">Sizes ({product.sizes.length} options)</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {product.sizes.map((size) => (
+                          <span key={size} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
+                            {size}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Materials */}
+                  {product.materials && product.materials.length > 1 && (
+                    <div className="mb-8">
+                      <h4 className="text-lg font-medium text-gray-900 mb-4">Materials ({product.materials.length} options)</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {product.materials.map((material) => (
+                          <div key={material} className="p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-all duration-200">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <Check className="w-4 h-4 text-green-600" />
+                              </div>
+                              <span className="text-sm font-medium text-gray-900">{material}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Styles */}
+                  {product.styles && product.styles.length > 1 && (
+                    <div className="mb-8">
+                      <h4 className="text-lg font-medium text-gray-900 mb-4">Styles ({product.styles.length} options)</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {product.styles.map((style) => (
+                          <div key={style} className="p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-200">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span className="text-xs font-bold text-purple-600">S</span>
+                              </div>
+                              <span className="text-sm font-medium text-gray-900">{style}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Features */}
+                  {product.features && product.features.length > 0 && (
+                    <div className="mb-8">
+                      <h4 className="text-lg font-medium text-gray-900 mb-4">Features ({product.features.length} included)</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {product.features.map((feature, index) => (
+                          <div key={index} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <Check className="w-5 h-5 text-blue-600 shrink-0" />
+                              <span className="text-sm font-medium text-gray-900">{feature}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -432,6 +657,15 @@ export default function ProductDetail() {
             </div>
           </div>
         )}
+
+        {/* Product Detail Modal */}
+        <ProductImageDetailModal
+          product={product}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+          selectedImage={selectedImage}
+          onImageSelect={setSelectedImage}
+        />
         </div>
     </div>
   );

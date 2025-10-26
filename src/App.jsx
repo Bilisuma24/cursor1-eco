@@ -15,6 +15,9 @@ import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
 import Wishlist from "./pages/Wishlist";
 import ScrollToTop from "./components/ScrollToTop";
+import ImageTest from "./components/ImageTest";
+import ImageDebug from "./components/ImageDebug";
+import ImageTestSimple from "./components/ImageTestSimple";
 
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { AuthProvider, AuthContext } from "./contexts/AuthContext";
@@ -253,6 +256,9 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/test" element={<ImageTest />} />
+              <Route path="/debug" element={<ImageDebug />} />
+              <Route path="/simple" element={<ImageTestSimple />} />
             </Routes>
           </main>
 

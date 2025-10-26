@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { Heart, ShoppingCart, Star, Truck, Shield } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Heart, ShoppingCart, Star, Truck, Shield, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import ImageGallery from "./ImageGallery";
+import SimpleImageGallery from "./SimpleImageGallery";
+import BasicImage from "./BasicImage";
+import ProductImageDetailModal from "./ProductImageDetailModal";
 
 export default function ProductCard({ product, onAddToCart, viewMode = 'grid' }) {
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+
 
   const handleAddToCart = () => {
     addToCart(product, 1);
@@ -20,6 +27,34 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
     } else {
       addToWishlist(product);
     }
+  };
+
+  const handleImageNavigation = (direction, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (direction === 'prev') {
+      setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length);
+    } else {
+      setSelectedImage((prev) => (prev + 1) % product.images.length);
+    }
+  };
+
+  const handleImageClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDetailModal(true);
+  };
+
+  const handleNavigateToProduct = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/product/${product.id}`);
+  };
+
+  const handleImageDetailClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDetailModal(true);
   };
 
   const formatPrice = (price) => {
@@ -42,19 +77,70 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
   if (viewMode === 'list') {
     return (
-      <div className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group">
+      <div 
+        className="product-card bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer"
+        onClick={(e) => {
+          // Open modal when clicking on card, images, or text content (but not buttons)
+          if (e.target === e.currentTarget || 
+              e.target.closest('.product-info-area') ||
+              e.target.closest('.product-image-area') ||
+              e.target.tagName === 'IMG' ||
+              e.target.closest('img')) {
+            setShowDetailModal(true);
+          }
+        }}
+      >
         <div className="flex">
           {/* Image Container */}
-          <div className="relative w-48 h-48 flex-shrink-0">
-            <ImageGallery
-              images={product.images}
-              selectedImage={selectedImage}
-              onImageSelect={setSelectedImage}
-              showThumbnails={false}
-              showNavigation={false}
-              className="w-full h-full"
-              mainImageSize="w-full h-full"
-            />
+          <div className="relative w-48 h-48 shrink-0 group product-image-area">
+            {/* Main Image - Clickable to open detail modal */}
+            <div 
+              className="w-full h-full cursor-pointer"
+              onClick={handleImageClick}
+            >
+              <img
+                src={product.images?.[selectedImage]}
+                alt={product.name}
+                className="w-full h-full object-cover transition-all duration-300 ease-in-out group-hover:scale-105"
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/400?text=Image+Error';
+                }}
+              />
+            </div>
+            
+            {/* AliExpress-style overlay on hover */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center pointer-events-none">
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                  <Eye className="w-6 h-6 text-gray-700" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Navigation Arrows - Only show if multiple images */}
+            {product.images && product.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => handleImageNavigation('prev', e)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => handleImageNavigation('next', e)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
+            
+            {/* Image Counter */}
+            {product.images && product.images.length > 1 && (
+              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded z-10">
+                {selectedImage + 1} / {product.images.length}
+              </div>
+            )}
             
             {/* Discount Badge */}
             {product.discount && (
@@ -63,21 +149,91 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
               </div>
             )}
 
-            {/* Wishlist Button */}
+            {/* Enhanced Detail Button */}
             <button
-              onClick={handleWishlistToggle}
-              className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 shadow-lg z-10 ${
-                isInWishlist(product.id)
-                  ? 'bg-red-500 text-white'
-                  : 'bg-white/90 text-gray-600 hover:bg-red-500 hover:text-white'
-              }`}
+              onClick={handleImageDetailClick}
+              className="absolute top-3 left-3 p-2.5 rounded-full bg-white/95 hover:bg-blue-500 text-gray-700 hover:text-white transition-all duration-300 shadow-lg z-10 hover:scale-110 backdrop-blur-sm"
+              title="Quick View Details"
             >
+              <Eye className="w-4 h-4" />
+            </button>
+
+            {/* Full Details Button */}
+            <button
+              onClick={handleNavigateToProduct}
+              className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full bg-white/95 hover:bg-gray-800 hover:text-white text-gray-700 text-xs font-medium transition-all duration-300 shadow-lg z-10 hover:scale-105 backdrop-blur-sm"
+              title="View Full Details"
+            >
+              Full Details
+            </button>
+{/**
+ * here let's add mini product image galleray, when clicked changes the product image 
+ */}
+            {/* Wishlist Button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleWishlistToggle(e);
+          }}
+          className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 shadow-lg z-10 ${
+            isInWishlist(product.id)
+              ? 'bg-red-500 text-white'
+              : 'bg-white/90 text-gray-600 hover:bg-red-500 hover:text-white'
+          }`}
+        >
               <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>
           </div>
 
+          {/* Mini Product Image Gallery for List View */}
+          {product.images && product.images.length > 1 && (
+            <div className="px-6 pb-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-gray-500 font-medium">Image Choices</span>
+                <span className="text-xs text-gray-400">{product.images.length} photos</span>
+              </div>
+              <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+                {product.images.slice(0, 8).map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedImage(index);
+                    }}
+                    className={`shrink-0 w-10 h-10 rounded-md overflow-hidden border-2 transition-all duration-200 hover:scale-105 group relative ${
+                      selectedImage === index 
+                        ? 'border-blue-500 ring-2 ring-blue-200 shadow-md' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    title={`View image ${index + 1}`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Product image ${index + 1}`}
+                      className="w-full h-full object-cover group-hover:brightness-110 transition-all duration-200"
+                    />
+                    {selectedImage === index && (
+                      <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✓</span>
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                ))}
+                {product.images.length > 8 && (
+                  <div className="shrink-0 w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-medium border-2 border-dashed border-gray-300">
+                    +{product.images.length - 8}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Content */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 product-info-area">
             <div className="flex justify-between items-start h-full">
               <div className="flex-1 pr-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors duration-200 line-clamp-2">
@@ -153,7 +309,11 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
                 <div className="flex items-center space-x-3">
                   <button
-                    onClick={handleWishlistToggle}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleWishlistToggle(e);
+                    }}
                     className={`p-3 rounded-lg border-2 transition-all duration-200 ${
                       isInWishlist(product.id)
                         ? 'border-red-500 bg-red-50 text-red-600'
@@ -164,7 +324,11 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
                     <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                   </button>
                   <button
-                    onClick={handleAddToCart}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleAddToCart();
+                    }}
                     className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg hover:shadow-xl"
                   >
                     <ShoppingCart className="w-5 h-5" />
@@ -175,27 +339,85 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
             </div>
           </div>
         </div>
+        
+        {/* Product Detail Modal for List View */}
+        <ProductImageDetailModal
+          product={product}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+          selectedImage={selectedImage}
+          onImageSelect={setSelectedImage}
+        />
       </div>
     );
   }
 
   return (
     <div 
-      className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer"
+      className="product-card bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={(e) => {
+        // Open modal when clicking on card, images, or text content (but not buttons)
+        if (e.target === e.currentTarget || 
+            e.target.closest('.product-info-area') ||
+            e.target.closest('.product-image-area') ||
+            e.target.tagName === 'IMG' ||
+            e.target.closest('img')) {
+          setShowDetailModal(true);
+        }
+      }}
     >
       {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-gray-50">
-        <ImageGallery
-          images={product.images}
-          selectedImage={selectedImage}
-          onImageSelect={setSelectedImage}
-          showThumbnails={false}
-          showNavigation={false}
-          className="w-full h-full"
-          mainImageSize="w-full h-full"
-        />
+      <div className="relative aspect-square overflow-hidden bg-gray-50 group product-image-area">
+        {/* Main Image - Clickable to open detail modal */}
+        <div 
+          className="w-full h-full cursor-pointer"
+          onClick={handleImageClick}
+        >
+          <img
+            src={product.images?.[selectedImage]}
+            alt={product.name}
+            className="w-full h-full object-cover transition-all duration-300 ease-in-out group-hover:scale-105"
+            onError={(e) => {
+              e.target.src = 'https://via.placeholder.com/400?text=Image+Error';
+            }}
+          />
+        </div>
+        
+        {/* AliExpress-style overlay on hover */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center pointer-events-none">
+          <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+              <Eye className="w-6 h-6 text-gray-700" />
+            </div>
+          </div>
+        </div>
+        
+        {/* Navigation Arrows - Only show if multiple images */}
+        {product.images && product.images.length > 1 && (
+          <>
+            <button
+              onClick={(e) => handleImageNavigation('prev', e)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => handleImageNavigation('next', e)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </>
+        )}
+        
+        {/* Image Counter */}
+        {product.images && product.images.length > 1 && (
+          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded z-10">
+            {selectedImage + 1} / {product.images.length}
+          </div>
+        )}
         
         {/* Discount Badge */}
         {product.discount && (
@@ -204,9 +426,31 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           </div>
         )}
 
+        {/* Enhanced Detail Button */}
+        <button
+          onClick={handleImageDetailClick}
+          className="absolute top-3 left-3 p-2.5 rounded-full bg-white/95 hover:bg-blue-500 text-gray-700 hover:text-white transition-all duration-300 shadow-lg z-10 hover:scale-110 backdrop-blur-sm"
+          title="Quick View Details"
+        >
+          <Eye className="w-4 h-4" />
+        </button>
+
+        {/* Full Details Button */}
+        <button
+          onClick={handleNavigateToProduct}
+          className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full bg-white/95 hover:bg-gray-800 hover:text-white text-gray-700 text-xs font-medium transition-all duration-300 shadow-lg z-10 hover:scale-105 backdrop-blur-sm"
+          title="View Full Details"
+        >
+          Full Details
+        </button>
+
         {/* Wishlist Button */}
         <button
-          onClick={handleWishlistToggle}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleWishlistToggle(e);
+          }}
           className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 shadow-lg z-10 ${
             isInWishlist(product.id)
               ? 'bg-orange-500 text-white'
@@ -216,31 +460,16 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
         </button>
 
-        {/* Image Thumbnails */}
-        {product.images.length > 1 && (
-          <div className="absolute bottom-3 left-3 right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-            {product.images.slice(0, 3).map((image, index) => (
-              <button
-                key={index}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedImage(index);
-                }}
-                className={`w-8 h-8 rounded border-2 shadow-sm ${
-                  selectedImage === index ? 'border-blue-500' : 'border-white'
-                }`}
-              >
-                <img src={image} alt="" className="w-full h-full object-cover rounded" />
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Quick Add to Cart (appears on hover) */}
         {isHovered && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
             <button
-              onClick={handleAddToCart}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAddToCart();
+              }}
               className="bg-orange-500 text-white px-4 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors duration-200 flex items-center space-x-2"
             >
               <ShoppingCart className="w-4 h-4" />
@@ -250,10 +479,56 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         )}
       </div>
 
+      {/* Mini Product Image Gallery */}
+      {product.images && product.images.length > 1 && (
+        <div className="px-4 pb-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-gray-500 font-medium">Image Choices</span>
+            <span className="text-xs text-gray-400">{product.images.length} photos</span>
+          </div>
+          <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+            {product.images.slice(0, 6).map((image, index) => (
+              <button
+                key={index}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedImage(index);
+                }}
+                className={`shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105 group relative ${
+                  selectedImage === index 
+                    ? 'border-blue-500 ring-2 ring-blue-200 shadow-md' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                title={`View image ${index + 1}`}
+              >
+                <img
+                  src={image}
+                  alt={`Product image ${index + 1}`}
+                  className="w-full h-full object-cover group-hover:brightness-110 transition-all duration-200"
+                />
+                {selectedImage === index && (
+                  <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
+                    <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">✓</span>
+                    </div>
+                  </div>
+                )}
+              </button>
+            ))}
+            {product.images.length > 6 && (
+              <div className="shrink-0 w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-medium border-2 border-dashed border-gray-300">
+                +{product.images.length - 6}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Product Info */}
-      <div className="p-4">
+      <div className="p-4 product-info-area">
         {/* Product Name */}
-        <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200 min-h-[2.5rem]">
+        <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200 min-h-10">
           {product.name}
         </h3>
 
@@ -325,13 +600,27 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
         {/* Add to Cart Button */}
         <button
-          onClick={handleAddToCart}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleAddToCart();
+          }}
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2"
         >
           <ShoppingCart className="w-4 h-4" />
           <span>Add to Cart</span>
         </button>
+
       </div>
+
+      {/* Product Detail Modal */}
+      <ProductImageDetailModal
+        product={product}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        selectedImage={selectedImage}
+        onImageSelect={setSelectedImage}
+      />
     </div>
   );
 }

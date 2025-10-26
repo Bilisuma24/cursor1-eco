@@ -16,7 +16,7 @@ export default function ImageGallery({
   const [currentImage, setCurrentImage] = useState(selectedImage);
   const [isZoomed, setIsZoomed] = useState(false);
   const [isAutoplaying, setIsAutoplaying] = useState(autoplay);
-  const [imageLoading, setImageLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
@@ -59,10 +59,12 @@ export default function ImageGallery({
   }, [isZoomed]);
 
   const handleImageSelect = (index) => {
+    if (index !== currentImage) {
+      setImageLoading(true);
+      setImageError(false);
+    }
     setCurrentImage(index);
     onImageSelect(index);
-    setImageLoading(true);
-    setImageError(false);
   };
 
   const handleImageLoad = () => {
@@ -105,13 +107,6 @@ export default function ImageGallery({
     <div className={`space-y-4 ${className}`}>
       {/* Main Image Container */}
       <div className={`relative ${mainImageSize} bg-white rounded-lg overflow-hidden border group`}>
-        {/* Loading State */}
-        {imageLoading && (
-          <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        )}
-        
         {/* Error State */}
         {imageError && (
           <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
@@ -125,9 +120,7 @@ export default function ImageGallery({
         <img
           src={images[currentImage]}
           alt={`Product image ${currentImage + 1}`}
-          className={`w-full h-full object-cover cursor-zoom-in transition-opacity duration-300 ${
-            imageLoading ? 'opacity-0' : 'opacity-100'
-          }`}
+          className="w-full h-full object-cover cursor-zoom-in"
           onClick={handleZoom}
           onMouseEnter={() => setIsAutoplaying(false)}
           onMouseLeave={() => setIsAutoplaying(autoplay)}
@@ -194,26 +187,50 @@ export default function ImageGallery({
         )}
       </div>
 
-      {/* Thumbnail Images */}
+      {/* Thumbnail Images with Enhanced Scrolling */}
       {showThumbnails && images.length > 1 && (
-        <div className="flex space-x-2 overflow-x-auto pb-2">
-          {images.map((image, index) => (
-            <button
-              key={index}
-              onClick={() => handleImageSelect(index)}
-              className={`flex-shrink-0 ${thumbnailSize} rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                currentImage === index 
-                  ? 'border-blue-500 ring-2 ring-blue-200' 
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <img 
-                src={image} 
-                alt={`Thumbnail ${index + 1}`} 
-                className="w-full h-full object-cover"
-              />
-            </button>
-          ))}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-gray-700">Image Choices ({images.length})</h4>
+            <div className="text-xs text-gray-500">
+              Click or scroll to browse
+            </div>
+          </div>
+          <div className="relative">
+            <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide" 
+                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {images.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleImageSelect(index)}
+                  className={`shrink-0 ${thumbnailSize} rounded-lg overflow-hidden border-2 transition-all duration-200 group ${
+                    currentImage === index 
+                      ? 'border-blue-500 ring-2 ring-blue-200 scale-105' 
+                      : 'border-gray-200 hover:border-gray-300 hover:scale-105'
+                  }`}
+                >
+                  <div className="relative">
+                    <img 
+                      src={image} 
+                      alt={`Choice ${index + 1}`} 
+                      className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+                    />
+                    {currentImage === index && (
+                      <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✓</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Scroll indicators */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+          </div>
         </div>
       )}
 

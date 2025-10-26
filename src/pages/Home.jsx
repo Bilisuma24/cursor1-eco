@@ -9,7 +9,10 @@ import {
   TrendingUp,
   Users,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Sparkles,
+  Zap,
+  Heart
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
@@ -21,7 +24,9 @@ export default function Home() {
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState({});
   const bannerTimer = useRef(null);
+  const observerRef = useRef(null);
 
   useEffect(() => {
     // Get featured products (high rating, good sales)
@@ -97,21 +102,68 @@ export default function Home() {
     return () => bannerTimer.current && clearInterval(bannerTimer.current);
   }, []);
 
+  // Scroll animation observer
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(prev => ({ ...prev, [entry.target.id]: true }));
+            entry.target.classList.add('animate-in');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    const elements = document.querySelectorAll('[data-animate]');
+    elements.forEach((el) => observerRef.current.observe(el));
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section with left categories and banner carousel */}
-      <div className="bg-orange-50">
-        <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="bg-gradient-to-br from-orange-50 via-orange-100 to-yellow-50 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-10 -left-10 w-20 h-20 bg-orange-200 rounded-full opacity-20 animate-pulse"></div>
+          <div className="absolute top-20 right-10 w-16 h-16 bg-yellow-200 rounded-full opacity-30 animate-bounce"></div>
+          <div className="absolute bottom-10 left-1/4 w-12 h-12 bg-orange-300 rounded-full opacity-25 animate-ping"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6 relative z-10">
           {/* Left Categories */}
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 font-semibold text-gray-800 border-b">Categories</div>
+          <div 
+            className="hidden lg:block lg:col-span-1"
+            data-animate
+            id="categories"
+          >
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-gray-200 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105">
+              <div className="px-4 py-3 font-semibold text-gray-800 border-b bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="w-5 h-5" />
+                  <span>Categories</span>
+                </div>
+              </div>
               <ul className="divide-y">
-                {productsData.categories.map((cat) => (
-                  <li key={cat.id}>
-                    <Link to={`/shop?category=${encodeURIComponent(cat.name)}`} className="flex items-center justify-between px-4 py-3 text-sm hover:bg-gray-50">
-                      <span>{cat.name}</span>
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                {productsData.categories.map((cat, index) => (
+                  <li 
+                    key={cat.id}
+                    className="group"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <Link 
+                      to={`/shop?category=${encodeURIComponent(cat.name)}`} 
+                      className="flex items-center justify-between px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 transition-all duration-300 group-hover:translate-x-2"
+                    >
+                      <span className="group-hover:text-orange-600 transition-colors duration-300">{cat.name}</span>
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-300" />
                     </Link>
                   </li>
                 ))}
@@ -120,16 +172,41 @@ export default function Home() {
           </div>
 
           {/* Banner Carousel */}
-          <div className="lg:col-span-3 relative">
-            <div className="relative overflow-hidden rounded-xl h-64 md:h-80">
+          <div 
+            className="lg:col-span-3 relative"
+            data-animate
+            id="banner"
+          >
+            <div className="relative overflow-hidden rounded-xl h-64 md:h-80 shadow-2xl">
               {banners.map((b, i) => (
-                <div key={i} className={`absolute inset-0 transition-opacity duration-700 ${i === bannerIndex ? 'opacity-100' : 'opacity-0'}`}>
-                  <img src={b.image} alt={b.title} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/30" />
+                <div 
+                  key={i} 
+                  className={`absolute inset-0 transition-all duration-1000 transform ${
+                    i === bannerIndex 
+                      ? 'opacity-100 scale-100 translate-x-0' 
+                      : 'opacity-0 scale-105 translate-x-4'
+                  }`}
+                >
+                  <img 
+                    src={b.image} 
+                    alt={b.title} 
+                    className="w-full h-full object-cover transition-transform duration-1000 hover:scale-110" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-transparent" />
                   <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-center text-white">
-                    <h2 className="text-2xl md:text-4xl font-bold mb-2">{b.title}</h2>
-                    <p className="text-sm md:text-lg text-white/90 mb-4">{b.subtitle}</p>
-                    <Link to={b.cta.to} className="w-max bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-md text-sm font-medium">{b.cta.label}</Link>
+                    <div className="transform transition-all duration-1000 delay-300">
+                      <h2 className="text-2xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">
+                        {b.title}
+                      </h2>
+                      <p className="text-sm md:text-lg text-white/90 mb-6 max-w-md">{b.subtitle}</p>
+                      <Link 
+                        to={b.cta.to} 
+                        className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-6 py-3 rounded-lg text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                      >
+                        <Zap className="w-4 h-4" />
+                        <span>{b.cta.label}</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -148,11 +225,25 @@ export default function Home() {
       </div>
 
       {/* Categories Section */}
-      <div className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Shop by Category</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Find exactly what you're looking for with our comprehensive product categories</p>
+      <div className="bg-gradient-to-b from-white to-gray-50 py-20 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-blue-100 rounded-full opacity-20 animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-24 h-24 bg-purple-100 rounded-full opacity-30 animate-bounce"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div 
+            className="text-center mb-16"
+            data-animate
+            id="categories-title"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+              Shop by Category
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Find exactly what you're looking for with our comprehensive product categories
+            </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
@@ -160,14 +251,31 @@ export default function Home() {
               <Link
                 key={index}
                 to="/shop"
-                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-center group border border-gray-100 hover:border-blue-200 transform hover:-translate-y-2"
+                data-animate
+                id={`category-${index}`}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center group border border-gray-100 hover:border-blue-200 transform hover:-translate-y-3 hover:rotate-1 relative overflow-hidden"
+                style={{ animationDelay: `${index * 150}ms` }}
               >
-                <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">{category.icon}</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-200">
+                {/* Hover effect background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
+                  <div className="text-6xl mb-4 group-hover:scale-125 transition-transform duration-500 group-hover:rotate-12">
+                    {category.icon}
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">
                   {category.name}
                 </h3>
-                <p className="text-sm text-gray-500 font-medium">{category.count}</p>
-                <div className="mt-4 w-12 h-1 bg-blue-600 mx-auto rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <p className="text-sm text-gray-500 font-medium group-hover:text-gray-700 transition-colors duration-300">
+                    {category.count}
+                  </p>
+                  <div className="mt-4 w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-x-0 group-hover:scale-x-100"></div>
+                </div>
+                
+                {/* Sparkle effect */}
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
+                </div>
               </Link>
             ))}
           </div>
@@ -175,67 +283,154 @@ export default function Home() {
       </div>
 
       {/* Featured Products */}
-      <div className="bg-gray-50 py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Featured Products</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">Handpicked products with excellent ratings and unbeatable value</p>
+      <div className="bg-gradient-to-b from-gray-50 to-white py-20 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-10 right-10 w-40 h-40 bg-orange-100 rounded-full opacity-20 animate-pulse"></div>
+          <div className="absolute bottom-10 left-10 w-28 h-28 bg-yellow-100 rounded-full opacity-30 animate-bounce"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div 
+            className="text-center mb-16"
+            data-animate
+            id="featured-title"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 bg-gradient-to-r from-gray-900 via-orange-600 to-red-600 bg-clip-text text-transparent">
+              Featured Products
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+              Handpicked products with excellent ratings and unbeatable value
+            </p>
             <Link
               to="/shop"
-              className="text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
+              className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             >
               <span>View All Products</span>
               <TrendingUp className="w-5 h-5" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+            data-animate
+            id="featured-products"
+          >
+            {featuredProducts.map((product, index) => (
+              <div
+                key={product.id}
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="transform transition-all duration-500 hover:scale-105"
+              >
+                <ProductCard product={product} />
+              </div>
             ))}
           </div>
         </div>
       </div>
 
       {/* Trending Products */}
-      <div className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Trending Now</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">Discover what's popular and trending among our customers</p>
+      <div className="bg-gradient-to-b from-white to-gray-50 py-20 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-20 w-36 h-36 bg-green-100 rounded-full opacity-20 animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-24 h-24 bg-blue-100 rounded-full opacity-30 animate-bounce"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div 
+            className="text-center mb-16"
+            data-animate
+            id="trending-title"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 bg-gradient-to-r from-gray-900 via-green-600 to-blue-600 bg-clip-text text-transparent">
+              Trending Now
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+              Discover what's popular and trending among our customers
+            </p>
             <Link
               to="/shop"
-              className="text-orange-600 hover:text-orange-700 font-medium flex items-center space-x-1"
+              className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             >
               <span>Explore Trending</span>
               <TrendingUp className="w-5 h-5" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {trendingProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+            data-animate
+            id="trending-products"
+          >
+            {trendingProducts.map((product, index) => (
+              <div
+                key={product.id}
+                style={{ animationDelay: `${index * 150}ms` }}
+                className="transform transition-all duration-500 hover:scale-105"
+              >
+                <ProductCard product={product} />
+              </div>
             ))}
           </div>
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="bg-gradient-to-br from-gray-50 to-blue-50 py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Why Choose Us?</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">We're committed to providing the best shopping experience with unmatched service and quality</p>
+      <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 py-20 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-28 h-28 bg-purple-200 rounded-full opacity-30 animate-bounce"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full opacity-10 animate-ping"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div 
+            className="text-center mb-16"
+            data-animate
+            id="features-title"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 bg-gradient-to-r from-gray-900 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Why Choose Us?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              We're committed to providing the best shopping experience with unmatched service and quality
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+            data-animate
+            id="features"
+          >
             {features.map((feature, index) => (
-              <div key={index} className="bg-white rounded-2xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
+              <div 
+                key={index} 
+                data-animate
+                id={`feature-${index}`}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:rotate-1 border border-gray-100 relative overflow-hidden group"
+                style={{ animationDelay: `${index * 200}ms` }}
+              >
+                {/* Hover effect background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
+                  <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
                   {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                    {feature.description}
+                  </p>
+                  
+                  {/* Sparkle effect */}
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <Heart className="w-4 h-4 text-red-400 animate-pulse" />
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
