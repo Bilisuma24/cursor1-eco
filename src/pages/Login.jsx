@@ -1,33 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
 
 export default function Login() {
-  const { signIn, resendConfirmation, error: authError } = useSupabaseAuth();
+  const { signIn, resendConfirmation, error: authError, user } = useSupabaseAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+
+  // Handle successful login by watching user state
+  useEffect(() => {
+    if (user && loading) {
+      console.log('User logged in successfully, navigating to profile');
+      console.log('User data:', user);
+      setLoginSuccess(true);
+      setLoading(false);
+      
+      // Show success message briefly then navigate
+      setTimeout(() => {
+        console.log('Navigating to profile page');
+        navigate("/profile");
+      }, 1500);
+    }
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setLoginSuccess(false);
     
     try {
       console.log('Attempting to sign in with:', email);
       const result = await signIn(email, password);
       console.log('Sign in successful:', result);
       
-      // Wait a moment for session to be set
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // The useEffect will handle navigation when user state updates
       
-      navigate("/profile");
-      
-      // Force reload to ensure auth state is updated
-      window.location.href = "/profile";
     } catch (err) {
       console.error('Sign in error:', err);
       setError(err.message || "Login failed. Please check your credentials.");
@@ -35,7 +48,6 @@ export default function Login() {
       if (err.message && err.message.includes('not confirmed')) {
         setShowResend(true);
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -73,10 +85,21 @@ export default function Login() {
         <button 
           type="submit"
           disabled={loading}
-          className="bg-emerald-600 text-white w-full py-2 rounded hover:brightness-110 transition disabled:opacity-50"
+          className={`w-full py-2 rounded transition disabled:opacity-50 ${
+            loginSuccess 
+              ? 'bg-green-600 text-white' 
+              : 'bg-emerald-600 text-white hover:brightness-110'
+          }`}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {loginSuccess ? 'Login Successful! Redirecting...' : loading ? 'Logging in...' : 'Login'}
         </button>
+        
+        {loginSuccess && (
+          <div className="mt-4 text-center">
+            <p className="text-green-600 font-medium">✅ Login successful!</p>
+            <p className="text-sm text-gray-600">Redirecting to your profile...</p>
+          </div>
+        )}
         {showResend && (
           <button 
             type="button"

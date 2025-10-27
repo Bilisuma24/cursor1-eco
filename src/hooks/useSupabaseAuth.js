@@ -6,15 +6,100 @@ export function useSupabaseAuth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('useSupabaseAuth: Current state - user:', user, 'loading:', loading, 'error:', error);
+  }, [user, loading, error]);
+
   // Get initial session
   useEffect(() => {
     console.log('useSupabaseAuth: Getting initial session...');
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('useSupabaseAuth: Initial session:', session);
-      console.log('useSupabaseAuth: User from session:', session?.user);
-      setUser(session?.user ?? null);
+    
+    const initializeAuth = async () => {
+      try {
+        console.log('useSupabaseAuth: Starting session check...');
+        
+        // First try to get session with a shorter timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 3000)
+        );
+
+        const sessionPromise = supabase.auth.getSession();
+        
+        try {
+          const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]);
+          
+          console.log('useSupabaseAuth: Initial session:', session);
+          console.log('useSupabaseAuth: User from session:', session?.user);
+          console.log('useSupabaseAuth: Session error:', error);
+          
+          if (session?.user) {
+            console.log('useSupabaseAuth: Setting user from session');
+            setUser(session.user);
+          } else {
+            console.log('useSupabaseAuth: No user in session, checking localStorage');
+            // Check localStorage as fallback
+            const localUser = localStorage.getItem('supabase_user');
+            if (localUser) {
+              try {
+                const parsedUser = JSON.parse(localUser);
+                console.log('useSupabaseAuth: Found user in localStorage:', parsedUser);
+                setUser(parsedUser);
+              } catch (parseErr) {
+                console.error('useSupabaseAuth: Error parsing localStorage user:', parseErr);
+                setUser(null);
+              }
+            } else {
+              setUser(null);
+            }
+          }
+        } catch (timeoutErr) {
+          console.warn('useSupabaseAuth: Session check timed out, checking localStorage');
+          // Session check timed out, try localStorage
+          const localUser = localStorage.getItem('supabase_user');
+          if (localUser) {
+            try {
+              const parsedUser = JSON.parse(localUser);
+              console.log('useSupabaseAuth: Using localStorage user as fallback:', parsedUser);
+              setUser(parsedUser);
+            } catch (parseErr) {
+              console.error('useSupabaseAuth: Error parsing localStorage user:', parseErr);
+              setUser(null);
+            }
+          } else {
+            console.log('useSupabaseAuth: No localStorage user found');
+            setUser(null);
+          }
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('useSupabaseAuth: Error getting initial session:', err);
+        // Even on error, try localStorage as last resort
+        const localUser = localStorage.getItem('supabase_user');
+        if (localUser) {
+          try {
+            const parsedUser = JSON.parse(localUser);
+            console.log('useSupabaseAuth: Using localStorage user after error:', parsedUser);
+            setUser(parsedUser);
+          } catch (parseErr) {
+            console.error('useSupabaseAuth: Error parsing localStorage user:', parseErr);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Fallback timeout to ensure loading is set to false
+    const fallbackTimeout = setTimeout(() => {
+      console.log('useSupabaseAuth: Fallback timeout - setting loading to false');
       setLoading(false);
-    });
+    }, 10000); // 10 second fallback
 
     // Listen for auth changes
     const {
@@ -23,11 +108,29 @@ export function useSupabaseAuth() {
       console.log('useSupabaseAuth: Auth state changed:', event);
       console.log('useSupabaseAuth: New session:', session);
       console.log('useSupabaseAuth: User:', session?.user);
-      setUser(session?.user ?? null);
+      console.log('useSupabaseAuth: Event type:', event);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        console.log('useSupabaseAuth: User signed in successfully');
+        setUser(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        console.log('useSupabaseAuth: User signed out');
+        setUser(null);
+      } else if (session?.user) {
+        console.log('useSupabaseAuth: Session updated with user');
+        setUser(session.user);
+      } else {
+        console.log('useSupabaseAuth: No user in session');
+        setUser(null);
+      }
+      
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(fallbackTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Sign in with email and password
@@ -47,10 +150,32 @@ export function useSupabaseAuth() {
       }
       
       console.log('useSupabaseAuth: Sign in successful, user:', data.user);
+      console.log('useSupabaseAuth: Sign in session:', data.session);
+      
+      // Set user immediately
       setUser(data.user);
       
-      // Wait for session to be stored
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Save user to localStorage as backup
+      try {
+        localStorage.setItem('supabase_user', JSON.stringify(data.user));
+        console.log('useSupabaseAuth: User saved to localStorage');
+      } catch (storageErr) {
+        console.error('useSupabaseAuth: Error saving user to localStorage:', storageErr);
+      }
+      
+      // Wait for session to be stored and refresh it
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Force refresh the session to ensure it's properly stored
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        console.log('useSupabaseAuth: Session refresh after sign in:', sessionData.session);
+        if (sessionError) {
+          console.error('useSupabaseAuth: Session refresh error:', sessionError);
+        }
+      } catch (sessionErr) {
+        console.error('useSupabaseAuth: Session refresh exception:', sessionErr);
+      }
       
       return { user: data.user };
     } catch (err) {
@@ -95,6 +220,14 @@ export function useSupabaseAuth() {
       }
       
       setUser(null);
+      
+      // Clear localStorage backup
+      try {
+        localStorage.removeItem('supabase_user');
+        console.log('useSupabaseAuth: User removed from localStorage');
+      } catch (storageErr) {
+        console.error('useSupabaseAuth: Error removing user from localStorage:', storageErr);
+      }
     } catch (err) {
       throw err;
     }
@@ -127,7 +260,7 @@ export function useSupabaseAuth() {
     try {
       setError(null);
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       });
       
       if (resetError) {

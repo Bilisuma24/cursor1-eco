@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Globe, MapPin } from "lucide-react";
-import { useState, useContext } from "react";
+import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Globe, MapPin, LogOut } from "lucide-react";
+import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
 
 import Home from "./pages/Home";
@@ -14,20 +14,28 @@ import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
 import Wishlist from "./pages/Wishlist";
+import SellerDashboard from "./pages/SellerDashboard";
+import AuthCallback from "./pages/auth/AuthCallback";
 import ScrollToTop from "./components/ScrollToTop";
 import ImageTest from "./components/ImageTest";
 import ImageDebug from "./components/ImageDebug";
 import ImageTestSimple from "./components/ImageTestSimple";
+import CartTest from "./components/CartTest";
+import SimpleCartTest from "./components/SimpleCartTest";
 
 import { CartProvider, useCart } from "./contexts/CartContext";
-import { AuthProvider, AuthContext } from "./contexts/AuthContext";
+import { useSupabaseAuth } from "./hooks/useSupabaseAuth";
+import { useUserRole } from "./hooks/useUserRole";
 
 function NavbarContent() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, signOut, loading: authLoading } = useSupabaseAuth();
+  const { userRole, isSeller, loading: roleLoading } = useUserRole();
   const { getCartItemsCount, wishlist } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
+  const dropdownRef = useRef(null);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -37,6 +45,43 @@ function NavbarContent() {
     const qs = params.toString();
     window.location.href = `/shop${qs ? `?${qs}` : ""}`;
   };
+
+  const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen);
+
+  const handleLogout = async () => {
+    await signOut();
+    setUserDropdownOpen(false);
+    window.location.href = "/login";
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (user?.user_metadata?.name) {
+      return user.user_metadata.name.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return 'U';
+  };
+
+  const getUserDisplayName = () => {
+    return user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200">
@@ -160,29 +205,54 @@ function NavbarContent() {
                 </Link>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Link
-                  to="/profile"
-                  className="flex items-center space-x-2 text-gray-700 hover:text-orange-600"
-                >
-                  <User className="w-5 h-5" />
-                  <span className="hidden sm:inline">Profile</span>
-                </Link>
-                <Link
-                  to="/orders"
-                  className="text-gray-700 hover:text-orange-600 font-medium"
-                >
-                  Orders
-                </Link>
+              <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={() => {
-                    logout();
-                    window.location.href = "/login";
-                  }}
-                  className="text-gray-700 hover:text-red-600 font-medium"
+                  onClick={toggleUserDropdown}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition-colors"
                 >
-                  Logout
+                  <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                    {getUserInitials()}
+                  </div>
+                  <span className="hidden sm:block font-medium">{getUserDisplayName()}</span>
+                  <ChevronDown className="w-4 h-4" />
                 </button>
+                
+                {/* User Dropdown */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Profile</span>
+                    </Link>
+                    <Link
+                      to="/orders"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    >
+                      <span>Orders</span>
+                    </Link>
+                    {isSeller && (
+                      <Link
+                        to="/seller-dashboard"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      >
+                        <span>Seller Dashboard</span>
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center space-x-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -214,12 +284,28 @@ function NavbarContent() {
               </Link>
               {user && (
                 <>
+                  <div className="border-t border-gray-200 px-6 py-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                        {getUserInitials()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                    </div>
+                  </div>
                   <Link to="/profile" className="text-gray-700 hover:text-orange-600 font-medium">
                     Profile
                   </Link>
                   <Link to="/orders" className="text-gray-700 hover:text-orange-600 font-medium">
                     Orders
                   </Link>
+                  {isSeller && (
+                    <Link to="/seller-dashboard" className="text-gray-700 hover:text-orange-600 font-medium">
+                      Seller Dashboard
+                    </Link>
+                  )}
                 </>
               )}
             </div>
@@ -231,16 +317,15 @@ function NavbarContent() {
 }
 
 function App() {
-  // Wrap Router with providers here so NavbarContent can access AuthContext
+  // Wrap Router with providers here so NavbarContent can access Supabase auth
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
-          <ScrollToTop />
-          {/* Header (simple horizontal navbar) */}
-          <header className="bg-white shadow-md sticky top-0 z-50">
-            <NavbarContent />
-          </header>
+    <CartProvider>
+      <Router>
+        <ScrollToTop />
+        {/* Header (simple horizontal navbar) */}
+        <header className="bg-white shadow-md sticky top-0 z-50">
+          <NavbarContent />
+        </header>
 
           {/* Page Routes */}
           <main>
@@ -256,9 +341,13 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/test" element={<ImageTest />} />
               <Route path="/debug" element={<ImageDebug />} />
               <Route path="/simple" element={<ImageTestSimple />} />
+              <Route path="/cart-test" element={<CartTest />} />
+              <Route path="/simple-cart-test" element={<SimpleCartTest />} />
             </Routes>
           </main>
 
@@ -337,7 +426,6 @@ function App() {
           </footer>
         </Router>
       </CartProvider>
-    </AuthProvider>
   );
 }
 
