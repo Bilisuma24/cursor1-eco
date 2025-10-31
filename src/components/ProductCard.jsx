@@ -15,17 +15,33 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   const [showDetailModal, setShowDetailModal] = useState(false);
 
 
-  const handleAddToCart = () => {
-    addToCart(product, 1);
-    if (onAddToCart) onAddToCart(product);
+  const handleAddToCart = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    try {
+      await addToCart(product, 1);
+      if (onAddToCart) onAddToCart(product);
+      // Optional: Show success feedback
+      console.log('Product added to cart:', product.name);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      // Still call onAddToCart for local state updates
+      if (onAddToCart) onAddToCart(product);
+    }
   };
 
-  const handleWishlistToggle = (e) => {
+  const handleWishlistToggle = async (e) => {
     e.stopPropagation();
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product);
+    try {
+      if (isInWishlist(product.id)) {
+        await removeFromWishlist(product.id);
+      } else {
+        await addToWishlist(product);
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
     }
   };
 
@@ -78,7 +94,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   if (viewMode === 'list') {
     return (
       <div 
-        className="product-card bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer"
+        className="product-card card-lift bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer glow-border"
         onClick={(e) => {
           // Open modal when clicking on card, images, or text content (but not buttons)
           if (e.target === e.currentTarget || 
@@ -354,7 +370,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
   return (
     <div 
-      className="product-card bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer"
+      className="product-card card-lift bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer glow-border"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={(e) => {
@@ -421,7 +437,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         
         {/* Discount Badge */}
         {product.discount && (
-          <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
+          <div className="absolute top-2 left-2 badge-modern animate-bounce-in z-10">
             -{product.discount}%
           </div>
         )}
@@ -470,7 +486,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
                 e.stopPropagation();
                 handleAddToCart();
               }}
-              className="bg-orange-500 text-white px-4 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors duration-200 flex items-center space-x-2"
+              className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-full font-medium hover:from-orange-600 hover:to-red-600 transition-all duration-300 flex items-center space-x-2 ripple hover-scale shadow-lg"
             >
               <ShoppingCart className="w-4 h-4" />
               <span>Add to Cart</span>

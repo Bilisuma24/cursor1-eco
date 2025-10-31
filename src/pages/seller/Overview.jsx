@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '../../hooks/useSupabaseAuth';
+import { useAuth } from '../../contexts/SupabaseAuthContext';
 import { analyticsService } from '../../services/analyticsService';
 import { orderService } from '../../services/orderService';
 import StatsCard from '../../components/seller/StatsCard';
+import LevelBadge from '../../components/achievements/LevelBadge';
+import LevelProgress from '../../components/achievements/LevelProgress';
+import { getUserLevel } from '../../services/achievementService';
 import { 
   DollarSign, 
   Package, 
@@ -15,12 +18,13 @@ import {
 } from 'lucide-react';
 
 const Overview = () => {
-  const { user } = useSupabaseAuth();
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [level, setLevel] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -28,8 +32,20 @@ const Overview = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (!user) return;
+        const lvl = await getUserLevel(user.id, 'seller');
+        if (mounted) setLevel(lvl);
+      } catch {}
+    })();
+    return () => { mounted = false; };
+  }, [user]);
+
   const loadDashboardData = async () => {
-    if (!user) {
+    if (!user?.id) {
       console.log('User not available yet, skipping dashboard data load');
       return;
     }
@@ -123,6 +139,15 @@ const Overview = () => {
         <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
         <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your store.</p>
       </div>
+
+      {level && (
+        <div>
+          <LevelBadge levelName={level?.badge?.split('/').pop()?.replace('.svg','')} badge={level?.badge} />
+          <div className="mt-2 max-w-md">
+            <LevelProgress xp={level?.xp || 0} next={level?.next_level_xp || 100} />
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

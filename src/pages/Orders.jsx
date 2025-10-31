@@ -8,92 +8,106 @@ import {
   Eye,
   Download,
   MessageCircle,
-  RefreshCw
+  RefreshCw,
+  AlertCircle
 } from "lucide-react";
+import { useAuth } from "../contexts/SupabaseAuthContext";
+import { orderService } from "../services/orderService";
+import { Link } from "react-router-dom";
 
 export default function Orders() {
+  const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('all');
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Load orders from localStorage or fallback to samples
+    if (authLoading) return;
+    
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    loadOrders();
+  }, [user, authLoading, activeTab]);
+
+  const loadOrders = async () => {
+    if (!user) return;
+
     try {
-      const saved = JSON.parse(localStorage.getItem('orders') || '[]');
-      if (saved.length > 0) {
-        setOrders(saved);
-        return;
-      }
-    } catch {}
-    // Fallback sample orders
-    setOrders([
-      {
-        id: 'ORD-2024-001',
-        date: '2024-01-15',
-        status: 'delivered',
-        total: 189.98,
-        items: [
-          {
-            id: 1,
-            name: 'Wireless Bluetooth Earbuds Pro',
-            image: 'https://images.unsplash.com/photo-1606220838315-056192d5e927?w=100&h=100&fit=crop',
-            price: 89.99,
-            quantity: 1,
-            seller: 'TechWorld Store'
-          },
-          {
-            id: 2,
-            name: 'Smart Fitness Watch Series 8',
-            image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop',
-            price: 199.99,
-            quantity: 1,
-            seller: 'Fitness Gear Pro'
-          }
-        ],
-        tracking: {
-          number: 'TRK123456789',
-          carrier: 'FedEx',
-          estimatedDelivery: '2024-01-18'
-        }
-      },
-      {
-        id: 'ORD-2024-002',
-        date: '2024-01-12',
-        status: 'shipped',
-        total: 79.99,
-        items: [
-          {
-            id: 6,
-            name: 'Smart Home Security Camera',
-            image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop',
-            price: 79.99,
-            quantity: 1,
-            seller: 'Smart Home Solutions'
-          }
-        ],
-        tracking: {
-          number: 'TRK987654321',
-          carrier: 'UPS',
-          estimatedDelivery: '2024-01-20'
-        }
-      },
-      {
-        id: 'ORD-2024-003',
-        date: '2024-01-10',
-        status: 'processing',
-        total: 159.99,
-        items: [
-          {
-            id: 3,
-            name: 'Premium Leather Handbag',
-            image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=100&h=100&fit=crop',
-            price: 159.99,
-            quantity: 1,
-            seller: 'Fashion Forward'
-          }
-        ]
-      }
-    ]);
-  }, []);
+      setLoading(true);
+      setError(null);
+      
+      // Determine status filter based on active tab
+      const statusFilter = activeTab === 'all' ? null : activeTab;
+      
+      const data = await orderService.fetchBuyerOrders(user.id, statusFilter);
+      
+      // Transform data to match the component's expected format
+      const transformedOrders = data.map(order => ({
+        id: order.id,
+        date: order.created_at,
+        status: order.status,
+        total: parseFloat(order.total_price),
+        items: order.order_items.map(item => ({
+          id: item.product?.id || item.product_id,
+          name: item.product?.name || 'Unknown Product',
+          image: item.product?.images?.[0] || 'https://via.placeholder.com/100',
+          price: parseFloat(item.price_at_purchase),
+          quantity: item.quantity,
+          seller: item.product?.seller?.full_name || item.product?.seller?.username || 'Unknown Seller'
+        })),
+        tracking: order.status === 'shipped' || order.status === 'delivered' ? {
+          number: `TRK${order.id.substring(0, 8).toUpperCase()}`,
+          carrier: 'Standard Shipping',
+          estimatedDelivery: new Date(new Date(order.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        } : null
+      }));
+
+      setOrders(transformedOrders);
+    } catch (err) {
+      console.error('Error loading orders:', err);
+      setError('Failed to load orders. Please try again.');
+      
+      // Fallback to empty array if there's an error
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Don't show anything while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center bg-white rounded-lg shadow-lg p-8 max-w-md">
+          <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h2>
+          <p className="text-gray-600 mb-6">You need to be logged in to view your orders.</p>
+          <Link
+            to="/login"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium inline-block"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -101,8 +115,12 @@ export default function Orders() {
         return <CheckCircle className="w-5 h-5 text-green-500" />;
       case 'shipped':
         return <Truck className="w-5 h-5 text-blue-500" />;
-      case 'processing':
+      case 'confirmed':
+        return <CheckCircle className="w-5 h-5 text-blue-500" />;
+      case 'pending':
         return <Clock className="w-5 h-5 text-yellow-500" />;
+      case 'cancelled':
+        return <AlertCircle className="w-5 h-5 text-red-500" />;
       default:
         return <Package className="w-5 h-5 text-gray-500" />;
     }
@@ -114,8 +132,12 @@ export default function Orders() {
         return 'text-green-600 bg-green-100';
       case 'shipped':
         return 'text-blue-600 bg-blue-100';
-      case 'processing':
+      case 'confirmed':
+        return 'text-blue-600 bg-blue-100';
+      case 'pending':
         return 'text-yellow-600 bg-yellow-100';
+      case 'cancelled':
+        return 'text-red-600 bg-red-100';
       default:
         return 'text-gray-600 bg-gray-100';
     }
@@ -127,16 +149,16 @@ export default function Orders() {
         return 'Delivered';
       case 'shipped':
         return 'Shipped';
-      case 'processing':
-        return 'Processing';
+      case 'confirmed':
+        return 'Confirmed';
+      case 'pending':
+        return 'Pending';
+      case 'cancelled':
+        return 'Cancelled';
       default:
-        return 'Unknown';
+        return status.charAt(0).toUpperCase() + status.slice(1);
     }
   };
-
-  const filteredOrders = activeTab === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === activeTab);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
@@ -153,6 +175,32 @@ export default function Orders() {
     });
   };
 
+  // Count orders by status
+  const getOrderCount = (status) => {
+    if (status === 'all') return orders.length;
+    return orders.filter(o => o.status === status).length;
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
+            <p className="text-gray-600">Track and manage your orders</p>
+          </div>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading your orders...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -161,15 +209,31 @@ export default function Orders() {
           <p className="text-gray-600">Track and manage your orders</p>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+            <p className="text-red-800">{error}</p>
+            <button
+              onClick={loadOrders}
+              className="ml-auto text-red-600 hover:text-red-700 font-medium"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Order Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
+            <nav className="flex space-x-8 px-6 overflow-x-auto">
               {[
-                { key: 'all', label: 'All Orders', count: orders.length },
-                { key: 'processing', label: 'Processing', count: orders.filter(o => o.status === 'processing').length },
-                { key: 'shipped', label: 'Shipped', count: orders.filter(o => o.status === 'shipped').length },
-                { key: 'delivered', label: 'Delivered', count: orders.filter(o => o.status === 'delivered').length }
+                { key: 'all', label: 'All Orders' },
+                { key: 'pending', label: 'Pending' },
+                { key: 'confirmed', label: 'Confirmed' },
+                { key: 'shipped', label: 'Shipped' },
+                { key: 'delivered', label: 'Delivered' },
+                { key: 'cancelled', label: 'Cancelled' }
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -180,7 +244,7 @@ export default function Orders() {
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  {tab.label} ({tab.count})
+                  {tab.label} ({getOrderCount(tab.key)})
                 </button>
               ))}
             </nav>
@@ -189,14 +253,20 @@ export default function Orders() {
 
         {/* Orders List */}
         <div className="space-y-6">
-          {filteredOrders.length === 0 ? (
-            <div className="text-center py-12">
+          {orders.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
               <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-              <p className="text-gray-600">You don't have any orders in this category.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+              <p className="text-gray-600 mb-6">Start shopping to see your orders here.</p>
+              <Link
+                to="/shop"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium inline-block"
+              >
+                Start Shopping
+              </Link>
             </div>
           ) : (
-            filteredOrders.map((order) => (
+            orders.map((order) => (
               <div key={order.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
                 {/* Order Header */}
                 <div className="p-6 border-b border-gray-200">
@@ -245,31 +315,51 @@ export default function Orders() {
                   </div>
 
                   {/* Order Actions */}
-                  <div className="mt-6 flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium">
+                  <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center space-x-4 flex-wrap">
+                      <Link
+                        to={`/orders/${order.id}`}
+                        className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                      >
                         <Eye className="w-4 h-4" />
                         <span>View Details</span>
-                      </button>
+                      </Link>
                       
                       {order.status === 'delivered' && (
                         <>
-                          <button className="flex items-center space-x-2 text-green-600 hover:text-green-700 font-medium">
+                          <button 
+                            className="flex items-center space-x-2 text-green-600 hover:text-green-700 font-medium"
+                            onClick={() => {
+                              // TODO: Implement review functionality
+                              alert('Review functionality coming soon!');
+                            }}
+                          >
                             <Star className="w-4 h-4" />
                             <span>Rate & Review</span>
                           </button>
-                          <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-700 font-medium">
+                          <button 
+                            className="flex items-center space-x-2 text-gray-600 hover:text-gray-700 font-medium"
+                            onClick={() => {
+                              // TODO: Implement reorder functionality
+                              alert('Reorder functionality coming soon!');
+                            }}
+                          >
                             <RefreshCw className="w-4 h-4" />
                             <span>Reorder</span>
                           </button>
                         </>
                       )}
                       
-                      {order.status === 'shipped' && (
-                        <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium">
+                      {(order.status === 'shipped' || order.status === 'delivered') && order.tracking && (
+                        <a
+                          href={`https://tracking.example.com/${order.tracking.number}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                        >
                           <Truck className="w-4 h-4" />
                           <span>Track Package</span>
-                        </button>
+                        </a>
                       )}
                     </div>
 

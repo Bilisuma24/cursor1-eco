@@ -13,17 +13,17 @@ export default function DashboardLayout({ children }) {
   const linkClass = ({ isActive }) => 
     `flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition ${
       isActive 
-        ? "bg-white text-blue-600 shadow-sm" 
-        : "text-gray-700 hover:bg-white hover:text-blue-600"
+        ? "bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm" 
+        : "text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400"
     }`
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <aside className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               {/* Header */}
               <div className="mb-8">
                 <div className="flex items-center space-x-3">
@@ -31,8 +31,8 @@ export default function DashboardLayout({ children }) {
                     <Store className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Seller Dashboard</h2>
-                    <p className="text-sm text-gray-500">Manage your store</p>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Seller Dashboard</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Manage your store</p>
                   </div>
                 </div>
               </div>
@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }) {
               </nav>
 
               {/* Quick Action */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <Link
                   to="/seller-dashboard/products/new"
                   className="flex items-center space-x-2 w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
@@ -72,7 +72,7 @@ export default function DashboardLayout({ children }) {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 min-h-[600px]">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 min-h-[600px]">
               <div className="p-6">
                 {children}
               </div>

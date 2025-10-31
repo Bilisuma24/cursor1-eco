@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Grid, List, Filter, SortAsc } from "lucide-react";
+import { Grid, List, Filter, SortAsc, Loader } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import SearchAndFilter from "../components/SearchAndFilter";
 import productsData from "../data/products.js";
+import { supabase } from "../lib/supabaseClient";
 
 export default function Shop() {
   const [products, setProducts] = useState([]);
@@ -12,12 +13,127 @@ export default function Shop() {
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
 
+  // Fetch products from Supabase (includes seller-added products)
   useEffect(() => {
-    setProducts(productsData.products);
-    setFilteredProducts(productsData.products);
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch products from database (seller-added products)
+      console.log('Fetching products from database...');
+      const { data: dbProducts, error: dbError } = await supabase
+        .from('product')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (dbError) {
+        console.error('❌ Error fetching products from database:', dbError);
+        console.error('Error code:', dbError.code);
+        console.error('Error message:', dbError.message);
+        console.error('Error details:', JSON.stringify(dbError, null, 2));
+        
+        // Check if it's a permissions/RLS issue
+        if (dbError.code === '42501' || dbError.message?.includes('permission') || dbError.message?.includes('policy')) {
+          console.warn('⚠️ Possible RLS policy issue. Products might not be publicly viewable.');
+        }
+        
+        // Still continue with static products
+      } else {
+        console.log(`✅ Successfully fetched ${dbProducts?.length || 0} products from database`);
+        if (dbProducts && dbProducts.length > 0) {
+          console.log('Sample product:', {
+            id: dbProducts[0].id,
+            name: dbProducts[0].name,
+            price: dbProducts[0].price,
+            category: dbProducts[0].category,
+            seller_id: dbProducts[0].seller_id,
+            image_url: dbProducts[0].image_url
+          });
+        }
+      }
+
+      // Transform database products to match ProductCard format
+      const transformedDbProducts = (dbProducts || []).map(product => {
+        console.log('Transforming product:', product.id, product.name);
+        return {
+        id: product.id,
+        name: product.name || 'Untitled Product',
+        description: product.description || '',
+        price: parseFloat(product.price) || 0,
+        images: (() => {
+          // Handle different image formats
+          if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            return product.images;
+          }
+          if (product.image_url) {
+            if (Array.isArray(product.image_url)) {
+              return product.image_url;
+            }
+            if (typeof product.image_url === 'string' && product.image_url.trim()) {
+              return [product.image_url];
+            }
+          }
+          // Default placeholder
+          return ['https://via.placeholder.com/400?text=No+Image'];
+        })(),
+        category: product.category || 'General',
+        rating: product.rating || 4.0,
+        reviewCount: product.review_count || 0,
+        sold: product.sold || 0,
+        stock: product.stock || 0,
+        brand: product.brand || '',
+        subcategory: product.subcategory || '',
+        seller: {
+          name: 'Seller',
+          verified: product.seller_id ? true : false,
+        },
+        shipping: {
+          free: product.free_shipping || false,
+          express: product.express_shipping || false,
+        },
+        features: product.features || [],
+        originalPrice: product.original_price || null,
+        discount: product.discount || null,
+        isFromDatabase: true, // Flag to identify database products
+      };
+      });
+
+      console.log(`Transformed ${transformedDbProducts.length} database products`);
+
+      // Combine database products with static products
+      // Database products will take precedence (avoid duplicates by ID)
+      const staticProducts = productsData.products || [];
+      console.log(`Using ${staticProducts.length} static products`);
+      const combinedProducts = [...transformedDbProducts, ...staticProducts];
+      
+      // Remove duplicates based on ID (database products first)
+      const uniqueProducts = combinedProducts.reduce((acc, product) => {
+        if (!acc.find(p => p.id === product.id)) {
+          acc.push(product);
+        }
+        return acc;
+      }, []);
+
+      console.log(`Total unique products: ${uniqueProducts.length}`);
+      console.log(`Database products: ${transformedDbProducts.length}, Static products: ${staticProducts.length}`);
+
+      setProducts(uniqueProducts);
+      setFilteredProducts(uniqueProducts);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      // Fallback to static products on error
+      setProducts(productsData.products);
+      setFilteredProducts(productsData.products);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Initialize from query string
   useEffect(() => {
@@ -124,6 +240,18 @@ export default function Shop() {
     setSortBy(e.target.value);
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-12 h-12 animate-spin text-orange-500 mx-auto mb-4" />
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Search and Filter Bar */}
@@ -138,10 +266,10 @@ export default function Shop() {
         {/* Results Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               {searchTerm ? `Search results for "${searchTerm}"` : 'All Products'}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
             </p>
                 </div>
@@ -188,8 +316,8 @@ export default function Shop() {
             <div className="text-gray-400 mb-4">
               <Filter className="w-16 h-16 mx-auto" />
                 </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No products found</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">Try adjusting your search or filter criteria</p>
                 <button
               onClick={() => {
                 setSearchTerm('');

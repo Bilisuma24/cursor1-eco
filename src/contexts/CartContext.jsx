@@ -1,58 +1,27 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 import productsData from "../data/products";
+import { useToast } from "./ToastContext";
+import { useAuth } from "./SupabaseAuthContext";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  console.log('=== CART PROVIDER INITIALIZED ===');
   const [cartItems, setCartItems] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
+  const [wishlistDbAvailable, setWishlistDbAvailable] = useState(true);
+  const { user } = useAuth();
+  const { push: pushToast } = useToast();
 
-  // Listen for auth state changes and load initial data
-  useEffect(() => {
-    // Load initial data first
-    const loadInitialData = async () => {
-      console.log('=== INITIAL LOAD DEBUG ===');
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Session:', session);
-      if (session?.user) {
-        console.log('User found, syncing localStorage and loading from database:', session.user.id);
-        setUser(session.user);
-        await syncLocalDataToDatabase(session.user.id);
-        await loadUserCartAndWishlist(session.user.id);
-      } else {
-        console.log('No user, loading from localStorage');
-        loadLocalCartAndWishlist();
-      }
-    };
-
-    loadInitialData();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // User logged in - sync localStorage to database, then load from database
-        console.log('User logged in, syncing localStorage to database...');
-        await syncLocalDataToDatabase(session.user.id);
-        await loadUserCartAndWishlist(session.user.id);
-      } else {
-        // User logged out - load from localStorage
-        console.log('User logged out, loading from localStorage...');
-        loadLocalCartAndWishlist();
-      }
-    });
-
-    return () => subscription.unsubscribe();
+  // Helper to detect UUID-looking IDs (Supabase tables use UUIDs)
+  const isValidUuid = useCallback((value) => {
+    if (typeof value !== 'string') return false;
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
   }, []);
 
   // Load cart and wishlist from localStorage (for guests)
-  const loadLocalCartAndWishlist = () => {
+  const loadLocalCartAndWishlist = useCallback(() => {
     const savedCart = localStorage.getItem('cart');
     const savedWishlist = localStorage.getItem('wishlist');
     
@@ -62,68 +31,90 @@ export function CartProvider({ children }) {
     if (savedWishlist) {
       setWishlist(JSON.parse(savedWishlist));
     }
-  };
+  }, []);
 
-  // Load cart and wishlist from database (for logged-in users)
-  const loadUserCartAndWishlist = async (userId) => {
-    console.log('=== LOAD USER DATA DEBUG ===');
-    console.log('Loading data for user:', userId);
+  // Helper function to get auth token
+  const getAuthToken = useCallback(async () => {
+    try {
+      const sessionTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Session timeout')), 2000)
+      );
+      const { data: { session } } = await Promise.race([
+        supabase.auth.getSession(),
+        sessionTimeout
+      ]);
+      return session?.access_token || null;
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
+  // Load cart and wishlist from database (for logged-in users) - Supabase client
+  const loadUserCartAndWishlist = useCallback(async (userId) => {
     setLoading(true);
     try {
-      // Load cart from database
-      console.log('Loading cart from database...');
+      // Load cart via Supabase client with joined product details
       const { data: cartData, error: cartError } = await supabase
         .from('cart')
-        .select('*')
+        .select(`
+          *,
+          product:product_id (*)
+        `)
         .eq('user_id', userId);
-
-      console.log('Cart data:', cartData);
-      console.log('Cart error:', cartError);
 
       if (cartError) {
         console.error('Error loading cart:', cartError);
       } else {
-        // Transform cart items with static product data
-        const transformedCartItems = cartData?.map(item => {
-          const product = productsData.products.find(p => p.id === item.product_id);
+        const transformedCartItems = (cartData || []).map(item => {
+          const productFromJoin = item.product || null;
+          // Fallback to static productsData by id if join not available
+          const productFromStatic = productsData.products.find(p => p.id === item.product_id);
+          const product = productFromJoin || productFromStatic || {};
           return {
-            cartId: item.id, // Keep database cart ID for updates/deletes
-            id: item.product_id, // Use product ID for UI logic
+            cartId: item.id,
+            id: item.product_id,
             product_id: item.product_id,
             quantity: item.quantity,
             selectedColor: item.selected_color,
             selectedSize: item.selected_size,
             addedAt: item.created_at,
-            ...product, // Spread product data from static data
+            ...product,
           };
-        }).filter(item => item.name) || []; // Filter out items where product wasn't found
+        }).filter(item => item && (item.name || item.product_id)) || [];
         setCartItems(transformedCartItems);
       }
 
-      // Load wishlist from database
-      console.log('Loading wishlist from database...');
+      // Load wishlist via Supabase client with joined product details
       const { data: wishlistData, error: wishlistError } = await supabase
         .from('wishlist')
-        .select('*')
+        .select(`
+          *,
+          product:product_id (*)
+        `)
         .eq('user_id', userId);
 
-      console.log('Wishlist data:', wishlistData);
-      console.log('Wishlist error:', wishlistError);
-
       if (wishlistError) {
-        console.error('Error loading wishlist:', wishlistError);
+        // Graceful fallback when wishlist table doesn't exist yet
+        if (wishlistError.code === 'PGRST205' || /Could not find the table/i.test(wishlistError.message || '')) {
+          if (wishlistDbAvailable) setWishlistDbAvailable(false);
+          const savedWishlist = localStorage.getItem('wishlist');
+          setWishlist(savedWishlist ? JSON.parse(savedWishlist) : []);
+        } else {
+          console.error('Error loading wishlist:', wishlistError);
+        }
       } else {
-        // Transform wishlist items with static product data
-        const transformedWishlist = wishlistData?.map(item => {
-          const product = productsData.products.find(p => p.id === item.product_id);
+        const transformedWishlist = (wishlistData || []).map(item => {
+          const productFromJoin = item.product || null;
+          const productFromStatic = productsData.products.find(p => p.id === item.product_id);
+          const product = productFromJoin || productFromStatic || {};
           return {
-            wishlistId: item.id, // Keep database wishlist ID for deletes
-            id: item.product_id, // Use product ID for UI logic
+            wishlistId: item.id,
+            id: item.product_id,
             product_id: item.product_id,
             addedAt: item.created_at,
-            ...product, // Spread product data from static data
+            ...product,
           };
-        }).filter(item => item.name) || []; // Filter out items where product wasn't found
+        }).filter(item => item && (item.name || item.product_id)) || [];
         setWishlist(transformedWishlist);
       }
     } catch (err) {
@@ -131,65 +122,98 @@ export function CartProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAuthToken, wishlistDbAvailable]);
 
-  // Save cart to localStorage (for guests)
+  // Save cart to localStorage (always persist local state; DB sync/clear handled elsewhere)
   useEffect(() => {
-    if (!user) {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
-    }
-  }, [cartItems, user]);
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
-  // Save wishlist to localStorage (for guests)
+  // Save wishlist to localStorage (always persist local state; DB sync/clear handled elsewhere)
   useEffect(() => {
-    if (!user) {
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    }
-  }, [wishlist, user]);
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
 
-  const addToCart = async (product, quantity = 1, selectedColor = null, selectedSize = null) => {
-    console.log('=== ADD TO CART DEBUG ===');
-    console.log('Product:', product);
-    console.log('Quantity:', quantity);
-    console.log('Selected Color:', selectedColor);
-    console.log('Selected Size:', selectedSize);
-    console.log('User:', user);
-    console.log('Current cart items:', cartItems);
+  // Local cart operations (for guests or fallback)
+  const addToCartLocal = useCallback((product, quantity = 1, selectedColor = null, selectedSize = null) => {
+    setCartItems(prev => {
+      const existingItem = prev.find(
+        item => item.id === product.id && 
+        item.selectedColor === selectedColor && 
+        item.selectedSize === selectedSize
+      );
+
+      if (existingItem) {
+        return prev.map(item => 
+          item.id === product.id && 
+          item.selectedColor === selectedColor && 
+          item.selectedSize === selectedSize
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        const newItem = {
+          ...product,
+          quantity,
+          selectedColor,
+          selectedSize,
+          addedAt: new Date().toISOString()
+        };
+        return [...prev, newItem];
+      }
+    });
+  }, []);
+
+  const addToCart = useCallback(async (product, quantity = 1, selectedColor = null, selectedSize = null) => {
+    console.log('addToCart called:', { product: product?.name, quantity, user: user?.id, hasUser: !!user });
     
+    if (!product || !product.id) {
+      console.error('Invalid product:', product);
+      throw new Error('Invalid product');
+    }
+
+    // If not authenticated, add locally (no redirect)
+    if (!user) {
+      addToCartLocal(product, quantity, selectedColor, selectedSize);
+      pushToast({ type: 'success', title: 'Added to cart', message: `${product.name} added to cart` });
+      return;
+    }
+
     if (user) {
-      // User is logged in - save to database
-      console.log('User logged in, saving to database...');
+      // Fallback to local storage when product ids are not UUIDs (e.g., demo/static products)
+      if (!isValidUuid(product.id)) {
+        addToCartLocal(product, quantity, selectedColor, selectedSize);
+        pushToast({ type: 'info', title: 'Added to cart', message: `${product.name} added (local cart)` });
+        return;
+      }
+      // User is logged in - save to database via Supabase client
       try {
-        // Check if item already exists
-        const { data: existingItems, error: fetchError } = await supabase
+        // Check if item already exists (handle null vs value for color/size)
+        let checkQuery = supabase
           .from('cart')
           .select('*')
           .eq('user_id', user.id)
-          .eq('product_id', product.id)
-          .eq('selected_color', selectedColor)
-          .eq('selected_size', selectedSize);
+          .eq('product_id', product.id);
+        checkQuery = selectedColor == null
+          ? checkQuery.is('selected_color', null)
+          : checkQuery.eq('selected_color', selectedColor);
+        checkQuery = selectedSize == null
+          ? checkQuery.is('selected_size', null)
+          : checkQuery.eq('selected_size', selectedSize);
+        const { data: existingItems, error: checkError } = await checkQuery;
 
-        if (fetchError) {
-          console.error('Error fetching existing cart items:', fetchError);
-          throw fetchError;
-        }
+        if (checkError) throw checkError;
 
         if (existingItems && existingItems.length > 0) {
-          // Update quantity if item exists
-          console.log('Updating existing cart item in database');
           const existingItem = existingItems[0];
           const { error: updateError } = await supabase
             .from('cart')
             .update({ quantity: existingItem.quantity + quantity })
             .eq('id', existingItem.id);
-          
-          if (updateError) {
-            console.error('Error updating cart item:', updateError);
-            throw updateError;
-          }
+
+          if (updateError) throw updateError;
+          pushToast({ type: 'success', title: 'Cart updated', message: `${product.name} quantity updated` });
         } else {
-          // Insert new item
-          console.log('Inserting new cart item to database');
           const { error: insertError } = await supabase
             .from('cart')
             .insert({
@@ -199,89 +223,83 @@ export function CartProvider({ children }) {
               selected_color: selectedColor,
               selected_size: selectedSize,
             });
-          
-          if (insertError) {
-            console.error('Error inserting cart item:', insertError);
-            throw insertError;
-          }
+          if (insertError) throw insertError;
+          pushToast({ type: 'success', title: 'Added to cart', message: `${product.name} added to cart` });
         }
 
-        // Refresh cart from database
-        console.log('Refreshing cart from database...');
         await loadUserCartAndWishlist(user.id);
-        console.log('Successfully added to cart in database');
       } catch (err) {
         console.error('Error adding to cart in database:', err);
-        console.log('Falling back to localStorage...');
-        addToCartLocal(product, quantity, selectedColor, selectedSize);
+        pushToast({ type: 'error', title: 'Error', message: 'Failed to add item to cart. Please try again.' });
+      }
+    }
+  }, [user, loadUserCartAndWishlist, addToCartLocal, getAuthToken, pushToast, isValidUuid]);
+
+  const removeFromCart = useCallback(async (id, selectedColor = null, selectedSize = null) => {
+    if (user) {
+      // User is logged in - remove via Supabase client
+      try {
+        let del = supabase
+          .from('cart')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('product_id', id);
+        del = selectedColor == null ? del.is('selected_color', null) : del.eq('selected_color', selectedColor);
+        del = selectedSize == null ? del.is('selected_size', null) : del.eq('selected_size', selectedSize);
+        const { error: deleteError } = await del;
+
+        if (deleteError) throw deleteError;
+        await loadUserCartAndWishlist(user.id);
+        pushToast({ type: 'success', title: 'Removed from cart', message: 'Item removed' });
+      } catch (err) {
+        console.error('Error removing from cart:', err);
       }
     } else {
-      // Guest user - save to localStorage
-      console.log('No user, saving to localStorage...');
-      addToCartLocal(product, quantity, selectedColor, selectedSize);
-    }
-  };
-
-  const addToCartLocal = (product, quantity = 1, selectedColor = null, selectedSize = null) => {
-    console.log('=== ADD TO CART LOCAL DEBUG ===');
-    console.log('Product:', product);
-    console.log('Quantity:', quantity);
-    console.log('Current cartItems before:', cartItems);
-    
-    const existingItem = cartItems.find(
-      item => item.id === product.id && 
-      item.selectedColor === selectedColor && 
-      item.selectedSize === selectedSize
-    );
-
-    console.log('Existing item found:', existingItem);
-
-    if (existingItem) {
-      console.log('Updating existing item quantity');
+      // Guest user - remove from localStorage
       setCartItems(prev => 
-        prev.map(item => 
-          item.id === product.id && 
-          item.selectedColor === selectedColor && 
-          item.selectedSize === selectedSize
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
+        prev.filter(item => 
+          !(item.id === id && 
+            item.selectedColor === selectedColor && 
+            item.selectedSize === selectedSize)
         )
       );
-    } else {
-      console.log('Adding new item to cart');
-      const newItem = {
-        ...product,
-        quantity,
-        selectedColor,
-        selectedSize,
-        addedAt: new Date().toISOString()
-      };
-      console.log('New item:', newItem);
-      setCartItems(prev => [...prev, newItem]);
+      pushToast({ type: 'success', title: 'Removed from cart', message: 'Item removed' });
     }
-    
-    console.log('Cart update completed');
-  };
+  }, [user, loadUserCartAndWishlist, getAuthToken]);
 
-  const updateQuantity = async (id, selectedColor, selectedSize, newQuantity) => {
+  const updateQuantity = useCallback(async (id, selectedColor, selectedSize, newQuantity) => {
     if (newQuantity <= 0) {
       await removeFromCart(id, selectedColor, selectedSize);
       return;
     }
 
     if (user) {
-      // User is logged in - update in database
+      // User is logged in - update in database via REST API
       try {
-        const { error } = await supabase
+        const supabaseUrl = 'https://azvslusinlvnjymaufhw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6dnNsdXNpbmx2bmp5bWF1Zmh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NjYwNjYsImV4cCI6MjA3NTU0MjA2Nn0.4MdiznfE-UOdDn25X8XocML44UrCxpsJ2fIgvULevnw';
+        const authToken = await getAuthToken() || supabaseKey;
+
+        // Find the cart item first (null-safe match)
+        let find = supabase
           .from('cart')
-          .update({ quantity: newQuantity })
+          .select('*')
           .eq('user_id', user.id)
-          .eq('product_id', id)
-          .eq('selected_color', selectedColor)
-          .eq('selected_size', selectedSize);
-        
-        if (error) throw error;
-        await loadUserCartAndWishlist(user.id);
+          .eq('product_id', id);
+        find = selectedColor == null ? find.is('selected_color', null) : find.eq('selected_color', selectedColor);
+        find = selectedSize == null ? find.is('selected_size', null) : find.eq('selected_size', selectedSize);
+        const { data: items, error: findError } = await find;
+
+        if (!findError && items && items.length > 0) {
+          const { error: updateError } = await supabase
+            .from('cart')
+            .update({ quantity: newQuantity })
+            .eq('id', items[0].id);
+          if (!updateError) {
+            await loadUserCartAndWishlist(user.id);
+            pushToast({ type: 'success', title: 'Quantity updated', message: 'Cart item quantity updated' });
+          }
+        }
       } catch (err) {
         console.error('Error updating quantity:', err);
       }
@@ -297,147 +315,141 @@ export function CartProvider({ children }) {
         )
       );
     }
-  };
+  }, [user, loadUserCartAndWishlist, removeFromCart, getAuthToken]);
 
-  const removeFromCart = async (id, selectedColor = null, selectedSize = null) => {
+  const clearCart = useCallback(async () => {
     if (user) {
-      // User is logged in - remove from database
+      // User is logged in - clear from database via REST API
       try {
-        const { error } = await supabase
-          .from('cart')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('product_id', id)
-          .eq('selected_color', selectedColor)
-          .eq('selected_size', selectedSize);
-        
-        if (error) throw error;
-        await loadUserCartAndWishlist(user.id);
-      } catch (err) {
-        console.error('Error removing from cart:', err);
-      }
-    } else {
-      // Guest user - remove from localStorage
-      setCartItems(prev => 
-        prev.filter(item => 
-          !(item.id === id && 
-            item.selectedColor === selectedColor && 
-            item.selectedSize === selectedSize)
-        )
-      );
-    }
-  };
+        const supabaseUrl = 'https://azvslusinlvnjymaufhw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6dnNsdXNpbmx2bmp5bWF1Zmh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NjYwNjYsImV4cCI6MjA3NTU0MjA2Nn0.4MdiznfE-UOdDn25X8XocML44UrCxpsJ2fIgvULevnw';
+        const authToken = await getAuthToken() || supabaseKey;
 
-  const clearCart = async () => {
-    if (user) {
-      // User is logged in - clear from database
-      try {
-        const { error } = await supabase
-          .from('cart')
-          .delete()
-          .eq('user_id', user.id);
-        
-        if (error) throw error;
-        setCartItems([]);
+        const deleteResponse = await fetch(
+          `${supabaseUrl}/rest/v1/cart?user_id=eq.${user.id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${authToken}`,
+              'Prefer': 'return=minimal'
+            }
+          }
+        );
+
+        if (deleteResponse.ok) {
+          setCartItems([]);
+          pushToast({ type: 'success', title: 'Cart cleared', message: 'All items removed' });
+        }
       } catch (err) {
         console.error('Error clearing cart:', err);
       }
     } else {
       // Guest user - clear from localStorage
       setCartItems([]);
+      pushToast({ type: 'success', title: 'Cart cleared', message: 'All items removed' });
     }
-  };
+  }, [user, getAuthToken]);
 
-  const addToWishlist = async (product) => {
-    console.log('=== ADD TO WISHLIST DEBUG ===');
-    console.log('Product:', product);
-    console.log('User:', user);
-    console.log('Current wishlist:', wishlist);
+  // Local wishlist operations (for guests or fallback)
+  const addToWishlistLocal = useCallback((product) => {
+    setWishlist(prev => {
+      const existingItem = prev.find(item => item.id === product.id);
+      if (!existingItem) {
+        const newItem = { ...product, addedAt: new Date().toISOString() };
+        return [...prev, newItem];
+      }
+      return prev;
+    });
+  }, []);
+
+  const addToWishlist = useCallback(async (product) => {
+    console.log('addToWishlist called:', { product: product?.name, user: user?.id, hasUser: !!user });
     
+    if (!product || !product.id) {
+      console.error('Invalid product:', product);
+      throw new Error('Invalid product');
+    }
+
+    // If not authenticated OR wishlist table unavailable, add locally
+    if (!user || !wishlistDbAvailable) {
+      addToWishlistLocal(product);
+      pushToast({ type: 'success', title: 'Added to wishlist', message: `${product.name} added` });
+      return;
+    }
+
     if (user) {
-      // User is logged in - save to database
-      console.log('User logged in, saving to database...');
+      // Fallback to local storage when product ids are not UUIDs (e.g., demo/static products)
+      if (!isValidUuid(product.id)) {
+        addToWishlistLocal(product);
+        pushToast({ type: 'info', title: 'Added to wishlist', message: `${product.name} added (local)` });
+        return;
+      }
+      // User is logged in - save to database via Supabase client
       try {
-        const { error } = await supabase
+        const { error: insertError } = await supabase
           .from('wishlist')
           .insert({
             user_id: user.id,
             product_id: product.id,
           });
-        
-        if (error && error.code !== '23505') { // Ignore duplicate key error
-          console.error('Error adding to wishlist:', error);
-          throw error;
+
+        if (insertError) {
+          // If duplicate
+          if (insertError.code === '23505') {
+            pushToast({ type: 'info', title: 'Already in wishlist', message: `${product.name}` });
+            await loadUserCartAndWishlist(user.id);
+          } else {
+            throw insertError;
+          }
+        } else {
+          pushToast({ type: 'success', title: 'Added to wishlist', message: `${product.name} added` });
+          await loadUserCartAndWishlist(user.id);
         }
-        
-        console.log('Successfully added to wishlist in database');
-        await loadUserCartAndWishlist(user.id);
       } catch (err) {
         console.error('Error adding to wishlist in database:', err);
-        console.log('Falling back to localStorage...');
-        addToWishlistLocal(product);
+        pushToast({ type: 'error', title: 'Error', message: 'Failed to add item to wishlist. Please try again.' });
       }
-    } else {
-      // Guest user - save to localStorage
-      console.log('No user, saving to localStorage...');
-      addToWishlistLocal(product);
     }
-  };
+  }, [user, loadUserCartAndWishlist, addToWishlistLocal, getAuthToken, pushToast, isValidUuid, wishlistDbAvailable]);
 
-  const addToWishlistLocal = (product) => {
-    console.log('=== ADD TO WISHLIST LOCAL DEBUG ===');
-    console.log('Product:', product);
-    console.log('Current wishlist before:', wishlist);
-    
-    const existingItem = wishlist.find(item => item.id === product.id);
-    console.log('Existing wishlist item found:', existingItem);
-    
-    if (!existingItem) {
-      console.log('Adding new item to wishlist');
-      const newItem = { ...product, addedAt: new Date().toISOString() };
-      console.log('New wishlist item:', newItem);
-      setWishlist(prev => [...prev, newItem]);
-    } else {
-      console.log('Item already in wishlist, skipping');
-    }
-    
-    console.log('Wishlist update completed');
-  };
-
-  const removeFromWishlist = async (id) => {
-    if (user) {
-      // User is logged in - remove from database
+  const removeFromWishlist = useCallback(async (id) => {
+    if (user && wishlistDbAvailable) {
+      // User is logged in - remove via Supabase client
       try {
-        const { error } = await supabase
+        const { error: deleteError } = await supabase
           .from('wishlist')
           .delete()
           .eq('user_id', user.id)
           .eq('product_id', id);
-        
-        if (error) throw error;
-        await loadUserCartAndWishlist(user.id);
+
+        if (!deleteError) {
+          await loadUserCartAndWishlist(user.id);
+          pushToast({ type: 'success', title: 'Removed from wishlist', message: 'Item removed' });
+        }
       } catch (err) {
         console.error('Error removing from wishlist:', err);
       }
     } else {
       // Guest user - remove from localStorage
       setWishlist(prev => prev.filter(item => item.id !== id));
+      pushToast({ type: 'success', title: 'Removed from wishlist', message: 'Item removed' });
     }
-  };
+  }, [user, loadUserCartAndWishlist, getAuthToken, wishlistDbAvailable]);
 
-  const isInWishlist = (id) => {
+  const isInWishlist = useCallback((id) => {
     return wishlist.some(item => item.id === id);
-  };
+  }, [wishlist]);
 
-  const getCartTotal = () => {
+  const getCartTotal = useCallback(() => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
+  }, [cartItems]);
 
-  const getCartItemsCount = () => {
+  const getCartItemsCount = useCallback(() => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
-  };
+  }, [cartItems]);
 
-  const getCartItemsBySeller = () => {
+  const getCartItemsBySeller = useCallback(() => {
     const grouped = {};
     cartItems.forEach(item => {
       const seller = item.seller?.name || 'Unknown Seller';
@@ -447,93 +459,182 @@ export function CartProvider({ children }) {
       grouped[seller].push(item);
     });
     return grouped;
-  };
+  }, [cartItems]);
 
-  // Sync localStorage data to database when user logs in
-  const syncLocalDataToDatabase = async (userId) => {
-    console.log('=== SYNC LOCAL DATA TO DATABASE ===');
+  // Sync localStorage data to database when user logs in - REST API
+  const syncLocalDataToDatabase = useCallback(async (userId) => {
     try {
+      const supabaseUrl = 'https://azvslusinlvnjymaufhw.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6dnNsdXNpbmx2bmp5bWF1Zmh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NjYwNjYsImV4cCI6MjA3NTU0MjA2Nn0.4MdiznfE-UOdDn25X8XocML44UrCxpsJ2fIgvULevnw';
+      const authToken = await getAuthToken() || supabaseKey;
+
       // Get localStorage data
       const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
       const localWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
 
-      console.log('Local cart items to sync:', localCart.length);
-      console.log('Local wishlist items to sync:', localWishlist.length);
+      // If demo/static products (non-UUID ids) exist, keep them local and load into state
+      const hasNonUuidCart = localCart.some(item => !isValidUuid(item.id));
+      const hasNonUuidWishlist = localWishlist.some(item => !isValidUuid(item.id));
+      if (hasNonUuidCart || hasNonUuidWishlist) {
+        if (hasNonUuidCart) {
+          setCartItems(localCart);
+        }
+        if (hasNonUuidWishlist) {
+          setWishlist(localWishlist);
+        }
+        // Do not attempt to sync or clear local for non-UUID items
+        return;
+      }
 
       // Sync cart items
+      let allCartSynced = true;
       for (const item of localCart) {
         try {
-          console.log('Syncing cart item:', item.name);
-          const { error } = await supabase
-            .from('cart')
-            .insert({
+          const insertResponse = await fetch(`${supabaseUrl}/rest/v1/cart`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${authToken}`,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
               user_id: userId,
               product_id: item.id,
               quantity: item.quantity,
               selected_color: item.selectedColor,
               selected_size: item.selectedSize,
-            });
-          
-          if (error && error.code !== '23505') { // Ignore duplicate key error
-            console.error('Error syncing cart item:', error);
-          } else {
-            console.log('Successfully synced cart item');
+            })
+          });
+
+          if (!insertResponse.ok) {
+            const errorText = await insertResponse.text();
+            // Ignore duplicate key error (23505)
+            if (!errorText.includes('23505')) {
+              console.error('Error syncing cart item:', errorText);
+              allCartSynced = false;
+            }
           }
         } catch (err) {
           console.error('Error syncing cart item:', err);
+          allCartSynced = false;
         }
       }
 
-      // Sync wishlist items
-      for (const item of localWishlist) {
-        try {
-          console.log('Syncing wishlist item:', item.name);
-          const { error } = await supabase
-            .from('wishlist')
-            .insert({
-              user_id: userId,
-              product_id: item.id,
+      // Sync wishlist items (only if table available)
+      let allWishlistSynced = true;
+      if (wishlistDbAvailable) {
+        for (const item of localWishlist) {
+          try {
+            const insertResponse = await fetch(`${supabaseUrl}/rest/v1/wishlist`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${authToken}`,
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({
+                user_id: userId,
+                product_id: item.id,
+              })
             });
-          
-          if (error && error.code !== '23505') { // Ignore duplicate key error
-            console.error('Error syncing wishlist item:', error);
-          } else {
-            console.log('Successfully synced wishlist item');
+
+            if (!insertResponse.ok) {
+              const errorText = await insertResponse.text();
+              // Ignore duplicate key error (23505)
+              if (!errorText.includes('23505')) {
+                console.error('Error syncing wishlist item:', errorText);
+                allWishlistSynced = false;
+              }
+            }
+          } catch (err) {
+            console.error('Error syncing wishlist item:', err);
+            allWishlistSynced = false;
           }
-        } catch (err) {
-          console.error('Error syncing wishlist item:', err);
         }
       }
 
-      // Clear localStorage after sync
-      console.log('Clearing localStorage after sync');
-      localStorage.removeItem('cart');
-      localStorage.removeItem('wishlist');
-      console.log('Sync completed successfully');
+      // Clear localStorage only if everything synced successfully
+      if (allCartSynced && allWishlistSynced) {
+        localStorage.removeItem('cart');
+        localStorage.removeItem('wishlist');
+      }
     } catch (err) {
       console.error('Error syncing local data:', err);
     }
-  };
+  }, [getAuthToken, isValidUuid, wishlistDbAvailable]);
+
+  // Listen for auth state changes and load initial data
+  useEffect(() => {
+    let mounted = true;
+    
+    const loadDataForUser = async (userId) => {
+      if (!mounted) return;
+      try {
+        await syncLocalDataToDatabase(userId);
+        await loadUserCartAndWishlist(userId);
+      } catch (error) {
+        console.error('Error loading data for user:', error);
+      }
+    };
+
+    if (user) {
+      // If local storage has non-UUID items, prefer local to avoid overwriting by empty DB
+      const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const localWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      const hasNonUuid = localCart.some(i => !isValidUuid(i.id)) || localWishlist.some(i => !isValidUuid(i.id));
+      if (hasNonUuid) {
+        loadLocalCartAndWishlist();
+      } else {
+        // User is logged in - load their data
+        loadDataForUser(user.id);
+      }
+    } else {
+      // No user - load from localStorage
+      loadLocalCartAndWishlist();
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [user, loadLocalCartAndWishlist, loadUserCartAndWishlist, syncLocalDataToDatabase, isValidUuid]);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    cartItems,
+    wishlist,
+    loading,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    getCartTotal,
+    getCartItemsCount,
+    getCartItemsBySeller,
+    syncLocalDataToDatabase,
+  }), [
+    cartItems,
+    wishlist,
+    loading,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    getCartTotal,
+    getCartItemsCount,
+    getCartItemsBySeller,
+    syncLocalDataToDatabase,
+  ]);
 
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        wishlist,
-        loading,
-        addToCart,
-        updateQuantity,
-        removeFromCart,
-        clearCart,
-        addToWishlist,
-        removeFromWishlist,
-        isInWishlist,
-        getCartTotal,
-        getCartItemsCount,
-        getCartItemsBySeller,
-        syncLocalDataToDatabase,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );
@@ -541,8 +642,27 @@ export function CartProvider({ children }) {
 
 // ✅ Custom hook that lets any component access the cart
 export function useCart() {
-  console.log('=== USE CART HOOK CALLED ===');
   const context = useContext(CartContext);
-  console.log('Cart context:', context);
+  
+  if (!context) {
+    console.error('useCart must be used within CartProvider');
+    // Return a default object with no-op functions to prevent crashes
+    return {
+      cartItems: [],
+      wishlist: [],
+      loading: false,
+      addToCart: async () => { console.error('Cart not initialized'); },
+      updateQuantity: async () => { console.error('Cart not initialized'); },
+      removeFromCart: async () => { console.error('Cart not initialized'); },
+      clearCart: async () => { console.error('Cart not initialized'); },
+      addToWishlist: async () => { console.error('Cart not initialized'); },
+      removeFromWishlist: async () => { console.error('Cart not initialized'); },
+      isInWishlist: () => false,
+      getCartTotal: () => 0,
+      getCartItemsCount: () => 0,
+      getCartItemsBySeller: () => ({}),
+    };
+  }
+  
   return context;
 }

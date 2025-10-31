@@ -111,5 +111,54 @@ export const orderService = {
       console.error('Error fetching order details:', error);
       throw error;
     }
+  },
+
+  // Get buyer orders (for buyers to view their orders)
+  async fetchBuyerOrders(userId, statusFilter = null) {
+    try {
+      let query = supabase
+        .from('order')
+        .select(`
+          id,
+          total_price,
+          status,
+          created_at,
+          updated_at,
+          shipping_address,
+          order_items (
+            id,
+            quantity,
+            price_at_purchase,
+            product:product_id (
+              id,
+              name,
+              description,
+              price,
+              images,
+              seller:seller_id (
+                id,
+                username,
+                full_name
+              )
+            )
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      const { data: orders, error } = await query;
+
+      if (error) throw error;
+
+      // Apply status filter if provided
+      if (statusFilter) {
+        return orders.filter(order => order.status === statusFilter);
+      }
+
+      return orders || [];
+    } catch (error) {
+      console.error('Error fetching buyer orders:', error);
+      throw error;
+    }
   }
 };

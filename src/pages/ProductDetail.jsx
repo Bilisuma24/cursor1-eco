@@ -19,6 +19,8 @@ import ImageGallery from "../components/ImageGallery";
 import ColorImageFilter from "../components/ColorImageFilter";
 import ImagePreviewGrid from "../components/ImagePreviewGrid";
 import ProductImageDetailModal from "../components/ProductImageDetailModal";
+import ProductMediaViewer from "../components/ProductMediaViewer";
+import AliExpressImageZoom from "../components/AliExpressImageZoom";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -143,42 +145,23 @@ export default function ProductDetail() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          {/* Product Images with Enhanced Gallery */}
+          {/* Product Media Viewer: zoom, gallery, 360° */}
           <div className="space-y-4">
-            <div className="relative">
-              <div onClick={() => setShowDetailModal(true)} className="cursor-pointer">
-                <ImageGallery
-                  images={product.images}
-                  selectedImage={selectedImage}
-                  onImageSelect={setSelectedImage}
-                  showThumbnails={true}
-                  showNavigation={true}
-                  autoplay={isAutoplaying}
-                  autoplayInterval={4000}
-                  className=""
-                  thumbnailSize="w-20 h-20"
-                  mainImageSize="aspect-square"
-                />
-              </div>
-              
-              {/* Enhanced Detail Button Overlay */}
-              <button
-                onClick={() => setShowDetailModal(true)}
-                className="absolute top-4 right-4 bg-white/95 hover:bg-blue-500 hover:text-white text-gray-700 p-3 rounded-full shadow-xl transition-all duration-300 z-10 hover:scale-110 backdrop-blur-sm"
-                title="Quick View Details"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </button>
-            </div>
-            
-            {/* Image Preview Grid Toggle */}
-            <ImagePreviewGrid
+            {/* AliExpress-style side preview zoom */}
+            <AliExpressImageZoom
               images={product.images}
-              selectedImage={selectedImage}
-              onImageSelect={setSelectedImage}
+              initialIndex={selectedImage}
+              zoomRatio={3}
+              previewWidth={360}
+              onChange={setSelectedImage}
+            />
+
+            {/* Keep the original gallery/360 below if you want both */}
+            <ProductMediaViewer
+              images={product.images}
+              spinImages={product.spinImages || product.images360 || []}
+              initialIndex={selectedImage}
+              onChange={setSelectedImage}
             />
           </div>
 

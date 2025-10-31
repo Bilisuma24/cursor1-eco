@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '../../hooks/useSupabaseAuth';
+import { useAuth } from '../../contexts/SupabaseAuthContext';
 import { productService } from '../../services/productService';
 import { Link } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, Eye, Package } from 'lucide-react';
 
 const Products = () => {
-  const { user } = useSupabaseAuth();
+  const { user, loading: authLoading } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,7 +21,7 @@ const Products = () => {
   }, [user]);
 
   const loadProducts = async () => {
-    if (!user) {
+    if (!user?.id) {
       console.log('User not available yet, skipping product load');
       return;
     }

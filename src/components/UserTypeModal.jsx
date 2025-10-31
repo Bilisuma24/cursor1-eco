@@ -4,40 +4,79 @@ import { supabase } from '../lib/supabaseClient';
 export default function UserTypeModal({ user, onComplete }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedType, setSelectedType] = useState(null);
 
   const handleSelectType = async (userType) => {
-    console.log('Creating profile for user type:', userType);
+    // Prevent multiple clicks
+    if (loading) return;
+    
+    console.log('[UserTypeModal] Creating profile for user type:', userType);
+    setSelectedType(userType);
     setLoading(true);
     setError('');
 
     try {
-      console.log('Creating profile in database...');
+      console.log('[UserTypeModal] Creating profile in database...');
       
-      // Add timeout to prevent infinite loading
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Profile creation timeout')), 10000)
-      );
+      // Create profile data object
+      const profileDataToSave = {
+        user_id: user.id,
+        username: user.email?.split('@')[0] || 'user',
+        full_name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        user_type: userType, // 'buyer' or 'seller'
+      };
 
-      const profilePromise = supabase
-        .from('profile')
-        .upsert({
-          user_id: user.id,
-          username: user.email?.split('@')[0] || 'user',
-          full_name: user.user_metadata?.name || 'User',
-          user_type: userType, // 'buyer' or 'seller'
-        }, {
-          onConflict: 'user_id'
-        });
+      // Try to upsert profile with timeout (increased to 10 seconds)
+      try {
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Profile creation timeout')), 10000)
+        );
 
-      const { error: profileError } = await Promise.race([profilePromise, timeoutPromise]);
+        const profilePromise = supabase
+          .from('profile')
+          .upsert(profileDataToSave, {
+            onConflict: 'user_id'
+          })
+          .select()
+          .single();
 
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-        throw profileError;
+        const { data, error: profileError } = await Promise.race([
+          profilePromise,
+          timeoutPromise
+        ]);
+
+        if (profileError) {
+          console.error('[UserTypeModal] Profile creation error:', profileError);
+          // Check if it's a constraint/conflict error (profile might already exist)
+          if (profileError.code === '23505' || profileError.message?.includes('duplicate')) {
+            console.log('[UserTypeModal] Profile already exists, continuing...');
+          } else {
+            throw profileError;
+          }
+        } else {
+          console.log('[UserTypeModal] Profile created/updated successfully:', data);
+        }
+      } catch (dbError) {
+        console.error('[UserTypeModal] Database error:', dbError);
+        // If database fails, save to localStorage and continue anyway
+        console.log('[UserTypeModal] Falling back to localStorage');
+        try {
+          localStorage.setItem('user_profile', JSON.stringify({
+            ...profileDataToSave,
+            created_at: new Date().toISOString(),
+          }));
+          console.log('[UserTypeModal] Saved to localStorage as fallback');
+        } catch (localError) {
+          console.error('[UserTypeModal] Failed to save to localStorage:', localError);
+        }
+        
+        // Still continue - don't block the user, call onComplete immediately
+        console.log('[UserTypeModal] Profile setup completed (localStorage), calling onComplete');
+        onComplete(userType);
+        setLoading(false);
+        return; // Exit early to prevent duplicate onComplete calls
       }
 
-      console.log('Profile created successfully, updating user metadata...');
-      
       // Update user metadata with user type (this might fail, but that's okay)
       try {
         const { error: updateError } = await supabase.auth.updateUser({
@@ -45,24 +84,42 @@ export default function UserTypeModal({ user, onComplete }) {
         });
 
         if (updateError) {
-          console.warn('User metadata update error (non-critical):', updateError);
-          // Don't throw error for metadata update failure
+          console.warn('[UserTypeModal] User metadata update error (non-critical):', updateError);
         }
       } catch (metadataError) {
-        console.warn('User metadata update failed (non-critical):', metadataError);
-        // Continue anyway
+        console.warn('[UserTypeModal] User metadata update failed (non-critical):', metadataError);
       }
 
-      console.log('Profile setup completed successfully');
+      console.log('[UserTypeModal] Profile setup completed, calling onComplete');
       onComplete(userType);
     } catch (err) {
-      console.error('Error saving user type:', err);
+      console.error('[UserTypeModal] Error saving user type:', err);
       
-      // If it's a timeout or database error, show a helpful message
-      if (err.message.includes('timeout') || err.message.includes('network') || err.message.includes('connection')) {
-        setError('Database connection issue. Please check your internet connection and try again.');
+      // Even on error, save to localStorage and continue
+      try {
+        const fallbackProfile = {
+          user_id: user.id,
+          username: user.email?.split('@')[0] || 'user',
+          full_name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          user_type: userType,
+          created_at: new Date().toISOString(),
+        };
+        localStorage.setItem('user_profile', JSON.stringify(fallbackProfile));
+        console.log('[UserTypeModal] Saved fallback profile to localStorage');
+      } catch (localError) {
+        console.error('[UserTypeModal] Failed to save fallback:', localError);
+      }
+      
+      // Show error but still allow user to continue
+      if (err.message?.includes('timeout') || err.message?.includes('network') || err.message?.includes('connection')) {
+        setError('Database connection issue. Your profile will be saved locally. Please try refreshing the page later.');
+        // Still call onComplete immediately to allow user to continue
+        console.log('[UserTypeModal] Continuing despite timeout error');
+        onComplete(userType);
       } else {
-        setError(err.message || 'Failed to save your selection. Please try again.');
+        setError(err.message || 'Failed to save to database, but continuing with local profile.');
+        // Still call onComplete immediately
+        onComplete(userType);
       }
     } finally {
       setLoading(false);
@@ -79,9 +136,9 @@ export default function UserTypeModal({ user, onComplete }) {
           <button
             onClick={() => handleSelectType('buyer')}
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50 flex items-center justify-center"
+            className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {loading ? (
+            {loading && selectedType === 'buyer' ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                 Creating Profile...
@@ -94,9 +151,9 @@ export default function UserTypeModal({ user, onComplete }) {
           <button
             onClick={() => handleSelectType('seller')}
             disabled={loading}
-            className="w-full bg-green-600 text-white py-4 px-6 rounded-lg hover:bg-green-700 transition font-semibold disabled:opacity-50 flex items-center justify-center"
+            className="w-full bg-green-600 text-white py-4 px-6 rounded-lg hover:bg-green-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {loading ? (
+            {loading && selectedType === 'seller' ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                 Creating Profile...

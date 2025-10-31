@@ -12,7 +12,7 @@ import {
   CreditCard
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
-import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
+import { useAuth } from "../contexts/SupabaseAuthContext";
 import { useCart as useSupabaseCart } from "../hooks/useCart";
 
 export default function Cart() {
@@ -29,7 +29,7 @@ export default function Cart() {
   } = useCart();
   
   // Use Supabase auth and cart hooks for Supabase integration
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const { checkout: supabaseCheckout } = useSupabaseCart(user?.id);
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);

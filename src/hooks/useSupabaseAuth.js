@@ -1,3 +1,11 @@
+/**
+ * DEPRECATED: Use useAuth from contexts/SupabaseAuthContext instead
+ * 
+ * This hook creates separate auth instances in each component and causes sync issues.
+ * The new SupabaseAuthContext provides a single source of truth for authentication state.
+ * 
+ * Migration: Replace `useSupabaseAuth()` with `useAuth()` from '../contexts/SupabaseAuthContext'
+ */
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 

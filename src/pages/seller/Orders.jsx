@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '../../hooks/useSupabaseAuth';
+import { useAuth } from '../../contexts/SupabaseAuthContext';
 import { orderService } from '../../services/orderService';
 import { Search, Filter, Eye, Package, Clock, CheckCircle, Truck, AlertCircle } from 'lucide-react';
 
 const Orders = () => {
-  const { user } = useSupabaseAuth();
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,7 +27,7 @@ const Orders = () => {
   }, [user, statusFilter]);
 
   const loadOrders = async () => {
-    if (!user) {
+    if (!user?.id) {
       console.log('User not available yet, skipping orders load');
       return;
     }

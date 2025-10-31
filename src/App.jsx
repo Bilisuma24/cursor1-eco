@@ -15,7 +15,10 @@ import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
 import Wishlist from "./pages/Wishlist";
 import SellerDashboard from "./pages/SellerDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import AuthCallback from "./pages/auth/AuthCallback";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import ScrollToTop from "./components/ScrollToTop";
 import ImageTest from "./components/ImageTest";
 import ImageDebug from "./components/ImageDebug";
@@ -24,12 +27,13 @@ import CartTest from "./components/CartTest";
 import SimpleCartTest from "./components/SimpleCartTest";
 
 import { CartProvider, useCart } from "./contexts/CartContext";
-import { useSupabaseAuth } from "./hooks/useSupabaseAuth";
+import { SupabaseAuthProvider, useAuth } from "./contexts/SupabaseAuthContext";
 import { useUserRole } from "./hooks/useUserRole";
+import { PublicRoute } from "./components/ProtectedRoute";
 
 function NavbarContent() {
-  const { user, signOut, loading: authLoading } = useSupabaseAuth();
-  const { userRole, isSeller, loading: roleLoading } = useUserRole();
+  const { user, signOut, loading: authLoading } = useAuth();
+  const { userRole, isSeller, isAdmin, loading: roleLoading } = useUserRole();
   const { getCartItemsCount, wishlist } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -68,6 +72,8 @@ function NavbarContent() {
   const getUserDisplayName = () => {
     return user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
   };
+
+  const getAvatarUrl = () => user?.user_metadata?.avatar_url || "";
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -205,21 +211,50 @@ function NavbarContent() {
                 </Link>
               </div>
             ) : (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={toggleUserDropdown}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition-colors"
+              <div className="relative flex items-center gap-2" ref={dropdownRef}>
+                {/* Mobile: Profile icon directly links to profile */}
+                <Link
+                  to="/profile"
+                  className="lg:hidden flex items-center text-gray-700 dark:text-gray-300 hover:text-orange-600 transition-colors"
+                  title="Profile"
                 >
-                  <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                    {getUserInitials()}
-                  </div>
-                  <span className="hidden sm:block font-medium">{getUserDisplayName()}</span>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
+                  {getAvatarUrl() ? (
+                    <img src={getAvatarUrl()} alt="Avatar" className="w-8 h-8 rounded-full object-cover border" />
+                  ) : (
+                    <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                      {getUserInitials()}
+                    </div>
+                  )}
+                </Link>
                 
-                {/* User Dropdown */}
+                {/* Desktop: Profile with dropdown */}
+                <div className="hidden lg:flex items-center space-x-2">
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-orange-600 transition-colors"
+                    title="Profile"
+                  >
+                    {getAvatarUrl() ? (
+                      <img src={getAvatarUrl()} alt="Avatar" className="w-8 h-8 rounded-full object-cover border" />
+                    ) : (
+                      <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                        {getUserInitials()}
+                      </div>
+                    )}
+                    <span className="font-medium">{getUserDisplayName()}</span>
+                  </Link>
+                  <button
+                    onClick={toggleUserDropdown}
+                    aria-label="Open menu"
+                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                {/* User Dropdown (Desktop only) */}
                 {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="hidden lg:block absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
                     <Link
                       to="/profile"
                       onClick={() => setUserDropdownOpen(false)}
@@ -242,6 +277,15 @@ function NavbarContent() {
                         className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
                       >
                         <span>Seller Dashboard</span>
+                      </Link>
+                    )}
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      >
+                        <span>Admin Dashboard</span>
                       </Link>
                     )}
                     <button
@@ -306,6 +350,11 @@ function NavbarContent() {
                       Seller Dashboard
                     </Link>
                   )}
+                  {isAdmin && (
+                    <Link to="/admin" className="text-gray-700 hover:text-orange-600 font-medium">
+                      Admin Dashboard
+                    </Link>
+                  )}
                 </>
               )}
             </div>
@@ -319,8 +368,9 @@ function NavbarContent() {
 function App() {
   // Wrap Router with providers here so NavbarContent can access Supabase auth
   return (
-    <CartProvider>
-      <Router>
+    <SupabaseAuthProvider>
+      <CartProvider>
+        <Router>
         <ScrollToTop />
         {/* Header (simple horizontal navbar) */}
         <header className="bg-white shadow-md sticky top-0 z-50">
@@ -330,19 +380,29 @@ function App() {
           {/* Page Routes */}
           <main>
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/shop" element={<Shop />} />
               <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              
+              {/* Auth Routes - Redirect if already logged in */}
+              <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
+              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+              <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              
+              {/* Protected Routes */}
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/admin/*" element={<AdminDashboard />} />
+              
+              {/* Test/Dev Routes */}
               <Route path="/test" element={<ImageTest />} />
               <Route path="/debug" element={<ImageDebug />} />
               <Route path="/simple" element={<ImageTestSimple />} />
@@ -426,6 +486,7 @@ function App() {
           </footer>
         </Router>
       </CartProvider>
+    </SupabaseAuthProvider>
   );
 }
 

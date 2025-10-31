@@ -17,6 +17,7 @@ import {
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
 import productsData from "../data/products.js";
+import { supabase } from "../lib/supabaseClient";
 
 export default function Home() {
   const { getCartItemsCount } = useCart();
@@ -28,19 +29,91 @@ export default function Home() {
   const bannerTimer = useRef(null);
   const observerRef = useRef(null);
 
+  // Fetch products from database and combine with static products
   useEffect(() => {
-    // Get featured products (high rating, good sales)
-    const featured = productsData.products
-      .filter(p => p.rating >= 4.5 && p.sold > 1000)
-      .slice(0, 8);
-    setFeaturedProducts(featured);
-
-    // Get trending products (recent sales)
-    const trending = productsData.products
-      .sort((a, b) => b.sold - a.sold)
-      .slice(0, 6);
-    setTrendingProducts(trending);
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    try {
+      // Fetch products from database (seller-added products)
+      const { data: dbProducts, error: dbError } = await supabase
+        .from('product')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (dbError) {
+        console.error('Error fetching products from database:', dbError);
+      }
+
+      // Transform database products to match ProductCard format
+      const transformedDbProducts = (dbProducts || []).map(product => ({
+        id: product.id,
+        name: product.name || 'Untitled Product',
+        description: product.description || '',
+        price: parseFloat(product.price) || 0,
+        images: product.image_url 
+          ? (Array.isArray(product.image_url) ? product.image_url : [product.image_url])
+          : (product.images && Array.isArray(product.images) ? product.images : ['https://via.placeholder.com/400']),
+        category: product.category || 'General',
+        rating: product.rating || 4.0,
+        reviewCount: product.review_count || 0,
+        sold: product.sold || 0,
+        stock: product.stock || 0,
+        brand: product.brand || '',
+        subcategory: product.subcategory || '',
+        seller: {
+          name: 'Seller',
+          verified: product.seller_id ? true : false,
+        },
+        shipping: {
+          free: product.free_shipping || false,
+          express: product.express_shipping || false,
+        },
+        features: product.features || [],
+        originalPrice: product.original_price || null,
+        discount: product.discount || null,
+        isFromDatabase: true,
+      }));
+
+      // Combine database products with static products
+      const staticProducts = productsData.products || [];
+      const combinedProducts = [...transformedDbProducts, ...staticProducts];
+      
+      // Remove duplicates based on ID (database products first)
+      const allProducts = combinedProducts.reduce((acc, product) => {
+        if (!acc.find(p => p.id === product.id)) {
+          acc.push(product);
+        }
+        return acc;
+      }, []);
+
+      // Get featured products (high rating, good sales)
+      const featured = allProducts
+        .filter(p => (p.rating || 0) >= 4.0 && (p.sold || 0) > 0)
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 8);
+      setFeaturedProducts(featured);
+
+      // Get trending products (recent sales or newest)
+      const trending = allProducts
+        .sort((a, b) => (b.sold || 0) - (a.sold || 0))
+        .slice(0, 6);
+      setTrendingProducts(trending);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      // Fallback to static products on error
+      const featured = productsData.products
+        .filter(p => p.rating >= 4.5 && p.sold > 1000)
+        .slice(0, 8);
+      setFeaturedProducts(featured);
+
+      const trending = productsData.products
+        .sort((a, b) => b.sold - a.sold)
+        .slice(0, 6);
+      setTrendingProducts(trending);
+    }
+  };
 
   const categories = [
     { name: "Electronics", icon: "📱", count: "12,345 products" },

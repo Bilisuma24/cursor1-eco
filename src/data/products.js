@@ -112,17 +112,27 @@ const categories = [
   {
     id: 1,
     name: "Electronics",
-    subcategories: ["Audio", "Wearables", "Photography", "Security"],
+    subcategories: ["Audio", "Wearables", "Photography", "Security", "Computers", "Mobile"],
   },
   {
     id: 2,
     name: "Fashion",
-    subcategories: ["Clothing", "Bags", "Shoes", "Accessories"],
+    subcategories: ["Clothing", "Bags", "Shoes", "Accessories", "Jewelry", "Watches"],
   },
   {
     id: 3,
     name: "Home & Garden",
-    subcategories: ["Furniture", "Decor", "Kitchen", "Garden"],
+    subcategories: ["Furniture", "Decor", "Kitchen", "Bathroom", "Garden", "Tools"],
+  },
+  {
+    id: 4,
+    name: "Sports & Outdoors",
+    subcategories: ["Fitness", "Outdoor", "Sports", "Camping", "Hiking", "Water Sports"],
+  },
+  {
+    id: 5,
+    name: "Health & Beauty",
+    subcategories: ["Skincare", "Makeup", "Hair Care", "Health", "Supplements", "Personal Care"],
   },
 ];
 
