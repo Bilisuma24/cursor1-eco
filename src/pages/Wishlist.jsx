@@ -23,13 +23,14 @@ export default function Wishlist() {
 
   if (wishlist.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+        {/* RESPONSIVE FIX: Improved padding */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {/* Left Column - Empty Wishlist Content */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-                <h1 className="text-4xl font-bold text-gray-900 mb-8">Wishlist</h1>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 lg:mb-8">Wishlist</h1>
                 
                 {/* Empty Wishlist Illustration */}
                 <div className="flex flex-col items-center justify-center py-16">
@@ -85,16 +86,16 @@ export default function Wishlist() {
                     </div>
                   </div>
                   
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Your wishlist is empty</h2>
-                  <p className="text-gray-600 mb-8 text-center max-w-md">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 px-3 sm:px-0">Your wishlist is empty</h2>
+                  <p className="text-gray-600 mb-6 sm:mb-8 text-center max-w-md px-3 sm:px-4 text-sm sm:text-base">
                     Save items you love for later by clicking the heart icon on any product.
                   </p>
                   
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Action Buttons - RESPONSIVE */}
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 px-3 sm:px-0">
                     <Link
                       to="/shop"
-                      className="bg-red-600 hover:bg-red-700 text-white px-10 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      className="bg-red-600 hover:bg-red-700 text-white px-6 sm:px-10 py-2.5 sm:py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base text-center touch-manipulation"
                     >
                       Explore items
                     </Link>
@@ -161,22 +162,25 @@ export default function Wishlist() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden mobile-container">
+      {/* MOBILE-FIRST: Improved padding with safe areas */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        {/* RESPONSIVE: Stack header on mobile */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-3 sm:gap-0">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Wishlist</h1>
-            <p className="text-gray-600 mt-2">{wishlist.length} item{wishlist.length !== 1 ? 's' : ''} saved</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Wishlist</h1>
+            <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">{wishlist.length} item{wishlist.length !== 1 ? 's' : ''} saved</p>
           </div>
           <Link
             to="/shop"
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold"
+            className="bg-blue-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold text-sm sm:text-base text-center touch-manipulation"
           >
             Continue Shopping
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* RESPONSIVE: 2 columns on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {wishlist.map((product) => (
             <div key={product.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group">
               {/* Image Container */}
@@ -239,19 +243,23 @@ export default function Wishlist() {
                 </h3>
 
                 {/* Rating */}
-                <div className="flex items-center space-x-1 mb-3">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <span
-                      key={i}
-                      className={`text-sm ${
-                        i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'
-                      }`}
-                    >
-                      ★
-                    </span>
-                  ))}
-                  <span className="text-xs text-gray-500 ml-1">({product.reviewCount.toLocaleString()})</span>
-                </div>
+                {product.rating && (
+                  <div className="flex items-center space-x-1 mb-3">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <span
+                        key={i}
+                        className={`text-sm ${
+                          i < Math.floor(product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'
+                        }`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                    {product.reviewCount && (
+                      <span className="text-xs text-gray-500 ml-1">({product.reviewCount.toLocaleString()})</span>
+                    )}
+                  </div>
+                )}
 
                 {/* Price */}
                 <div className="flex items-center space-x-2 mb-3">

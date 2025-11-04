@@ -73,9 +73,9 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
   };
 
   return (
-    <div className="relative w-full max-w-md" ref={suggestionsRef}>
+    <div className="relative w-full max-w-md mx-auto" ref={suggestionsRef}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
         <input
           ref={inputRef}
           type="text"
@@ -84,7 +84,7 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
           onKeyPress={handleKeyPress}
           onFocus={() => setShowSuggestions(true)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+          className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 md:py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
         />
         {query && (
           <button
@@ -97,7 +97,7 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
       </div>
 
       {showSuggestions && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto max-w-[calc(100vw-2rem)] sm:max-w-none">
           {suggestions.length > 0 ? (
             <div className="p-2">
               <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2 uppercase tracking-wide">

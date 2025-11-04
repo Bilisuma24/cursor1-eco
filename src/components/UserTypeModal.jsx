@@ -1,10 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../lib/supabaseClient';
 
 export default function UserTypeModal({ user, onComplete }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedType, setSelectedType] = useState(null);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const modalRef = useRef(null);
+  
+  // Swipe gesture handlers
+  const minSwipeDistance = 50;
+  
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+  
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+  
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchEnd - touchStart;
+    if (distance > minSwipeDistance) {
+      // Can't swipe to close this modal - it's required
+    }
+  };
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const handleSelectType = async (userType) => {
     // Prevent multiple clicks
@@ -126,17 +157,33 @@ export default function UserTypeModal({ user, onComplete }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-        <h2 className="text-2xl font-bold mb-4 text-center">Welcome! Choose Your Role</h2>
-        <p className="text-gray-600 mb-6 text-center">Are you a buyer or a seller?</p>
+  return createPortal(
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm mobile-modal-backdrop z-50 sm:flex sm:items-center sm:justify-center sm:p-4"
+    >
+      <div 
+        ref={modalRef}
+        className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 sm:p-8 max-w-md w-full mx-auto bottom-sheet animate-bottom-sheet-up absolute bottom-0 left-0 right-0 sm:relative sm:bottom-auto sm:left-auto sm:right-auto"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
+        }}
+      >
+        {/* Swipe indicator */}
+        <div className="flex justify-center pt-2 pb-4 sm:hidden">
+          <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full bottom-sheet-handle"></div>
+        </div>
         
-        <div className="space-y-4">
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-center text-gray-900 dark:text-white">Welcome! Choose Your Role</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6 text-center text-sm sm:text-base">Are you a buyer or a seller?</p>
+        
+        <div className="space-y-3 sm:space-y-4">
           <button
             onClick={() => handleSelectType('buyer')}
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="w-full min-h-[48px] bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center touch-manipulation active:scale-95 shadow-lg"
           >
             {loading && selectedType === 'buyer' ? (
               <>
@@ -144,14 +191,17 @@ export default function UserTypeModal({ user, onComplete }) {
                 Creating Profile...
               </>
             ) : (
-              '👤 I\'m a Buyer'
+              <>
+                <span className="text-xl mr-2">👤</span>
+                <span>I'm a Buyer</span>
+              </>
             )}
           </button>
           
           <button
             onClick={() => handleSelectType('seller')}
             disabled={loading}
-            className="w-full bg-green-600 text-white py-4 px-6 rounded-lg hover:bg-green-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="w-full min-h-[48px] bg-green-600 text-white py-4 px-6 rounded-lg hover:bg-green-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center touch-manipulation active:scale-95 shadow-lg"
           >
             {loading && selectedType === 'seller' ? (
               <>
@@ -159,33 +209,33 @@ export default function UserTypeModal({ user, onComplete }) {
                 Creating Profile...
               </>
             ) : (
-              '🏪 I\'m a Seller'
+              <>
+                <span className="text-xl mr-2">🏪</span>
+                <span>I'm a Seller</span>
+              </>
             )}
           </button>
         </div>
 
         {error && (
-          <div className="mt-4">
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="mt-4 sm:mt-6">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg mb-4 text-sm break-words">
               {error}
             </div>
             <div className="text-center">
               <button
                 onClick={() => {
                   console.log('Skipping database, using local storage');
-                  // Create a mock profile data and call onComplete
                   const mockProfile = {
                     user_id: user.id,
                     username: user.email?.split('@')[0] || 'user',
                     full_name: user.user_metadata?.name || 'User',
-                    user_type: 'buyer', // Default to buyer
+                    user_type: 'buyer',
                   };
-                  
-                  // Store in localStorage as fallback
                   localStorage.setItem('user_profile', JSON.stringify(mockProfile));
                   onComplete('buyer');
                 }}
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline touch-manipulation min-h-[44px] flex items-center justify-center"
               >
                 Skip database and continue as buyer
               </button>
@@ -193,10 +243,11 @@ export default function UserTypeModal({ user, onComplete }) {
           </div>
         )}
 
-        <p className="text-sm text-gray-500 mt-4 text-center">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-4 sm:mt-6 text-center">
           Don't worry, you can change this later in your profile settings.
         </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

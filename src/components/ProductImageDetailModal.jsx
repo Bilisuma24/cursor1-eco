@@ -19,6 +19,32 @@ export default function ProductImageDetailModal({
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const modalRef = useRef(null);
+  
+  // Swipe gesture handlers for mobile
+  const minSwipeDistance = 50;
+  
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+  
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+  
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchEnd - touchStart;
+    const isDownSwipe = distance > minSwipeDistance;
+    
+    // Close modal on downward swipe
+    if (isDownSwipe && isOpen) {
+      onClose();
+    }
+  };
   
   // Handle mounting state
   useEffect(() => {
@@ -46,6 +72,18 @@ export default function ProductImageDetailModal({
   }
 
   const handleAddToCart = async () => {
+    // Check stock availability
+    if (product.stock !== undefined && product.stock !== null && product.stock === 0) {
+      alert('This product is out of stock!');
+      return;
+    }
+    
+    if (product.stock !== undefined && product.stock !== null && quantity > product.stock) {
+      alert(`Only ${product.stock} items available in stock!`);
+      setQuantity(product.stock);
+      return;
+    }
+    
     try {
       await addToCart(product, quantity, selectedColor, selectedSize);
       setAddedToCart(true);
@@ -168,41 +206,67 @@ export default function ProductImageDetailModal({
     return colorMap[colorName] || '#E5E7EB';
   };
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   return createPortal(
     <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-9999" 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] sm:flex sm:items-center sm:justify-center sm:p-4 mobile-modal-backdrop" 
       onClick={onClose}
     >
+      {/* MOBILE-FIRST: Bottom sheet with swipe-to-dismiss */}
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+        ref={modalRef}
+        className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-7xl w-full h-[85vh] sm:h-auto sm:max-h-[90vh] absolute bottom-0 left-0 right-0 sm:relative sm:left-auto sm:right-auto overflow-hidden flex flex-col bottom-sheet animate-bottom-sheet-up"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
+        }}
       >
-        {/* AliExpress-style Header */}
-        <div className="relative bg-gradient-to-r from-red-500 to-orange-500 text-white p-6 shadow-lg">
+        {/* MOBILE-FIRST: Swipe indicator / drag handle */}
+        <div className="flex justify-center pt-3 pb-2 sm:hidden">
+          <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full bottom-sheet-handle"></div>
+        </div>
+        
+        {/* AliExpress-style Header - MOBILE: Reduced padding */}
+        <div className="relative bg-gradient-to-r from-red-500 to-orange-500 text-white p-3 sm:p-4 lg:p-6 shadow-lg">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <Eye className="w-6 h-6" />
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+                <Eye className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">Quick View</h2>
-                <p className="text-orange-100 text-sm font-medium">Choose your options and add to cart</p>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">Quick View</h2>
+                <p className="text-orange-100 text-xs sm:text-sm font-medium hidden sm:block">Choose your options and add to cart</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3 flex-shrink-0">
               <button
                 onClick={() => setShowShareMenu(!showShareMenu)}
-                className="p-3 hover:bg-white/20 rounded-full transition-all duration-300 hover:scale-110"
+                className="p-2 sm:p-2.5 lg:p-3 hover:bg-white/20 rounded-full transition-all duration-300 hover:scale-110 touch-manipulation"
                 title="Share Product"
               >
-                <Share2 className="w-5 h-5" />
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={onClose}
-                className="p-3 hover:bg-white/20 rounded-full transition-all duration-300 hover:scale-110"
+                className="min-w-[44px] min-h-[44px] p-2 sm:p-2.5 lg:p-3 hover:bg-white/20 rounded-full transition-all duration-300 hover:scale-110 touch-manipulation flex items-center justify-center"
                 title="Close"
+                aria-label="Close modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
           </div>
@@ -222,11 +286,12 @@ export default function ProductImageDetailModal({
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row flex-1 min-h-0">
-          {/* Enhanced Image Section */}
-          <div className="lg:w-1/2 p-6 flex items-center justify-center">
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-y-auto">
+          {/* Enhanced Image Section - MOBILE: Much smaller and compact */}
+          <div className="lg:w-1/2 p-2 sm:p-4 lg:p-6 flex items-center justify-center flex-shrink-0">
             <div className="relative group w-full max-w-lg">
-              <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shadow-lg">
+              {/* MOBILE: Image VERY small - only 25vh to save maximum space */}
+              <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl overflow-hidden shadow-lg max-h-[25vh] sm:max-h-[40vh] lg:max-h-none w-full">
                 {(() => {
                   // Ensure we always have a valid image source
                   const imageSrc = product.images?.[selectedImage];
@@ -296,15 +361,15 @@ export default function ProductImageDetailModal({
                 </button>
               </div>
 
-              {/* Enhanced Thumbnail Navigation */}
+              {/* Enhanced Thumbnail Navigation - MOBILE: Very small thumbnails */}
               {product.images && product.images.length > 1 && (
-                <div className="mt-4">
-                  <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-                    {product.images.slice(0, 8).map((image, index) => (
+                <div className="mt-1 sm:mt-2 lg:mt-4">
+                  <div className="flex space-x-1.5 sm:space-x-2 overflow-x-auto pb-1 sm:pb-2 scrollbar-hide -mx-2 px-2">
+                    {product.images.slice(0, 5).map((image, index) => (
                       <button
                         key={index}
                         onClick={() => onImageSelect(index)}
-                        className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 hover:scale-105 ${
+                        className={`shrink-0 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-md sm:rounded-lg overflow-hidden border-2 transition-all duration-300 hover:scale-105 touch-manipulation ${
                           selectedImage === index 
                             ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg' 
                             : 'border-gray-200 hover:border-gray-300'
@@ -334,64 +399,67 @@ export default function ProductImageDetailModal({
           </div>
 
           {/* Enhanced Product Info Section */}
-          <div className="lg:w-1/2 p-6 overflow-y-auto flex items-center justify-center">
-            <div className="w-full max-w-lg space-y-6">
-              {/* Enhanced Product Title */}
+          {/* Product Details Section - MOBILE: Very compact spacing */}
+          <div className="lg:w-1/2 p-2 sm:p-3 lg:p-6 overflow-y-auto flex items-start sm:items-center justify-center flex-1">
+            <div className="w-full max-w-lg space-y-2 sm:space-y-2.5 lg:space-y-6 pb-3 sm:pb-4">
+              {/* Enhanced Product Title - MOBILE: Much more compact, hide duplicate rating */}
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">{product.name}</h3>
-                <div className="flex items-center space-x-4 mb-4">
+                <h3 className="text-base sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 lg:mb-3 leading-tight line-clamp-2">{product.name}</h3>
+                {/* MOBILE: Hide duplicate rating info - shown in price section below */}
+                <div className="hidden sm:flex flex-wrap items-center gap-1.5 sm:gap-3 lg:gap-4 mb-2 sm:mb-4 text-xs sm:text-sm">
                   <div className="flex items-center space-x-2">
                     <div className="flex items-center space-x-1">
                       {renderStars(product.rating)}
                     </div>
-                    <span className="text-lg font-semibold text-gray-800">{product.rating}</span>
-                    <span className="text-sm text-gray-600">({product.reviewCount.toLocaleString()} reviews)</span>
+                    <span className="text-base sm:text-lg font-semibold text-gray-800">{product.rating}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">({product.reviewCount.toLocaleString()} reviews)</span>
                   </div>
                   <div className="flex items-center space-x-1 text-orange-600">
-                    <TrendingUp className="w-4 h-4" />
-                    <span className="text-sm font-medium">{product.sold.toLocaleString()}+ sold</span>
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="text-xs sm:text-sm font-medium">{product.sold.toLocaleString()}+ sold</span>
                   </div>
                 </div>
               </div>
 
-              {/* AliExpress-style Price Section */}
-              <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-2xl border-2 border-red-100 shadow-lg">
-                <div className="flex items-center space-x-4 mb-3">
-                  <span className="text-4xl font-bold text-red-600">
+              {/* AliExpress-style Price Section - MOBILE: Compact */}
+              <div className="bg-gradient-to-r from-red-50 to-orange-50 p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl lg:rounded-2xl border-2 border-red-100 shadow-lg">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4 mb-1.5 sm:mb-2 lg:mb-3">
+                  <span className="text-xl sm:text-2xl lg:text-4xl font-bold text-red-600">
                     {formatPrice(product.price)}
                   </span>
                   {product.originalPrice && (
-                    <span className="text-2xl text-gray-500 line-through">
+                    <span className="text-base sm:text-xl lg:text-2xl text-gray-500 line-through">
                       {formatPrice(product.originalPrice)}
                     </span>
                   )}
                   {product.discount && (
-                    <div className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                    <div className="bg-red-500 text-white px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-full text-xs sm:text-sm font-bold shadow-lg">
                       -{product.discount}% OFF
                     </div>
                   )}
                 </div>
                 {product.discount && (
-                  <div className="text-lg text-red-700 font-bold mb-2">
+                  <div className="text-sm sm:text-base lg:text-lg text-red-700 font-bold mb-1.5 sm:mb-2">
                     🔥 Limited time offer! Save {formatPrice(product.originalPrice - product.price)}
                   </div>
                 )}
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                {/* MOBILE: Compact rating row */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4 text-xs sm:text-sm text-gray-600">
                   <div className="flex items-center space-x-1">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current" />
                     <span className="font-semibold">{product.rating}</span>
                     <span>({product.reviewCount.toLocaleString()} reviews)</span>
                   </div>
                   <div className="flex items-center space-x-1 text-orange-600">
-                    <TrendingUp className="w-4 h-4" />
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span className="font-semibold">{product.sold.toLocaleString()}+ sold</span>
                   </div>
                 </div>
               </div>
 
-              {/* Enhanced Seller Info */}
+              {/* Enhanced Seller Info - MOBILE: Reduced padding */}
               {product.seller && (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 rounded-xl border border-blue-100">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
@@ -526,40 +594,79 @@ export default function ProductImageDetailModal({
                 </div>
               )}
 
-              {/* Enhanced Quantity */}
+              {/* Stock Availability - MOBILE: Reduced padding */}
+              {product.stock !== undefined && product.stock !== null && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-medium text-blue-900 mb-1">Available Stock</h4>
+                      <p className="text-lg font-bold">
+                        {product.stock > 0 ? (
+                          <span className="text-green-600">{product.stock} items available</span>
+                        ) : (
+                          <span className="text-red-600">Out of Stock</span>
+                        )}
+                      </p>
+                    </div>
+                    {product.stock > 0 && product.stock < 10 && (
+                      <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded-lg text-xs font-medium">
+                        Limited Stock!
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Enhanced Quantity - MOBILE: Compact layout */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Quantity</h4>
-                <div className="flex items-center space-x-4">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Quantity</h4>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                   <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-3 hover:bg-gray-50 transition-colors duration-200"
+                      disabled={quantity <= 1}
+                      className="p-3 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Minus className="w-5 h-5" />
                     </button>
-                    <span className="w-16 text-center py-3 font-semibold text-lg">
-                      {quantity}
-                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={product.stock || 999}
+                      value={quantity}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 1;
+                        const maxStock = product.stock || 999;
+                        setQuantity(Math.max(1, Math.min(val, maxStock)));
+                      }}
+                      className="w-20 text-center py-3 font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                     <button
-                      onClick={() => setQuantity(Math.min(product.maxOrder || 10, quantity + 1))}
-                      className="p-3 hover:bg-gray-50 transition-colors duration-200"
+                      onClick={() => {
+                        const maxStock = product.stock || 999;
+                        setQuantity(Math.min(maxStock, quantity + 1));
+                      }}
+                      disabled={quantity >= (product.stock || 999)}
+                      className="p-3 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Plus className="w-5 h-5" />
                     </button>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    Max: {product.maxOrder || 10} per order
-                  </div>
+                  {product.stock !== undefined && product.stock !== null && (
+                    <div className="text-sm text-gray-600">
+                      Max: {product.stock} {product.stock === 1 ? 'item' : 'items'} available
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Enhanced Features */}
+              {/* Enhanced Features - MOBILE: Compact */}
               {product.features && product.features.length > 0 && (
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h4>
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Key Features</h4>
                   <div className="grid grid-cols-1 gap-2">
                     {product.features.slice(0, 4).map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div key={index} className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-green-50 rounded-lg border border-green-200">
                         <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shrink-0">
                           <Check className="w-4 h-4 text-white" />
                         </div>
@@ -575,62 +682,68 @@ export default function ProductImageDetailModal({
                 </div>
               )}
 
-              {/* Enhanced Shipping Info */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
-                <div className="space-y-2">
+              {/* Enhanced Shipping Info - MOBILE: Compact */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-3 sm:p-4 rounded-xl border border-green-100">
+                <div className="space-y-1.5 sm:space-y-2">
                   {product.shipping?.free && (
                     <div className="flex items-center space-x-2 text-green-700">
-                      <Truck className="w-5 h-5" />
-                      <span className="font-semibold">Free shipping on orders over $50</span>
+                      <Truck className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm font-semibold">Free shipping on orders over $50</span>
                     </div>
                   )}
                   <div className="flex items-center space-x-2 text-gray-700">
-                    <Check className="w-5 h-5" />
-                    <span className="font-medium">30-day return policy</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium">30-day return policy</span>
                   </div>
                   <div className="flex items-center space-x-2 text-gray-700">
-                    <Clock className="w-5 h-5" />
-                    <span className="font-medium">Fast delivery: 2-5 business days</span>
+                    <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium">Fast delivery: 2-5 business days</span>
                   </div>
                 </div>
               </div>
 
-              {/* AliExpress-style Action Buttons */}
-              <div className="space-y-4">
-                <div className="flex space-x-4">
+              {/* AliExpress-style Action Buttons - MOBILE: Compact */}
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex gap-2 sm:gap-3 lg:gap-4">
                   <button
                     onClick={handleAddToCart}
-                    className={`flex-1 py-5 px-8 rounded-2xl font-bold text-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-xl ${
+                    disabled={product.stock !== undefined && product.stock !== null && product.stock === 0}
+                    className={`flex-1 py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-8 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base lg:text-xl transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 touch-manipulation ${
                       addedToCart 
                         ? 'bg-green-600 text-white scale-105 animate-bounce' 
+                        : product.stock === 0
+                        ? 'bg-gray-400 text-white'
                         : 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white hover:scale-105 hover:shadow-2xl'
                     }`}
                   >
-                    <ShoppingCart className="w-7 h-7" />
-                    <span>{addedToCart ? '✅ Added to Cart!' : '🛒 Add to Cart'}</span>
+                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
+                    <span className="whitespace-nowrap">{addedToCart ? '✅ Added!' : product.stock === 0 ? '❌ Out of Stock' : 'Add to Cart'}</span>
                   </button>
                   <button
                     onClick={handleWishlistToggle}
-                    className={`px-8 py-5 rounded-2xl border-3 transition-all duration-300 flex items-center justify-center space-x-2 hover:scale-105 shadow-lg ${
+                    className={`px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 rounded-xl sm:rounded-2xl border-2 sm:border-3 transition-all duration-300 flex items-center justify-center hover:scale-105 shadow-lg touch-manipulation ${
                       isInWishlist(product.id)
                         ? 'border-red-500 bg-red-50 text-red-600 shadow-xl'
                         : 'border-gray-300 hover:border-red-500 hover:text-red-600 hover:bg-red-50'
                     }`}
                   >
-                    <Heart className={`w-7 h-7 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                    <Heart className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                   </button>
                 </div>
                 {/* Price Alert Button */}
                 <PriceAlertButton product={product} currentPrice={product.price} />
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <button className="py-4 px-6 border-2 border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 font-medium flex items-center justify-center space-x-2 hover:scale-105">
-                    <MessageCircle className="w-5 h-5" />
-                    <span>Contact Seller</span>
+                {/* MOBILE: Compact button grid */}
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+                  <button className="py-2.5 sm:py-3 lg:py-4 px-3 sm:px-4 lg:px-6 border-2 border-gray-300 rounded-lg sm:rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 text-xs sm:text-sm lg:text-base font-medium flex items-center justify-center space-x-1 sm:space-x-2 hover:scale-105 touch-manipulation">
+                    <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="hidden sm:inline">Contact Seller</span>
+                    <span className="sm:hidden">Contact</span>
                   </button>
-                  <button className="py-4 px-6 border-2 border-gray-300 rounded-xl hover:border-green-400 hover:bg-green-50 transition-all duration-300 font-medium flex items-center justify-center space-x-2 hover:scale-105">
-                    <Share2 className="w-5 h-5" />
-                    <span>Share Product</span>
+                  <button className="py-2.5 sm:py-3 lg:py-4 px-3 sm:px-4 lg:px-6 border-2 border-gray-300 rounded-lg sm:rounded-xl hover:border-green-400 hover:bg-green-50 transition-all duration-300 text-xs sm:text-sm lg:text-base font-medium flex items-center justify-center space-x-1 sm:space-x-2 hover:scale-105 touch-manipulation">
+                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="hidden sm:inline">Share Product</span>
+                    <span className="sm:hidden">Share</span>
                   </button>
                 </div>
               </div>

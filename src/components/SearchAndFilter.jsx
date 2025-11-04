@@ -33,38 +33,52 @@ export default function SearchAndFilter({
   );
 
   return (
-    <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex items-center space-x-4 mb-4">
+    <div className="bg-white border-b border-gray-200 sticky top-16 z-40 shadow-sm">
+      {/* RESPONSIVE FIX: Improved padding for mobile */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 md:py-5">
+        {/* Search Bar - RESPONSIVE: Stack on mobile */}
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-4 mb-3 sm:mb-4 md:mb-5">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-2 sm:left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
             <input
               type="text"
               placeholder="Search for products, brands, and more..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full min-h-[44px] md:min-h-[48px] pl-8 sm:pl-10 md:pl-12 pr-4 py-2.5 sm:py-3 md:py-3.5 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
             />
           </div>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+            className="min-h-[44px] md:min-h-[48px] bg-blue-600 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3.5 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-sm sm:text-base whitespace-nowrap touch-manipulation shadow-sm hover:shadow-md"
           >
             Search
           </button>
         </form>
 
-        {/* Filter Bar */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        {/* Filter Bar - RESPONSIVE: Collapse filters on mobile with toggle */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+          {/* Mobile Filter Toggle */}
+          <button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="lg:hidden flex items-center justify-between w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 touch-manipulation"
+          >
+            <span className="flex items-center space-x-2">
+              <Filter className="w-4 h-4" />
+              <span>Filters {hasActiveFilters && `(${Object.values(localFilters).filter(v => v && v !== '' && (Array.isArray(v) ? v.length > 0 : true)).length})`}</span>
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Filter Controls - RESPONSIVE: Hide on mobile unless open, show on desktop */}
+          <div className={`${isFilterOpen ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4`}>
             {/* Categories */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Category:</span>
+            <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Category:</span>
               <select
                 value={localFilters.category || ''}
                 onChange={(e) => handleFilterChange('category', e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 sm:flex-none min-w-[120px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">All Categories</option>
                 {categories.map(category => (
@@ -74,13 +88,13 @@ export default function SearchAndFilter({
                 ))}
               </select>
             </div>
-            {/* Subcategory (dependent) */}
-            <div className="hidden md:flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Subcategory:</span>
+            {/* Subcategory (dependent) - RESPONSIVE: Hide on small mobile */}
+            <div className="hidden md:flex items-center space-x-1.5 sm:space-x-2">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Subcategory:</span>
               <select
                 value={localFilters.subcategory || ''}
                 onChange={(e) => handleFilterChange('subcategory', e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="min-w-[120px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">All</option>
                 {categories
@@ -90,13 +104,13 @@ export default function SearchAndFilter({
               </select>
             </div>
 
-            {/* Price Range */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Price:</span>
+            {/* Price Range - RESPONSIVE: Full width on mobile */}
+            <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1 sm:flex-none">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Price:</span>
               <select
                 value={localFilters.priceRange || ''}
                 onChange={(e) => handleFilterChange('priceRange', e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 sm:flex-none min-w-[120px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Any Price</option>
                 <option value="0-25">Under $25</option>
@@ -107,13 +121,13 @@ export default function SearchAndFilter({
               </select>
             </div>
 
-            {/* Rating */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Rating:</span>
+            {/* Rating - RESPONSIVE: Full width on mobile */}
+            <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0 flex-1 sm:flex-none">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Rating:</span>
               <select
                 value={localFilters.rating || ''}
                 onChange={(e) => handleFilterChange('rating', e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 sm:flex-none min-w-[120px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Any Rating</option>
                 <option value="4.5">4.5+ Stars</option>
@@ -122,29 +136,29 @@ export default function SearchAndFilter({
               </select>
             </div>
 
-            {/* Shipping */}
-            <div className="flex items-center space-x-2">
-              <label className="flex items-center space-x-2">
+            {/* Shipping - RESPONSIVE: Stack checkboxes on mobile */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-x-2 gap-y-1">
+              <label className="flex items-center space-x-1.5 text-xs sm:text-sm">
                 <input
                   type="checkbox"
                   checked={localFilters.freeShipping || false}
                   onChange={(e) => handleFilterChange('freeShipping', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
                 />
-                <span className="text-sm text-gray-700">Free Shipping</span>
+                <span className="text-gray-700 whitespace-nowrap">Free Shipping</span>
               </label>
-              <label className="flex items-center space-x-2">
+              <label className="flex items-center space-x-1.5 text-xs sm:text-sm">
                 <input
                   type="checkbox"
                   checked={localFilters.express || false}
                   onChange={(e) => handleFilterChange('express', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
                 />
-                <span className="text-sm text-gray-700">Express</span>
+                <span className="text-gray-700 whitespace-nowrap">Express</span>
               </label>
             </div>
 
-            {/* Brand */}
+            {/* Brand - RESPONSIVE: Hide on mobile and tablet */}
             <div className="hidden lg:flex items-center space-x-2">
               <span className="text-sm font-medium text-gray-700">Brand:</span>
               <input
@@ -152,19 +166,20 @@ export default function SearchAndFilter({
                 placeholder="e.g. FitTech"
                 value={localFilters.brand || ''}
                 onChange={(e) => handleFilterChange('brand', e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[120px]"
               />
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Sort and Clear - RESPONSIVE: Stack on mobile */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:space-x-2">
             {/* Sort */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Sort by:</span>
+            <div className="flex items-center space-x-2 min-w-0 flex-1 sm:flex-none">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap hidden sm:inline">Sort by:</span>
               <select
                 value={localFilters.sortBy || ''}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 sm:flex-none min-w-[140px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Featured</option>
                 <option value="price-low">Price: Low to High</option>
@@ -179,10 +194,10 @@ export default function SearchAndFilter({
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                className="flex items-center justify-center space-x-1 text-xs sm:text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md hover:bg-gray-50"
               >
-                <X className="w-4 h-4" />
-                <span>Clear Filters</span>
+                <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Clear</span>
               </button>
             )}
           </div>

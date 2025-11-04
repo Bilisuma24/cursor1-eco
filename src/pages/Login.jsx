@@ -163,13 +163,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-8 overflow-x-hidden mobile-container">
+      {/* MOBILE-FIRST: Compact mobile design */}
+      <div className="max-w-md w-full space-y-4 sm:space-y-6 bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+          <h2 className="text-center text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+            Sign in
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-1.5 sm:mt-2 text-center text-xs sm:text-sm text-gray-600">
             Don't have an account?{" "}
             <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
               Sign up
@@ -177,12 +178,12 @@ export default function Login() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-3 sm:space-y-4 lg:space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 sm:px-4 sm:py-3 rounded-lg text-sm">
               <div className="flex items-start">
                 <svg
-                  className="h-5 w-5 mr-2 mt-0.5"
+                  className="h-4 w-4 sm:h-5 sm:w-5 mr-2 mt-0.5 flex-shrink-0"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -192,13 +193,13 @@ export default function Login() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <div className="flex-1">
-                  <p>{error}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="break-words">{error}</p>
                   {showResend && (
                     <button
                       type="button"
                       onClick={handleResend}
-                      className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+                      className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-blue-600 hover:text-blue-800 underline"
                     >
                       Resend confirmation email
                     </button>
@@ -208,11 +209,11 @@ export default function Login() {
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
+              <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                Email
               </label>
               <input
                 id="email"
@@ -222,29 +223,29 @@ export default function Login() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${
+                className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.email
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10 sm:text-sm`}
+                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
                 placeholder="Enter your email"
               />
               {validationErrors.email && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                <p className="mt-1 text-xs sm:text-sm text-red-600">{validationErrors.email}</p>
               )}
             </div>
 
             {/* Password */}
             <div>
-              <div className="flex justify-between mb-1">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700">
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-500"
+                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-500"
                 >
-                  Forgot password?
+                  Forgot?
                 </Link>
               </div>
               <input
@@ -255,30 +256,30 @@ export default function Login() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${
+                className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.password
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10 sm:text-sm`}
+                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
                 placeholder="Enter your password"
               />
               {validationErrors.password && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+                <p className="mt-1 text-xs sm:text-sm text-red-600">{validationErrors.password}</p>
               )}
             </div>
           </div>
 
-          {/* Remember Me */}
-          <div className="flex items-center">
+          {/* Remember Me - MOBILE-FIRST: Enhanced touch target */}
+          <div className="flex items-center min-h-[44px]">
             <input
               id="rememberMe"
               name="rememberMe"
               type="checkbox"
               checked={formData.rememberMe}
               onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded touch-manipulation"
             />
-            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="rememberMe" className="ml-3 block text-sm text-gray-900 dark:text-gray-100 cursor-pointer touch-manipulation">
               Remember me
             </label>
           </div>
@@ -287,7 +288,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white ${
+              className={`group relative w-full flex justify-center min-h-[44px] py-2.5 sm:py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white touch-manipulation ${
                 loading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

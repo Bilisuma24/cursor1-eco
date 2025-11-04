@@ -3,9 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 export default function AliExpressImageZoom({
     images = [],
     initialIndex = 0,
-    zoomRatio = 3,
-    previewWidth = 360,
-    previewHeight, // optional; defaults to main image aspect
+    zoomRatio = 2.5,
     lensOpacity = 0.25,
     className = '',
     onChange = () => {}
@@ -24,9 +22,6 @@ export default function AliExpressImageZoom({
     // keep external state informed
     useEffect(() => { onChange(index); }, [index]);
 
-	// Derive preview height if not provided (square by default)
-	const effectivePreviewHeight = previewHeight || previewWidth;
-
 	// Track container size for lens math
 	const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 	useEffect(() => {
@@ -41,8 +36,8 @@ export default function AliExpressImageZoom({
 	}, []);
 
 	// Lens size based on zoomRatio and preview size
-	const lensW = Math.max(30, Math.min(containerSize.w, previewWidth / zoomRatio));
-	const lensH = Math.max(30, Math.min(containerSize.h, effectivePreviewHeight / zoomRatio));
+	const lensW = Math.max(80, Math.min(containerSize.w * 0.3, 120));
+	const lensH = Math.max(80, Math.min(containerSize.h * 0.3, 120));
 
 	// Move handler (requestAnimationFrame to avoid jank)
 	const queueCursorUpdate = (clientX, clientY) => {
@@ -66,80 +61,92 @@ export default function AliExpressImageZoom({
 	// Touch: open modal on tap (mobile), no hover zoom
 	const onTouchStart = () => setShowModal(true);
 
-	// Background size and position for preview
-	const bgSizeX = containerSize.w * zoomRatio;
-	const bgSizeY = containerSize.h * zoomRatio;
-	const bgPosX = (cursorPct.x / 100) * bgSizeX - (previewWidth / 2);
-	const bgPosY = (cursorPct.y / 100) * bgSizeY - (effectivePreviewHeight / 2);
-
 	return (
-		<div className={`grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_${previewWidth}px] gap-4 ${className}`}>
-			{/* Main image with lens */}
-			<div
-				ref={containerRef}
-				className="relative rounded-lg border bg-white overflow-hidden aspect-square select-none"
-				onMouseEnter={onMouseEnter}
-				onMouseLeave={onMouseLeave}
-				onMouseMove={onMouseMove}
-				onTouchStart={onTouchStart}
-			>
-				{src ? (
-					<img ref={imageRef} src={src} alt="Product" className="w-full h-full object-cover" />
-				) : (
-					<div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
-				)}
-
-				{/* Lens (desktop only) */}
+		<div className={`flex flex-col gap-4 ${className}`}>
+			{/* Main image with self-zoom - AliExpress style */}
+			<div className="relative w-full">
 				<div
-					className={`pointer-events-none hidden md:block absolute transition-opacity duration-150 ${hovering ? 'opacity-100' : 'opacity-0'}`}
-					style={{
-						width: `${lensW}px`,
-						height: `${lensH}px`,
-						left: `calc(${cursorPct.x}% - ${lensW / 2}px)`,
-						top: `calc(${cursorPct.y}% - ${lensH / 2}px)`,
-						backgroundColor: `rgba(0,0,0,${lensOpacity})`,
-						outline: '2px solid rgba(255,255,255,0.9)',
-						boxShadow: '0 0 0 2px rgba(0,0,0,0.2)'
-					}}
-				/>
+					ref={containerRef}
+					className="relative border border-gray-200 bg-white overflow-hidden aspect-square w-full max-w-[400px] md:max-w-[480px] select-none rounded-lg"
+					onMouseEnter={onMouseEnter}
+					onMouseLeave={onMouseLeave}
+					onMouseMove={onMouseMove}
+					onTouchStart={onTouchStart}
+				>
+					{src ? (
+						<>
+							{/* Base image */}
+							<img ref={imageRef} src={src} alt="Product" className="w-full h-full object-contain" />
+							
+							{/* Zoomed overlay image */}
+							<img 
+								src={src} 
+								alt="Product zoomed" 
+								className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-75 ${hovering ? 'opacity-100' : 'opacity-0'}`}
+								style={{
+									transform: `scale(${zoomRatio})`,
+									transformOrigin: `${cursorPct.x}% ${cursorPct.y}%`,
+									pointerEvents: 'none'
+								}}
+							/>
+						</>
+					) : (
+						<div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
+					)}
+
+					{/* Lens indicator (desktop only) */}
+					<div
+						className={`pointer-events-none hidden md:block absolute border-2 transition-opacity duration-75 ${hovering ? 'opacity-100' : 'opacity-0'}`}
+						style={{
+							width: `${lensW}px`,
+							height: `${lensH}px`,
+							left: `calc(${cursorPct.x}% - ${lensW / 2}px)`,
+							top: `calc(${cursorPct.y}% - ${lensH / 2}px)`,
+							borderColor: 'rgba(255,255,255,0.9)',
+							boxShadow: '0 0 8px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(0,0,0,0.1)',
+							cursor: 'crosshair'
+						}}
+					/>
+				</div>
 			</div>
 
-			{/* Side preview (desktop only) */}
-			<div className="hidden md:block">
-				<div
-					className={`relative rounded-lg border overflow-hidden bg-white transition-opacity duration-150 ${hovering ? 'opacity-100' : 'opacity-0'}`}
-					style={{ width: `${previewWidth}px`, height: `${effectivePreviewHeight}px` }}
-				>
-					{src && (
-						<div
-							className="absolute inset-0"
-							style={{
-								backgroundImage: `url(${src})`,
-								backgroundRepeat: 'no-repeat',
-								backgroundSize: `${bgSizeX}px ${bgSizeY}px`,
-								backgroundPosition: `-${Math.max(0, Math.min(bgSizeX - previewWidth, bgPosX))}px -${Math.max(0, Math.min(bgSizeY - effectivePreviewHeight, bgPosY))}px`,
-								transition: 'background-position 40ms linear' // snappy, low-latency feel
-							}}
-						/>
-					)}
-				</div>
-
-				{/* Thumbnails (optional, if multiple images) */}
-				{images.length > 1 && (
-					<div className="mt-3 grid grid-cols-6 gap-2">
+			{/* Mobile thumbnail gallery */}
+			{images.length > 1 && (
+				<div className="mt-2 md:hidden">
+					<div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
 						{images.map((s, i) => (
-                        <button
+							<button
 								key={i}
-                            onClick={() => setIndex(i)}
-								className={`aspect-square border rounded overflow-hidden ${i === index ? 'ring-2 ring-gray-900' : ''}`}
+								onClick={() => setIndex(i)}
+								className={`flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 border-2 rounded-md overflow-hidden touch-manipulation transition-all ${
+									i === index 
+										? 'border-blue-500 ring-2 ring-blue-200 shadow-md' 
+										: 'border-gray-200 hover:border-gray-300'
+								}`}
 								aria-label={`Select image ${i + 1}`}
 							>
 								<img src={s} alt={`thumb-${i + 1}`} className="w-full h-full object-cover" />
 							</button>
 						))}
 					</div>
-				)}
-			</div>
+				</div>
+			)}
+
+			{/* Desktop thumbnail gallery */}
+			{images.length > 1 && (
+				<div className="hidden md:grid grid-cols-6 gap-2 mt-2">
+					{images.map((s, i) => (
+						<button
+							key={i}
+							onClick={() => setIndex(i)}
+							className={`aspect-square border-2 rounded overflow-hidden transition-all ${i === index ? 'ring-2 ring-gray-900 border-gray-900' : 'border-gray-200 hover:border-gray-400'}`}
+							aria-label={`Select image ${i + 1}`}
+						>
+							<img src={s} alt={`thumb-${i + 1}`} className="w-full h-full object-cover" />
+						</button>
+					))}
+				</div>
+			)}
 
 			{/* Mobile fullscreen modal */}
 			{showModal && (

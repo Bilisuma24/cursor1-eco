@@ -53,7 +53,7 @@ const FloatingLabelInput = ({
         disabled={disabled}
         required={required}
         className={`
-          w-full px-4 pt-6 pb-2 text-gray-900 dark:text-white
+          w-full min-h-[44px] px-4 pt-6 pb-2 text-gray-900 dark:text-white
           bg-white dark:bg-gray-800
           border border-gray-300 dark:border-gray-600
           rounded-lg
@@ -94,6 +94,8 @@ const FloatingLabelInput = ({
 };
 
 export default FloatingLabelInput;
+
+
 
 
 

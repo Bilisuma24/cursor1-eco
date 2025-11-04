@@ -46,7 +46,7 @@ const StatsCard = ({
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${className}`}>
+    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
@@ -54,17 +54,18 @@ const StatsCard = ({
             {formatValue(value)}
           </p>
           {change !== undefined && (
-            <div className={`flex items-center mt-2 text-sm ${getChangeColor()}`}>
+            <div className={`flex items-center mt-2 text-sm font-semibold ${getChangeColor()}`}>
               {getChangeIcon()}
               <span className="ml-1">
                 {change > 0 ? '+' : ''}{change}%
               </span>
+              <span className="ml-2 text-xs text-gray-500">vs previous period</span>
             </div>
           )}
         </div>
         {Icon && (
           <div className="shrink-0">
-            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors">
               <Icon className="h-6 w-6 text-gray-600" />
             </div>
           </div>

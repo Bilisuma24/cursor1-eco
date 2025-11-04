@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Grid, List, Filter, SortAsc, Loader } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Grid, List, Filter, SortAsc, Loader, Search, ShoppingCart, User } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import SearchAndFilter from "../components/SearchAndFilter";
 import productsData from "../data/products.js";
@@ -14,7 +14,9 @@ export default function Shop() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Fetch products from Supabase (includes seller-added products)
   useEffect(() => {
@@ -305,8 +307,11 @@ CREATE POLICY "public_read_products"
     const q = params.get('search') || '';
     const cat = params.get('category') || '';
     setSearchTerm(q);
+    setSelectedCategory(cat || 'For you');
     if (cat) {
       setFilters((prev) => ({ ...prev, category: cat }));
+    } else {
+      setFilters((prev) => ({ ...prev, category: '' }));
     }
   }, [location.search]);
 
@@ -416,125 +421,315 @@ CREATE POLICY "public_read_products"
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Search and Filter Bar */}
-      <SearchAndFilter
-        onSearch={handleSearch}
-        onFilterChange={handleFilterChange}
-        categories={productsData.categories}
-        filters={filters}
-      />
+  const categories = productsData.categories || [];
+  const allCategories = ['For you', 'All', ...categories.map(cat => cat.name)];
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Results Header */}
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+  // Mobile category handler
+  const handleCategorySelect = (categoryName) => {
+    if (categoryName === 'For you') {
+      setSelectedCategory('For you');
+      setFilters((prev) => ({ ...prev, category: '' }));
+      navigate('/shop');
+    } else if (categoryName === 'All') {
+      setSelectedCategory('All');
+      setFilters((prev) => ({ ...prev, category: '' }));
+      navigate('/shop');
+    } else {
+      setSelectedCategory(categoryName);
+      setFilters((prev) => ({ ...prev, category: categoryName }));
+      navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Mobile Category Layout */}
+      <div className="md:hidden">
+        {/* Top Browser Bar */}
+        <div className="bg-gray-800 text-white text-xs py-1 px-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-600 rounded"></div>
+            <span className="text-gray-300">ecostore.com</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-600 rounded"></div>
+            <div className="w-6 h-4 bg-gray-600 rounded text-xs flex items-center justify-center">15</div>
+            <div className="w-4 h-4 bg-gray-600 rounded"></div>
+          </div>
+        </div>
+
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <span className="text-xl font-bold text-gray-900">Eco</span>
+              <span className="text-xl font-bold text-orange-500">Store</span>
+            </Link>
+            <button 
+              onClick={() => navigate('/shop')}
+              className="p-2"
+            >
+              <Search className="w-6 h-6 text-gray-700" />
+            </button>
+          </div>
+        </div>
+
+        {/* Two-Panel Layout */}
+        <div className="flex h-[calc(100vh-140px)] overflow-hidden">
+          {/* Left Panel - Categories List */}
+          <div className="w-32 bg-white border-r border-gray-200 overflow-y-auto">
+            <div className="py-2">
+              {allCategories.map((category, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleCategorySelect(category)}
+                  className={`w-full text-left px-3 py-2.5 text-xs transition-colors relative ${
+                    selectedCategory === category
+                      ? 'text-red-500 font-semibold'
+                      : 'text-gray-900'
+                  }`}
+                >
+                  <span className="relative">
+                    {category}
+                    {selectedCategory === category && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500"></span>
+                    )}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Panel - Product Grid */}
+          <div className="flex-1 overflow-y-auto bg-gray-50">
+            <div className="p-3 pb-20">
+              <h2 className="text-sm font-semibold text-gray-900 mb-3">Recommended</h2>
+              {filteredProducts.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 text-sm">No products found</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 gap-2">
+                    {filteredProducts.map((product) => (
+                      <Link
+                        key={product.id}
+                        to={`/product/${product.id}`}
+                        className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-orange-500 transition-colors"
+                      >
+                        <div className="aspect-square bg-gray-50">
+                          <img
+                            src={product.images?.[0] || product.image_url || 'https://via.placeholder.com/150'}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="p-2">
+                          <p className="text-xs text-gray-900 line-clamp-2 min-h-[32px]">{product.name}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  {/* Category Button at Bottom */}
+                  {selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'For you' && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <button
+                        onClick={() => handleCategorySelect(selectedCategory)}
+                        className="w-full bg-gray-900 text-white py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+                      >
+                        {selectedCategory}
+                      </button>
+                    </div>
+                  )}
+                  {/* For you button */}
+                  {selectedCategory === 'For you' && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <button
+                        onClick={() => handleCategorySelect('For you')}
+                        className="w-full bg-gray-900 text-white py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+                      >
+                        For you
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Navigation Bar */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+          <div className="flex justify-around py-2">
+            <Link
+              to="/"
+              className="flex flex-col items-center gap-1"
+            >
+              <div className="w-6 h-6 flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-gray-300 rounded-sm flex items-center justify-center">
+                  <div className="w-2 h-2 bg-gray-300 rounded-sm"></div>
+                </div>
+              </div>
+              <span className="text-xs text-gray-600">Home</span>
+            </Link>
+            <Link
+              to="/shop"
+              className="flex flex-col items-center gap-1"
+            >
+              <div className="w-6 h-6 flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-red-500 rounded-sm flex items-center justify-center">
+                  <div className="w-2 h-2 bg-red-500 rounded-sm"></div>
+                </div>
+              </div>
+              <span className="text-xs text-red-500 font-medium">Category</span>
+            </Link>
+            <Link
+              to="/cart"
+              className="flex flex-col items-center gap-1 relative"
+            >
+              <ShoppingCart className="w-6 h-6 text-gray-600" />
+              <span className="text-xs text-gray-600">Cart</span>
+            </Link>
+            <Link
+              to="/profile"
+              className="flex flex-col items-center gap-1"
+            >
+              <User className="w-6 h-6 text-gray-600" />
+              <span className="text-xs text-gray-600">Account</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Layout */}
+      <div className="hidden md:block bg-gray-50 min-h-screen">
+        <SearchAndFilter
+          onSearch={handleSearch}
+          onFilterChange={handleFilterChange}
+          categories={productsData.categories}
+          filters={filters}
+        />
+
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Results Header - Desktop Optimized */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {searchTerm ? `Search results for "${searchTerm}"` : 'All Products'}
               </h1>
+              <p className="text-base text-gray-600">
+                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+                {products.some(p => p.isFromDatabase) && (
+                  <span className="ml-2 text-sm text-green-600">
+                    ({products.filter(p => p.isFromDatabase).length} from sellers)
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Sort and View Controls - Desktop */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <SortAsc className="w-5 h-5 text-gray-500" />
+                <select
+                  value={sortBy}
+                  onChange={handleSortChange}
+                  className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                >
+                  <option value="">Sort by</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating">Customer Rating</option>
+                  <option value="bestselling">Best Selling</option>
+                  <option value="newest">Newest</option>
+                </select>
+              </div>
+                  
+              {/* View Mode Toggle */}
+              <div className="flex items-center border border-gray-300 rounded-lg bg-white shadow-sm">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`flex items-center justify-center p-2.5 rounded-l-lg transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <Grid className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`flex items-center justify-center p-2.5 rounded-r-lg transition-colors ${
+                    viewMode === 'list' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Refresh Button */}
               <button
                 onClick={() => {
                   setLoading(true);
                   fetchProducts();
                 }}
                 disabled={loading}
-                className="px-3 py-1.5 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2.5 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 title="Refresh products"
               >
                 {loading ? 'Refreshing...' : '🔄 Refresh'}
               </button>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-              {products.some(p => p.isFromDatabase) && (
-                <span className="ml-2 text-xs text-green-600 dark:text-green-400">
-                  ({products.filter(p => p.isFromDatabase).length} from sellers)
-                </span>
-              )}
-            </p>
-                </div>
-
-          <div className="flex items-center space-x-4">
-            {/* Sort Dropdown */}
-                  <div className="flex items-center space-x-2">
-              <SortAsc className="w-4 h-4 text-gray-500" />
-              <select
-                value={sortBy}
-                onChange={handleSortChange}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Sort by</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Customer Rating</option>
-                <option value="bestselling">Best Selling</option>
-                <option value="newest">Newest</option>
-              </select>
-                  </div>
-                  
-            {/* View Mode Toggle */}
-            <div className="flex items-center space-x-1 border border-gray-300 rounded-md">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-              >
-                <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-                    </div>
-                  </div>
-                </div>
-
-        {/* Products Grid/List */}
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <Filter className="w-16 h-16 mx-auto" />
-                </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No products found</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">Try adjusting your search or filter criteria</p>
-                <button
-              onClick={() => {
-                setSearchTerm('');
-                setFilters({});
-                setSortBy('');
-              }}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Clear all filters
-                </button>
-              </div>
-        ) : (
-          <div className={
-            viewMode === 'grid'
-              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-              : 'space-y-4'
-          }>
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                viewMode={viewMode}
-              />
-          ))}
-        </div>
-        )}
-
-        {/* Load More Button */}
-        {filteredProducts.length > 0 && (
-          <div className="text-center mt-12">
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-              Load More Products
-            </button>
           </div>
-        )}
+
+          {/* Products Grid/List - Desktop Optimized */}
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-20 px-4 bg-white rounded-xl shadow-sm">
+              <div className="text-gray-400 mb-4">
+                <Filter className="w-24 h-24 mx-auto" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-3">No products found</h3>
+              <p className="text-base text-gray-600 mb-8">Try adjusting your search or filter criteria</p>
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilters({});
+                  setSortBy('');
+                }}
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-base transition-colors duration-200 shadow-md"
+              >
+                Clear all filters
+              </button>
+            </div>
+          ) : (
+            <div className={
+              viewMode === 'grid'
+                ? 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                : 'space-y-4'
+            }>
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  viewMode={viewMode}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Load More Button - Desktop */}
+          {filteredProducts.length > 0 && (
+            <div className="text-center mt-12">
+              <button className="bg-blue-600 text-white px-10 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-base shadow-md hover:shadow-lg">
+                Load More Products
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

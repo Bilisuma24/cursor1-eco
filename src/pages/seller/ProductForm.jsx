@@ -122,15 +122,26 @@ const ProductForm = () => {
       'Fashion': { colors: true, sizes: true, gender: true },
       'Clothing': { colors: true, sizes: true, gender: true },
       'Shoes': { colors: true, sizes: true, gender: true },
+      'Jewelry & Watches': { colors: true, sizes: false, gender: true },
       'Sports & Outdoors': { colors: true, sizes: true, gender: true },
       'Health & Beauty': { colors: false, sizes: false, gender: true },
       'Beauty': { colors: false, sizes: false, gender: true },
       'Electronics': { colors: false, sizes: false, gender: false },
       'Home & Garden': { colors: false, sizes: false, gender: false },
       'Home': { colors: false, sizes: false, gender: false },
+      'Home Improvement': { colors: false, sizes: false, gender: false },
       'Garden': { colors: false, sizes: false, gender: false },
       'Automotive': { colors: true, sizes: false, gender: false },
-      'Toys & Games': { colors: false, sizes: false, gender: false }
+      'Toys & Games': { colors: false, sizes: false, gender: false },
+      'Baby & Kids': { colors: true, sizes: true, gender: true },
+      'Books & Media': { colors: false, sizes: false, gender: false },
+      'Pet Supplies': { colors: false, sizes: false, gender: false },
+      'Food & Beverages': { colors: false, sizes: false, gender: false },
+      'Office Supplies': { colors: false, sizes: false, gender: false },
+      'Musical Instruments': { colors: true, sizes: false, gender: false },
+      'Art & Crafts': { colors: true, sizes: false, gender: false },
+      'Luggage & Travel': { colors: true, sizes: false, gender: false },
+      'Industrial & Scientific': { colors: false, sizes: false, gender: false }
     };
     
     // Try to match category (case-insensitive, partial match)
@@ -523,17 +534,22 @@ const ProductForm = () => {
                 placeholder="0.00"
                 required
               />
-              <FloatingLabelInput
-                id="stock"
-                label="Stock Quantity"
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleInputChange}
-                min="0"
-                placeholder="0"
-                required
-              />
+              <div>
+                <FloatingLabelInput
+                  id="stock"
+                  label="Available Stock (How many you have)"
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                  min="0"
+                  placeholder="0"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter the total number of items you have available for sale
+                </p>
+              </div>
             </div>
 
             {/* Category */}

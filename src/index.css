@@ -1,5 +1,80 @@
 @import "tailwindcss";
 
+/* MOBILE-FIRST: Foundation styles */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+  position: relative;
+  /* Mobile-first base font size */
+  font-size: 16px;
+  /* Prevent iOS zoom on input focus */
+  -webkit-text-size-adjust: 100%;
+  /* Smooth scrolling for mobile */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* MOBILE-FIRST: Safe area insets for iOS devices with notches */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* MOBILE-FIRST: Ensure all images are responsive by default */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: auto;
+}
+
+/* MOBILE-FIRST: Enhanced touch targets and interactions */
+button, a, input[type="button"], input[type="submit"], input[type="reset"], 
+[role="button"], [role="link"], select, label {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* MOBILE-FIRST: Minimum touch target size (44x44px for accessibility) */
+button, a[role="button"], [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* MOBILE-FIRST: Better touch targets for icon buttons */
+button svg, a svg {
+  pointer-events: none; /* Prevent accidental taps on SVG */
+}
+
+/* MOBILE-FIRST: Prevent text selection on buttons (mobile UX) */
+button, [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* MOBILE-FIRST: Prevent text overflow and improve readability */
+* {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+/* MOBILE-FIRST: Better text rendering on mobile */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* RESPONSIVE FIX: Consistent box-sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 /* Ensure modal portals are properly positioned */
 .modal-portal {
   position: fixed;
@@ -137,9 +212,22 @@
   background: linear-gradient(to bottom, #2563eb, #7c3aed);
 }
 
-/* Smooth scrolling */
+/* MOBILE-FIRST: Smooth scrolling with performance optimization */
 html {
   scroll-behavior: smooth;
+}
+
+/* MOBILE-FIRST: Better scroll performance on mobile */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    scroll-behavior: smooth;
+  }
+}
+
+/* MOBILE-FIRST: Prevent scroll chaining on mobile */
+body {
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
 }
 
 /* Loading animation */
@@ -187,13 +275,55 @@ html {
 
 @keyframes slide-up {
   0% {
-    transform: translateY(20px);
+    transform: translateY(100%);
     opacity: 0;
   }
   100% {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* MOBILE-FIRST: Bottom sheet animations for modals */
+@keyframes bottom-sheet-up {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bottom-sheet-down {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.animate-bottom-sheet-up {
+  animation: bottom-sheet-up 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.animate-bottom-sheet-down {
+  animation: bottom-sheet-down 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @keyframes pulse-glow {
@@ -938,4 +1068,200 @@ html {
 
 .dark ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #4b5563, #6b7280);
+}
+
+/* MOBILE-FIRST: Input and form enhancements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+  /* Prevent iOS zoom on input focus */
+  font-size: 16px !important;
+  /* Better touch targets */
+  min-height: 44px;
+  /* Better mobile input styling */
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 8px;
+}
+
+/* MOBILE-FIRST: Prevent zoom on iOS for inputs (use 16px font) */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* MOBILE-FIRST: Better mobile input focus */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* MOBILE-FIRST: Swipe gestures support */
+.swipeable {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* MOBILE-FIRST: Bottom sheet styles */
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 9999;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  /* Safe area support */
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+/* MOBILE-FIRST: Bottom sheet drag handle */
+.bottom-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  margin: 12px auto;
+  cursor: grab;
+}
+
+.bottom-sheet-handle:active {
+  cursor: grabbing;
+}
+
+/* MOBILE-FIRST: Mobile modal backdrop */
+.mobile-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9998;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* MOBILE-FIRST: Sticky elements for mobile */
+.sticky-mobile {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  background: white;
+  padding: 16px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  /* Safe area support */
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+/* MOBILE-FIRST: Mobile-optimized typography */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.875rem; /* 30px */
+    line-height: 2.25rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 2rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.75rem;
+  }
+  
+  p, body {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem;
+  }
+}
+
+/* MOBILE-FIRST: Improved mobile scrollbars */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+}
+
+
+/* MOBILE-FIRST: Better tap highlight colors */
+a, button {
+  -webkit-tap-highlight-color: rgba(59, 130, 246, 0.2);
+}
+
+/* MOBILE-FIRST: Loading states for mobile */
+.mobile-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+/* MOBILE-FIRST: Responsive container padding */
+.mobile-container {
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+/* MOBILE-FIRST: Card styles optimized for mobile */
+.mobile-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background: white;
+}
+
+/* MOBILE-FIRST: Better button spacing on mobile */
+@media (max-width: 640px) {
+  button {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+}
+
+/* MOBILE-FIRST: Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* MOBILE-FIRST: Better focus indicators for mobile */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
 }

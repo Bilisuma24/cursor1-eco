@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Globe, MapPin, LogOut } from "lucide-react";
+import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Globe, MapPin, LogOut, ChevronUp } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
 
@@ -21,6 +21,7 @@ import AuthCallback from "./pages/auth/AuthCallback";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ScrollToTop from "./components/ScrollToTop";
+import BottomNavigation from "./components/BottomNavigation";
 import ImageTest from "./components/ImageTest";
 import ImageDebug from "./components/ImageDebug";
 import ImageTestSimple from "./components/ImageTestSimple";
@@ -93,24 +94,25 @@ function NavbarContent() {
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between py-2 text-xs text-gray-600">
-          <div className="flex items-center gap-4">
+      {/* RESPONSIVE FIX: Improved padding */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+        {/* Top Bar - RESPONSIVE: Hide or simplify on mobile */}
+        <div className="hidden sm:flex items-center justify-between py-2 text-xs text-gray-600">
+          <div className="flex items-center gap-3 lg:gap-4">
             <div className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /><span>Ship to</span><span className="font-medium text-gray-800">United States</span></div>
-            <div className="hidden sm:flex items-center gap-1"><Globe className="w-3.5 h-3.5" /><span>English</span><ChevronDown className="w-3 h-3" /></div>
-            <span className="hidden sm:inline">Trade Assurance</span>
-            <span className="hidden md:inline">Secure payments</span>
+            <div className="hidden md:flex items-center gap-1"><Globe className="w-3.5 h-3.5" /><span>English</span><ChevronDown className="w-3 h-3" /></div>
+            <span className="hidden lg:inline">Trade Assurance</span>
+            <span className="hidden xl:inline">Secure payments</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span>Help</span>
-            <span>Buyer Protection</span>
-            <span>App</span>
+          <div className="flex items-center gap-3 lg:gap-4">
+            <span className="hidden md:inline">Help</span>
+            <span className="hidden lg:inline">Buyer Protection</span>
+            <span className="hidden xl:inline">App</span>
           </div>
         </div>
 
-        {/* Main Navigation */}
-        <div className="flex items-center justify-between py-4">
+        {/* Main Navigation - RESPONSIVE: Improved spacing */}
+        <div className="flex items-center justify-between py-3 sm:py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
@@ -119,14 +121,14 @@ function NavbarContent() {
             <span className="text-2xl font-bold text-gray-900">AliStyle</span>
           </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-3xl mx-6">
-            <form onSubmit={handleSearch} className="flex">
-              <div className="hidden md:block">
+          {/* Search Bar - RESPONSIVE: Improved mobile layout */}
+          <div className="hidden sm:flex flex-1 max-w-3xl mx-3 lg:mx-6">
+            <form onSubmit={handleSearch} className="flex w-full">
+              <div className="hidden lg:block">
                 <select
                   value={searchCategory}
                   onChange={(e) => setSearchCategory(e.target.value)}
-                  className="h-[44px] border border-r-0 border-gray-300 rounded-l-lg px-3 text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="h-[42px] sm:h-[44px] border border-r-0 border-gray-300 rounded-l-lg px-3 text-xs sm:text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 >
                   <option value="">All Categories</option>
                   {productsData.categories.map((c) => (
@@ -134,24 +136,24 @@ function NavbarContent() {
                   ))}
                 </select>
               </div>
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className="relative flex-1 min-w-0">
+                <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                 <input
                   type="text"
-                  placeholder="Search for products, brands, and more..."
+                  placeholder="Search for products..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-28 h-[44px] border border-gray-300 md:border-l-0 md:rounded-none rounded-l-lg md:rounded-r-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full pl-8 sm:pl-10 pr-20 sm:pr-28 h-[40px] sm:h-[44px] border border-gray-300 lg:border-l-0 rounded-l-lg lg:rounded-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                 />
                 <button
                   type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium"
                 >
                   Search
                 </button>
               </div>
             </form>
-            <div className="hidden md:flex gap-3 text-xs text-gray-500 mt-2">
+            <div className="hidden lg:flex gap-3 text-xs text-gray-500 mt-2">
               <span className="hover:text-gray-700 cursor-pointer">Top deals</span>
               <span className="hover:text-gray-700 cursor-pointer">New arrivals</span>
               <span className="hover:text-gray-700 cursor-pointer">Free shipping</span>
@@ -302,30 +304,51 @@ function NavbarContent() {
               </div>
             )}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - RESPONSIVE: Better touch target */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-gray-700 hover:text-orange-600"
+              className="sm:hidden p-2 text-gray-700 hover:text-orange-600 touch-manipulation"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - RESPONSIVE: Improved spacing and scrolling */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <div className="flex flex-col space-y-4">
-              <Link to="/" className="text-gray-700 hover:text-orange-600 font-medium">
+          <div className="sm:hidden border-t border-gray-200 py-4 max-h-[calc(100vh-120px)] overflow-y-auto">
+            {/* Mobile Search */}
+            <div className="px-3 mb-4">
+              <form onSubmit={handleSearch} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
+                />
+                <button
+                  type="submit"
+                  className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Search
+                </button>
+              </form>
+            </div>
+            <div className="flex flex-col space-y-2">
+              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium rounded-lg transition-colors touch-manipulation">
                 Home
               </Link>
-              <Link to="/shop" className="text-gray-700 hover:text-orange-600 font-medium">
+              <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium rounded-lg transition-colors touch-manipulation">
                 Shop
               </Link>
-              <Link to="/about" className="text-gray-700 hover:text-orange-600 font-medium">
+              <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium rounded-lg transition-colors touch-manipulation">
                 About
               </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-orange-600 font-medium">
+              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium rounded-lg transition-colors touch-manipulation">
                 Contact
               </Link>
               {user && (
@@ -364,6 +387,109 @@ function NavbarContent() {
         )}
       </div>
     </div>
+  );
+}
+
+function FooterContent() {
+  const [openSections, setOpenSections] = useState({});
+  
+  const toggleSection = (section) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  return (
+    <footer className="bg-gray-900 text-white mt-auto">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12 mobile-container">
+        {/* MOBILE-FIRST: Collapsible sections on mobile, grid on desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          {/* Company Info - Always visible */}
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-lg sm:text-xl">E</span>
+              </div>
+              <span className="text-xl sm:text-2xl font-bold">EcoShop</span>
+            </div>
+            <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+              Your trusted partner for quality products at unbeatable prices.
+            </p>
+            <div className="flex space-x-3">
+              <button className="min-w-[44px] min-h-[44px] w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 touch-manipulation">
+                <span className="text-sm">f</span>
+              </button>
+              <button className="min-w-[44px] min-h-[44px] w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 touch-manipulation">
+                <span className="text-sm">t</span>
+              </button>
+              <button className="min-w-[44px] min-h-[44px] w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 touch-manipulation">
+                <span className="text-sm">i</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Links - Collapsible on mobile */}
+          <div className="sm:block">
+            <button
+              onClick={() => toggleSection('quickLinks')}
+              className="w-full sm:pointer-events-none flex items-center justify-between sm:justify-start py-2 text-base sm:text-lg font-semibold touch-manipulation"
+            >
+              <span>Quick Links</span>
+              <ChevronDown className={`w-5 h-5 sm:hidden transition-transform duration-200 ${openSections.quickLinks ? 'rotate-180' : ''}`} />
+            </button>
+            <ul className={`space-y-2 overflow-hidden transition-all duration-300 ${openSections.quickLinks ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0 sm:max-h-96 sm:opacity-100 sm:mt-3'}`}>
+              <li><Link to="/" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Home</Link></li>
+              <li><Link to="/shop" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Shop</Link></li>
+              <li><Link to="/about" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">About Us</Link></li>
+              <li><Link to="/contact" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Contact</Link></li>
+            </ul>
+          </div>
+
+          {/* Customer Service - Collapsible on mobile */}
+          <div className="sm:block">
+            <button
+              onClick={() => toggleSection('customerService')}
+              className="w-full sm:pointer-events-none flex items-center justify-between sm:justify-start py-2 text-base sm:text-lg font-semibold touch-manipulation"
+            >
+              <span>Customer Service</span>
+              <ChevronDown className={`w-5 h-5 sm:hidden transition-transform duration-200 ${openSections.customerService ? 'rotate-180' : ''}`} />
+            </button>
+            <ul className={`space-y-2 overflow-hidden transition-all duration-300 ${openSections.customerService ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0 sm:max-h-96 sm:opacity-100 sm:mt-3'}`}>
+              <li><Link to="/orders" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">My Orders</Link></li>
+              <li><Link to="/wishlist" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Wishlist</Link></li>
+              <li><a href="#" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Help Center</a></li>
+              <li><a href="#" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Returns</a></li>
+            </ul>
+          </div>
+
+          {/* Contact Info - Collapsible on mobile */}
+          <div className="sm:block">
+            <button
+              onClick={() => toggleSection('contactInfo')}
+              className="w-full sm:pointer-events-none flex items-center justify-between sm:justify-start py-2 text-base sm:text-lg font-semibold touch-manipulation"
+            >
+              <span>Contact Info</span>
+              <ChevronDown className={`w-5 h-5 sm:hidden transition-transform duration-200 ${openSections.contactInfo ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`space-y-2 overflow-hidden transition-all duration-300 ${openSections.contactInfo ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0 sm:max-h-96 sm:opacity-100 sm:mt-3'}`}>
+              <p className="text-sm sm:text-base text-gray-400 break-words">📧 support@ecoshop.com</p>
+              <p className="text-sm sm:text-base text-gray-400">📞 1-800-ECO-SHOP</p>
+              <p className="text-sm sm:text-base text-gray-400 break-words">📍 123 Commerce St, Business City, BC 12345</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer bottom section */}
+        <div className="border-t border-gray-800 mt-6 sm:mt-8 lg:mt-12 pt-4 sm:pt-6 lg:pt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+            <p className="text-xs sm:text-sm text-gray-400 text-center sm:text-left">© {new Date().getFullYear()} EcoShop. All rights reserved.</p>
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 lg:gap-6">
+              <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors duration-200 min-h-[44px] flex items-center touch-manipulation">Privacy Policy</a>
+              <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors duration-200 min-h-[44px] flex items-center touch-manipulation">Terms of Service</a>
+              <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors duration-200 min-h-[44px] flex items-center touch-manipulation">Cookie Policy</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -415,79 +541,8 @@ function App() {
             </Routes>
           </main>
 
-          {/* Footer */}
-          <footer className="bg-gray-900 text-white mt-auto">
-            <div className="max-w-7xl mx-auto px-4 py-16">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {/* Company Info */}
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-xl">E</span>
-                    </div>
-                    <span className="text-2xl font-bold">EcoShop</span>
-                  </div>
-                  <p className="text-gray-400 leading-relaxed">
-                    Your trusted partner for quality products at unbeatable prices. Join millions of satisfied customers worldwide.
-                  </p>
-                  <div className="flex space-x-4">
-                    <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
-                      <span className="text-sm">f</span>
-                    </div>
-                    <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
-                      <span className="text-sm">t</span>
-                    </div>
-                    <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
-                      <span className="text-sm">i</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Links */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Quick Links</h3>
-                  <ul className="space-y-2">
-                    <li><Link to="/" className="text-gray-400 hover:text-white transition-colors duration-200">Home</Link></li>
-                    <li><Link to="/shop" className="text-gray-400 hover:text-white transition-colors duration-200">Shop</Link></li>
-                    <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors duration-200">About Us</Link></li>
-                    <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors duration-200">Contact</Link></li>
-                  </ul>
-                </div>
-
-                {/* Customer Service */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Customer Service</h3>
-                  <ul className="space-y-2">
-                    <li><Link to="/orders" className="text-gray-400 hover:text-white transition-colors duration-200">My Orders</Link></li>
-                    <li><Link to="/wishlist" className="text-gray-400 hover:text-white transition-colors duration-200">Wishlist</Link></li>
-                    <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Help Center</a></li>
-                    <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Returns</a></li>
-                  </ul>
-                </div>
-
-                {/* Contact Info */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Contact Info</h3>
-                  <div className="space-y-2 text-gray-400">
-                    <p>📧 support@ecoshop.com</p>
-                    <p>📞 1-800-ECO-SHOP</p>
-                    <p>📍 123 Commerce St, Business City, BC 12345</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-gray-800 mt-12 pt-8">
-                <div className="flex flex-col md:flex-row justify-between items-center">
-                  <p className="text-gray-400">© {new Date().getFullYear()} EcoShop. All rights reserved.</p>
-                  <div className="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Privacy Policy</a>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Terms of Service</a>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Cookie Policy</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </footer>
+          {/* Footer - MOBILE-FIRST: Enhanced with collapsible sections */}
+          <FooterContent />
         </Router>
         </ToastProvider>
       </CartProvider>

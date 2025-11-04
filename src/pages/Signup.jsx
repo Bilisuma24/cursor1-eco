@@ -213,13 +213,13 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-8 overflow-x-hidden mobile-container">
+      <div className="max-w-md w-full space-y-4 sm:space-y-6 bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create Your Account
+          <h2 className="text-center text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+            Create Account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-1.5 sm:mt-2 text-center text-xs sm:text-sm text-gray-600">
             Already have an account?{" "}
             <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
               Sign in
@@ -227,17 +227,17 @@ export default function SignUp() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-3 sm:space-y-4 lg:space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 sm:px-4 sm:py-3 rounded-lg text-sm break-words">
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Full Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                 Full Name
               </label>
               <input
@@ -247,22 +247,22 @@ export default function SignUp() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${
+                className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.name
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10 sm:text-sm`}
+                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
                 placeholder="Enter your full name"
               />
               {validationErrors.name && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
+                <p className="mt-1 text-xs sm:text-sm text-red-600">{validationErrors.name}</p>
               )}
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
+              <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                Email
               </label>
               <input
                 id="email"
@@ -272,21 +272,21 @@ export default function SignUp() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${
+                className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.email
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10 sm:text-sm`}
+                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
                 placeholder="Enter your email"
               />
               {validationErrors.email && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                <p className="mt-1 text-xs sm:text-sm text-red-600">{validationErrors.email}</p>
               )}
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
               <input
@@ -297,15 +297,15 @@ export default function SignUp() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${
+                className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.password
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10 sm:text-sm`}
-                placeholder="Create a password (min. 6 characters)"
+                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
+                placeholder="Min. 6 characters"
               />
               {validationErrors.password && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+                <p className="mt-1 text-xs sm:text-sm text-red-600">{validationErrors.password}</p>
               )}
             </div>
 
@@ -313,7 +313,7 @@ export default function SignUp() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
               >
                 Confirm Password
               </label>
@@ -325,55 +325,55 @@ export default function SignUp() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`appearance-none rounded-lg relative block w-full px-3 py-2 border ${
+                className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.confirmPassword
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10 sm:text-sm`}
-                placeholder="Confirm your password"
+                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
+                placeholder="Confirm password"
               />
               {validationErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.confirmPassword}</p>
+                <p className="mt-1 text-xs sm:text-sm text-red-600">{validationErrors.confirmPassword}</p>
               )}
             </div>
 
             {/* User Type Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 I am a:
               </label>
               <div className="space-y-2">
-                <label className="flex items-center space-x-3 cursor-pointer p-3 border-2 rounded-lg hover:bg-gray-50 transition-colors">
+                <label className="flex items-center space-x-2 sm:space-x-3 cursor-pointer p-2.5 sm:p-3 border-2 rounded-lg hover:bg-gray-50 transition-colors touch-manipulation">
                   <input
                     type="radio"
                     name="userType"
                     value="buyer"
                     checked={formData.userType === "buyer"}
                     onChange={handleChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 flex-shrink-0"
                   />
-                  <div className="flex-1">
-                    <span className="text-gray-900 font-medium">👤 Buyer</span>
-                    <p className="text-xs text-gray-500">I want to purchase products</p>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm sm:text-base text-gray-900 font-medium">👤 Buyer</span>
+                    <p className="text-xs text-gray-500">Purchase products</p>
                   </div>
                 </label>
-                <label className="flex items-center space-x-3 cursor-pointer p-3 border-2 rounded-lg hover:bg-gray-50 transition-colors">
+                <label className="flex items-center space-x-2 sm:space-x-3 cursor-pointer p-2.5 sm:p-3 border-2 rounded-lg hover:bg-gray-50 transition-colors touch-manipulation">
                   <input
                     type="radio"
                     name="userType"
                     value="seller"
                     checked={formData.userType === "seller"}
                     onChange={handleChange}
-                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 flex-shrink-0"
                   />
-                  <div className="flex-1">
-                    <span className="text-gray-900 font-medium">🏪 Seller</span>
-                    <p className="text-xs text-gray-500">I want to sell products</p>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm sm:text-base text-gray-900 font-medium">🏪 Seller</span>
+                    <p className="text-xs text-gray-500">Sell products</p>
                   </div>
                 </label>
               </div>
               {validationErrors.userType && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.userType}</p>
+                <p className="mt-1 text-xs sm:text-sm text-red-600">{validationErrors.userType}</p>
               )}
             </div>
           </div>
@@ -382,7 +382,7 @@ export default function SignUp() {
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white ${
+              className={`group relative w-full flex justify-center min-h-[44px] py-2.5 sm:py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white touch-manipulation ${
                 loading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -418,7 +418,7 @@ export default function SignUp() {
             </button>
           </div>
 
-          <div className="text-xs text-center text-gray-500">
+          <div className="text-xs text-center text-gray-500 px-2">
             By signing up, you agree to our Terms of Service and Privacy Policy
           </div>
         </form>
