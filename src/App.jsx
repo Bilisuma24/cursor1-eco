@@ -9,11 +9,12 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
-import Profile from "./pages/Profile";
+import Profile from "./pages/profile";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
 import Wishlist from "./pages/Wishlist";
+import PriceAlerts from "./pages/PriceAlerts";
 import SellerDashboard from "./pages/SellerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AuthCallback from "./pages/auth/AuthCallback";
@@ -28,6 +29,7 @@ import SimpleCartTest from "./components/SimpleCartTest";
 
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { SupabaseAuthProvider, useAuth } from "./contexts/SupabaseAuthContext";
+import { ToastProvider } from "./contexts/ToastContext";
 import { useUserRole } from "./hooks/useUserRole";
 import { PublicRoute } from "./components/ProtectedRoute";
 
@@ -370,7 +372,8 @@ function App() {
   return (
     <SupabaseAuthProvider>
       <CartProvider>
-        <Router>
+        <ToastProvider>
+          <Router>
         <ScrollToTop />
         {/* Header (simple horizontal navbar) */}
         <header className="bg-white shadow-md sticky top-0 z-50">
@@ -398,6 +401,7 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/price-alerts" element={<PriceAlerts />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
               <Route path="/admin/*" element={<AdminDashboard />} />
@@ -485,6 +489,7 @@ function App() {
             </div>
           </footer>
         </Router>
+        </ToastProvider>
       </CartProvider>
     </SupabaseAuthProvider>
   );

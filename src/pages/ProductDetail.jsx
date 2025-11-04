@@ -21,6 +21,8 @@ import ImagePreviewGrid from "../components/ImagePreviewGrid";
 import ProductImageDetailModal from "../components/ProductImageDetailModal";
 import ProductMediaViewer from "../components/ProductMediaViewer";
 import AliExpressImageZoom from "../components/AliExpressImageZoom";
+import PriceAlertButton from "../components/PriceAlertButton";
+import { supabase } from "../lib/supabaseClient";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -28,6 +30,7 @@ export default function ProductDetail() {
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
   
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const autoplayRef = useRef(null);
   const [isAutoplaying, setIsAutoplaying] = useState(true);
@@ -41,20 +44,247 @@ export default function ProductDetail() {
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
-    const foundProduct = productsData.products.find(p => p.id === parseInt(id));
-    if (foundProduct) {
-      setProduct(foundProduct);
-      setSelectedColor(foundProduct.colors?.[0] || null);
-      setSelectedSize(foundProduct.sizes?.[0] || null);
-      setSelectedMaterial(foundProduct.materials?.[0] || null);
-      setSelectedStyle(foundProduct.styles?.[0] || null);
+    const loadProduct = async () => {
+      setLoading(true);
       
-      // Get suggested products (same category, different products)
-      const suggested = productsData.products
-        .filter(p => p.category === foundProduct.category && p.id !== foundProduct.id)
-        .slice(0, 4);
-      setSuggestedProducts(suggested);
-    }
+      // First, try to find in static products
+      const foundProduct = productsData.products.find(p => p.id === parseInt(id));
+      if (foundProduct) {
+        setProduct(foundProduct);
+        setSelectedColor(foundProduct.colors?.[0] || null);
+        setSelectedSize(foundProduct.sizes?.[0] || null);
+        setSelectedMaterial(foundProduct.materials?.[0] || null);
+        setSelectedStyle(foundProduct.styles?.[0] || null);
+        
+        // Get suggested products (same category, different products)
+        const suggested = productsData.products
+          .filter(p => p.category === foundProduct.category && p.id !== foundProduct.id)
+          .slice(0, 4);
+        setSuggestedProducts(suggested);
+        setLoading(false);
+        return;
+      }
+
+      // If not found in static data, fetch from database
+      try {
+        console.log('Fetching product from database:', id);
+        const { data: dbProduct, error } = await supabase
+          .from('product')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching product from database:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (dbProduct) {
+          console.log('Found product in database:', dbProduct);
+          
+          // Helper function to convert image paths to public URLs
+          const convertToPublicUrl = (imagePath) => {
+            if (!imagePath || typeof imagePath !== 'string') {
+              return null;
+            }
+            
+            // If it's already a full URL (http/https), return as-is
+            if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+              return imagePath;
+            }
+            
+            // If it's a relative path, convert to public URL
+            const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+            
+            try {
+              const { data } = supabase.storage
+                .from('product-images')
+                .getPublicUrl(cleanPath);
+              return data?.publicUrl || null;
+            } catch (err) {
+              console.warn('Error converting image path to URL:', cleanPath, err);
+              return null;
+            }
+          };
+
+          // Transform database product to match ProductCard format
+          let imageArray = [];
+          
+          // Check product.images array first
+          if (dbProduct.images) {
+            if (Array.isArray(dbProduct.images) && dbProduct.images.length > 0) {
+              imageArray = dbProduct.images.filter(img => img != null && img !== '');
+            } else if (typeof dbProduct.images === 'string' && dbProduct.images.trim()) {
+              // Handle case where images might be stored as a single string instead of array
+              try {
+                const parsed = JSON.parse(dbProduct.images);
+                if (Array.isArray(parsed)) {
+                  imageArray = parsed.filter(img => img != null && img !== '');
+                } else {
+                  imageArray = [dbProduct.images];
+                }
+              } catch {
+                imageArray = [dbProduct.images];
+              }
+            }
+          }
+          
+          // Check product.image_url (could be array or string) if images is empty
+          if (imageArray.length === 0 && dbProduct.image_url) {
+            if (Array.isArray(dbProduct.image_url)) {
+              imageArray = dbProduct.image_url.filter(img => img != null && img !== '');
+            } else if (typeof dbProduct.image_url === 'string' && dbProduct.image_url.trim()) {
+              imageArray = [dbProduct.image_url];
+            }
+          }
+          
+          // Convert all image paths to public URLs
+          const convertedImages = imageArray
+            .map(img => {
+              if (typeof img === 'string' && img.trim()) {
+                const trimmed = img.trim();
+                // Skip ALL via.placeholder.com URLs (they don't work and cause errors)
+                if (trimmed.includes('via.placeholder.com')) {
+                  return null;
+                }
+                // If it's already a full URL, return it
+                if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image')) {
+                  return trimmed;
+                }
+                // Try to convert relative path to public URL
+                const publicUrl = convertToPublicUrl(trimmed);
+                // Only return if we got a valid URL back
+                if (publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://'))) {
+                  return publicUrl;
+                }
+                // If conversion failed, skip it
+                return null;
+              }
+              return null;
+            })
+            .filter(img => {
+              // Only keep valid URLs that start with http/https or data URIs
+              if (typeof img === 'string' && img.trim().length > 0) {
+                const trimmed = img.trim();
+                return trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image');
+              }
+              return false;
+            });
+          
+          // Use converted images or placeholder
+          let finalImages = convertedImages;
+          if (finalImages.length === 0) {
+            console.warn(`⚠️ Product ${dbProduct.id} has no images, using SVG placeholder`);
+            const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+              <rect width="400" height="400" fill="#f3f4f6"/>
+              <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text>
+            </svg>`)}`;
+            finalImages = [svgPlaceholder];
+          } else {
+            console.log(`✅ Product ${dbProduct.id} has ${finalImages.length} images:`, finalImages);
+          }
+
+          // Transform to expected format
+          const transformedProduct = {
+            id: dbProduct.id,
+            name: dbProduct.name || 'Untitled Product',
+            description: dbProduct.description || '',
+            price: parseFloat(dbProduct.price) || 0,
+            images: finalImages,
+            category: dbProduct.category || 'General',
+            rating: dbProduct.rating || 4.0,
+            reviewCount: dbProduct.review_count || 0,
+            sold: dbProduct.sold || 0,
+            stock: dbProduct.stock || 0,
+            brand: dbProduct.brand || '',
+            subcategory: dbProduct.subcategory || '',
+            seller: {
+              name: 'Seller',
+              verified: dbProduct.seller_id ? true : false,
+            },
+            shipping: {
+              free: dbProduct.free_shipping || false,
+              express: dbProduct.express_shipping || false,
+            },
+            features: dbProduct.features || [],
+            originalPrice: dbProduct.original_price || null,
+            discount: dbProduct.discount || null,
+            colors: dbProduct.colors && Array.isArray(dbProduct.colors) && dbProduct.colors.length > 0 ? dbProduct.colors : null,
+            sizes: dbProduct.sizes && Array.isArray(dbProduct.sizes) && dbProduct.sizes.length > 0 ? dbProduct.sizes : null,
+            gender: dbProduct.gender || null,
+            materials: dbProduct.materials || [],
+            styles: dbProduct.styles || [],
+            currency: 'USD',
+            isFromDatabase: true,
+          };
+
+          setProduct(transformedProduct);
+          // Set initial selections from product options
+          if (transformedProduct.colors && transformedProduct.colors.length > 0) {
+            setSelectedColor(transformedProduct.colors[0]);
+          }
+          if (transformedProduct.sizes && transformedProduct.sizes.length > 0) {
+            setSelectedSize(transformedProduct.sizes[0]);
+          }
+          setSelectedMaterial(transformedProduct.materials?.[0] || null);
+          setSelectedStyle(transformedProduct.styles?.[0] || null);
+
+          // Get suggested products from database (same category)
+          try {
+            const { data: suggested } = await supabase
+              .from('product')
+              .select('*')
+              .eq('category', transformedProduct.category)
+              .neq('id', transformedProduct.id)
+              .limit(4);
+            
+            if (suggested && suggested.length > 0) {
+              const transformedSuggested = suggested.map(p => ({
+                id: p.id,
+                name: p.name,
+                price: parseFloat(p.price) || 0,
+                rating: p.rating || 4.0,
+                reviewCount: p.review_count || 0,
+                images: (() => {
+                  let imgArray = [];
+                  if (p.images && Array.isArray(p.images) && p.images.length > 0) {
+                    imgArray = p.images;
+                  } else if (p.image_url) {
+                    imgArray = Array.isArray(p.image_url) ? p.image_url : [p.image_url];
+                  }
+                  const converted = imgArray
+                    .map(img => {
+                      if (typeof img === 'string' && img.trim()) {
+                        const trimmed = img.trim();
+                        if (trimmed.includes('via.placeholder.com')) return null;
+                        if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image')) {
+                          return trimmed;
+                        }
+                        const publicUrl = convertToPublicUrl(trimmed);
+                        return publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://')) ? publicUrl : null;
+                      }
+                      return null;
+                    })
+                    .filter(Boolean);
+                  return converted.length > 0 ? converted : [`data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`];
+                })(),
+                category: p.category,
+              }));
+              setSuggestedProducts(transformedSuggested);
+            }
+          } catch (err) {
+            console.warn('Error fetching suggested products:', err);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading product:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
   }, [id]);
 
   // Autoplay carousel
@@ -71,7 +301,7 @@ export default function ProductDetail() {
     };
   }, [product, isAutoplaying]);
 
-  if (!product) {
+  if (loading || !product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -212,56 +442,86 @@ export default function ProductDetail() {
 
             {/* Enhanced Product Choices */}
             <div className="space-y-6">
-              {/* Color Selection */}
-              {product.colors && product.colors.length > 1 && (
+              {/* Gender Display */}
+              {product.gender && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">Color</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {product.colors.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                          selectedColor === color
-                            ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
-                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                        }`}
-                      >
-                        {color}
-                      </button>
-                    ))}
+                  <h3 className="text-sm font-medium text-gray-900 mb-2">Gender</h3>
+                  <div className="inline-block px-4 py-2 bg-purple-100 text-purple-800 rounded-lg text-sm font-medium">
+                    {product.gender}
                   </div>
-                  {selectedColor && (
-                    <p className="text-xs text-gray-600 mt-2">
-                      Selected: <span className="font-medium">{selectedColor}</span>
-                    </p>
+                </div>
+              )}
+
+              {/* Color Selection */}
+              {product.colors && product.colors.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">
+                    Color {product.colors.length === 1 && <span className="text-gray-500 font-normal">({product.colors[0]})</span>}
+                  </h3>
+                  {product.colors.length > 1 ? (
+                    <>
+                      <div className="flex flex-wrap gap-2">
+                        {product.colors.map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => setSelectedColor(color)}
+                            className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              selectedColor === color
+                                ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
+                                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                            }`}
+                          >
+                            {color}
+                          </button>
+                        ))}
+                      </div>
+                      {selectedColor && (
+                        <p className="text-xs text-gray-600 mt-2">
+                          Selected: <span className="font-medium">{selectedColor}</span>
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium inline-block">
+                      {product.colors[0]}
+                    </div>
                   )}
                 </div>
               )}
 
               {/* Size Selection */}
-              {product.sizes && product.sizes.length > 1 && (
+              {product.sizes && product.sizes.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">Size</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {product.sizes.map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                          selectedSize === size
-                            ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
-                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                  {selectedSize && (
-                    <p className="text-xs text-gray-600 mt-2">
-                      Selected: <span className="font-medium">{selectedSize}</span>
-                    </p>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">
+                    Size {product.sizes.length === 1 && <span className="text-gray-500 font-normal">({product.sizes[0]})</span>}
+                  </h3>
+                  {product.sizes.length > 1 ? (
+                    <>
+                      <div className="flex flex-wrap gap-2">
+                        {product.sizes.map((size) => (
+                          <button
+                            key={size}
+                            onClick={() => setSelectedSize(size)}
+                            className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              selectedSize === size
+                                ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
+                                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                      {selectedSize && (
+                        <p className="text-xs text-gray-600 mt-2">
+                          Selected: <span className="font-medium">{selectedSize}</span>
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium inline-block">
+                      {product.sizes[0]}
+                    </div>
                   )}
                 </div>
               )}
@@ -350,51 +610,99 @@ export default function ProductDetail() {
               )}
             </div>
 
+            {/* Stock Availability */}
+            {product.stock !== undefined && product.stock !== null && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium text-blue-900 mb-1">Available Stock</h3>
+                    <p className="text-lg font-bold text-blue-700">
+                      {product.stock > 0 ? (
+                        <span className="text-green-600">{product.stock} items available</span>
+                      ) : (
+                        <span className="text-red-600">Out of Stock</span>
+                      )}
+                    </p>
+                  </div>
+                  {product.stock > 0 && product.stock < 10 && (
+                    <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded-lg text-xs font-medium">
+                      Limited Stock!
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Quantity */}
             <div>
               <h3 className="text-sm font-medium text-gray-900 mb-2">Quantity</h3>
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  disabled={quantity <= 1}
+                  className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="w-16 text-center border border-gray-300 rounded-md py-2">
-                  {quantity}
-                </span>
+                <input
+                  type="number"
+                  min="1"
+                  max={product.stock || 999}
+                  value={quantity}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 1;
+                    const maxStock = product.stock || 999;
+                    setQuantity(Math.max(1, Math.min(val, maxStock)));
+                  }}
+                  className="w-20 text-center border border-gray-300 rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
                 <button
-                  onClick={() => setQuantity(Math.min(product.maxOrder || 10, quantity + 1))}
-                  className="p-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  onClick={() => {
+                    const maxStock = product.stock || 999;
+                    setQuantity(Math.min(maxStock, quantity + 1));
+                  }}
+                  disabled={quantity >= (product.stock || 999)}
+                  className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+              {product.stock !== undefined && product.stock !== null && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Maximum quantity: {product.stock} {product.stock === 1 ? 'item' : 'items'}
+                </p>
+              )}
             </div>
 
             {/* Action Buttons */}
-            <div className="flex space-x-4">
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium flex items-center justify-center space-x-2"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                <span>Add to Cart</span>
-              </button>
-              <button
-                onClick={handleWishlistToggle}
-                className={`px-6 py-3 rounded-lg border-2 transition-colors duration-200 flex items-center justify-center space-x-2 ${
-                  isInWishlist(product.id)
-                    ? 'border-red-500 bg-red-50 text-red-600'
-                    : 'border-gray-300 hover:border-red-500 hover:text-red-600'
-                }`}
-              >
-                <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
-                <span>Wishlist</span>
-              </button>
-              <button className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                <Share2 className="w-5 h-5" />
-              </button>
+            <div className="space-y-4">
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium flex items-center justify-center space-x-2"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>Add to Cart</span>
+                </button>
+                <button
+                  onClick={handleWishlistToggle}
+                  className={`px-6 py-3 rounded-lg border-2 transition-colors duration-200 flex items-center justify-center space-x-2 ${
+                    isInWishlist(product.id)
+                      ? 'border-red-500 bg-red-50 text-red-600'
+                      : 'border-gray-300 hover:border-red-500 hover:text-red-600'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                  <span>Wishlist</span>
+                </button>
+                <button className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                  <Share2 className="w-5 h-5" />
+                </button>
+              </div>
+              {/* Price Alert Button */}
+              {product && (
+                <PriceAlertButton product={product} currentPrice={product.price} />
+              )}
             </div>
 
             {/* Shipping Info */}

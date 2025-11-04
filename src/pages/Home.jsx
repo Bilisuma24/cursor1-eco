@@ -12,7 +12,9 @@ import {
   ChevronLeft,
   Sparkles,
   Zap,
-  Heart
+  Heart,
+  Timer,
+  Copy
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
@@ -28,6 +30,8 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState({});
   const bannerTimer = useRef(null);
   const observerRef = useRef(null);
+  const [countdown, setCountdown] = useState({ hours: 9, minutes: 50, seconds: 45 });
+  const countdownTimer = useRef(null);
 
   // Fetch products from database and combine with static products
   useEffect(() => {
@@ -46,15 +50,76 @@ export default function Home() {
         console.error('Error fetching products from database:', dbError);
       }
 
+      // Helper function to convert image paths to public URLs
+      const convertToPublicUrl = (imagePath) => {
+        if (!imagePath || typeof imagePath !== 'string') {
+          return null;
+        }
+        
+        // If it's already a full URL (http/https), return as-is
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+          return imagePath;
+        }
+        
+        // If it's a relative path, convert to public URL
+        const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+        
+        try {
+          const { data } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(cleanPath);
+          return data?.publicUrl || null;
+        } catch (err) {
+          console.warn('Error converting image path to URL:', cleanPath, err);
+          return null;
+        }
+      };
+      
       // Transform database products to match ProductCard format
-      const transformedDbProducts = (dbProducts || []).map(product => ({
+      const transformedDbProducts = (dbProducts || []).map(product => {
+        // Handle images
+        let imageArray = [];
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+          imageArray = product.images;
+        } else if (product.image_url) {
+          if (Array.isArray(product.image_url)) {
+            imageArray = product.image_url;
+          } else if (typeof product.image_url === 'string' && product.image_url.trim()) {
+            imageArray = [product.image_url];
+          }
+        }
+        
+        // Convert image paths to public URLs
+        const convertedImages = imageArray
+          .map(img => {
+            if (typeof img === 'string') {
+              const trimmed = img.trim();
+              // Skip ALL via.placeholder.com URLs (they don't work and cause errors)
+              if (trimmed.includes('via.placeholder.com')) {
+                return null;
+              }
+              return convertToPublicUrl(trimmed) || (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image') ? trimmed : null);
+            }
+            return null;
+          })
+          .filter(img => img && img !== null && img !== undefined && (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:image'))));
+        
+        return {
         id: product.id,
         name: product.name || 'Untitled Product',
         description: product.description || '',
         price: parseFloat(product.price) || 0,
-        images: product.image_url 
-          ? (Array.isArray(product.image_url) ? product.image_url : [product.image_url])
-          : (product.images && Array.isArray(product.images) ? product.images : ['https://via.placeholder.com/400']),
+        images: (() => {
+          if (convertedImages.length > 0) {
+            return convertedImages;
+          }
+          // Use SVG data URI placeholder
+          const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+            <rect width="400" height="400" fill="#f3f4f6"/>
+            <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text>
+          </svg>`)}`;
+          return [svgPlaceholder];
+        })(),
         category: product.category || 'General',
         rating: product.rating || 4.0,
         reviewCount: product.review_count || 0,
@@ -73,8 +138,12 @@ export default function Home() {
         features: product.features || [],
         originalPrice: product.original_price || null,
         discount: product.discount || null,
+        colors: product.colors && Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : null,
+        sizes: product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : null,
+        gender: product.gender || null,
         isFromDatabase: true,
-      }));
+        };
+      });
 
       // Combine database products with static products
       const staticProducts = productsData.products || [];
@@ -174,6 +243,68 @@ export default function Home() {
     }, 5000);
     return () => bannerTimer.current && clearInterval(bannerTimer.current);
   }, []);
+
+  // Countdown timer effect
+  useEffect(() => {
+    countdownTimer.current = setInterval(() => {
+      setCountdown((prev) => {
+        let { hours, minutes, seconds } = prev;
+        seconds -= 1;
+        
+        if (seconds < 0) {
+          seconds = 59;
+          minutes -= 1;
+        }
+        
+        if (minutes < 0) {
+          minutes = 59;
+          hours -= 1;
+        }
+        
+        if (hours < 0) {
+          hours = 23;
+        }
+        
+        return { hours, minutes, seconds };
+      });
+    }, 1000);
+    
+    return () => {
+      if (countdownTimer.current) {
+        clearInterval(countdownTimer.current);
+      }
+    };
+  }, []);
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const copyCouponCode = (code) => {
+    navigator.clipboard.writeText(code);
+    // You could add a toast notification here
+  };
+
+  const coupons = [
+    {
+      discount: 12039.56,
+      minOrder: 97864.42,
+      code: "CD1170"
+    },
+    {
+      discount: 9459.65,
+      minOrder: 77225.17,
+      code: "CD1155"
+    },
+    {
+      discount: 7739.72,
+      minOrder: 63465.68,
+      code: "CD1145"
+    }
+  ];
 
   // Scroll animation observer
   useEffect(() => {
@@ -293,6 +424,102 @@ export default function Home() {
                 <button key={i} onClick={() => setBannerIndex(i)} className={`w-2.5 h-2.5 rounded-full ${i === bannerIndex ? 'bg-white' : 'bg-white/60'}`} />
               ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AliExpress-style Promotional Banner */}
+      <div className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 py-8 md:py-12 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            {/* Left: Countdown and Discount Text */}
+            <div className="lg:col-span-4 space-y-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Timer className="w-5 h-5 text-gray-900" />
+                <span className="text-sm font-semibold text-gray-900">Sale Starts in:</span>
+              </div>
+              <div className="flex items-center space-x-2 text-3xl md:text-4xl font-bold text-gray-900">
+                <span className="bg-white/90 px-3 py-1 rounded">{String(countdown.hours).padStart(2, '0')}</span>
+                <span>:</span>
+                <span className="bg-white/90 px-3 py-1 rounded">{String(countdown.minutes).padStart(2, '0')}</span>
+                <span>:</span>
+                <span className="bg-white/90 px-3 py-1 rounded">{String(countdown.seconds).padStart(2, '0')}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">Up to</span>
+                <span className="text-3xl md:text-4xl font-bold text-red-600">70%</span>
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">off</span>
+                <ChevronRight className="w-6 h-6 text-gray-900" />
+              </div>
+            </div>
+
+            {/* Middle: Coupons */}
+            <div className="lg:col-span-5 flex flex-wrap gap-3 justify-center lg:justify-start">
+              {coupons.map((coupon, index) => (
+                <div
+                  key={index}
+                  className="relative bg-pink-100 border-2 border-pink-300 rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
+                  style={{
+                    borderRightStyle: 'dashed',
+                    borderRightWidth: '3px',
+                    borderRightColor: '#f472b6'
+                  }}
+                  onClick={() => copyCouponCode(coupon.code)}
+                >
+                  <div className="flex flex-col items-center text-center min-w-[140px]">
+                    <div className="text-lg font-bold text-pink-700 mb-1">
+                      ETB{formatCurrency(coupon.discount)} OFF
+                    </div>
+                    <div className="text-xs text-gray-600 mb-2">
+                      orders ETB{formatCurrency(coupon.minOrder)}+
+                    </div>
+                    <div className="flex items-center space-x-1 bg-white px-2 py-1 rounded border border-red-300">
+                      <span className="text-xs font-semibold text-red-600">Code:</span>
+                      <span className="text-xs font-bold text-red-600">{coupon.code}</span>
+                      <Copy className="w-3 h-3 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Right: Featured Product */}
+            <div className="lg:col-span-3 flex justify-center lg:justify-end">
+              {featuredProducts[0] && (
+                <Link
+                  to={`/product/${featuredProducts[0].id}`}
+                  className="bg-white rounded-lg shadow-xl p-4 hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                >
+                  <div className="w-full h-32 mb-2 overflow-hidden rounded">
+                    <img
+                      src={featuredProducts[0].images?.[0] || featuredProducts[0].image_url}
+                      alt={featuredProducts[0].name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="text-xs text-gray-600 mb-1 line-clamp-1">
+                    {featuredProducts[0].category || 'Featured Product'}
+                  </div>
+                  <div className="text-sm font-bold text-gray-900 bg-gray-100 px-2 py-1 rounded inline-block">
+                    ETB{formatCurrency(featuredProducts[0].price)}
+                  </div>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Today's Deals Section */}
+      <div className="bg-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8">
+            Today's deals
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            {trendingProducts.slice(0, 6).map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { User, ShoppingBag, Settings, LogOut, Heart, Package, Home } from "lucide-react";
+import { User, ShoppingBag, Settings, LogOut, Heart, Package, Home, BellRing } from "lucide-react";
 import LevelBadge from "../components/achievements/LevelBadge";
 import LevelProgress from "../components/achievements/LevelProgress";
 import AchievementList from "../components/achievements/AchievementList";
@@ -90,24 +90,50 @@ export default function Profile() {
 
         if (!mounted) return;
 
-        if (error && error.code !== "PGRST116") {
-          console.error("Error fetching profile:", error);
-          // Create a minimal profile if none exists
-          const minimalProfile = {
-            user_id: user.id,
-            username: user.email?.split("@")[0] || "user",
-            full_name: user.user_metadata?.name || "",
-            phone: "",
-            address: "",
-            user_type: userRole || null,
-          };
-          setProfileData(minimalProfile);
-          setFormData({
-            full_name: minimalProfile.full_name,
-            username: minimalProfile.username,
-            phone: "",
-            address: "",
-          });
+        // Handle different error types gracefully
+        if (error) {
+          // PGRST116 = no rows returned (profile doesn't exist) - this is OK
+          // PGRST205 = table doesn't exist - use fallback
+          // 404/500 = server error - use fallback
+          if (error.code === "PGRST116") {
+            // Profile doesn't exist yet - create minimal one
+            const minimalProfile = {
+              user_id: user.id,
+              username: user.email?.split("@")[0] || "user",
+              full_name: user.user_metadata?.name || "",
+              phone: "",
+              address: "",
+              user_type: userRole || null,
+            };
+            setProfileData(minimalProfile);
+            setFormData({
+              full_name: minimalProfile.full_name,
+              username: minimalProfile.username,
+              phone: "",
+              address: "",
+            });
+          } else {
+            // Other errors (including 500) - log and use fallback
+            console.error("Error fetching profile:", error.code, error.message);
+            if (import.meta.env.DEV) {
+              console.warn('[Profile] Using fallback profile due to error');
+            }
+            const minimalProfile = {
+              user_id: user.id,
+              username: user.email?.split("@")[0] || "user",
+              full_name: user.user_metadata?.name || "",
+              phone: "",
+              address: "",
+              user_type: userRole || null,
+            };
+            setProfileData(minimalProfile);
+            setFormData({
+              full_name: minimalProfile.full_name,
+              username: minimalProfile.username,
+              phone: "",
+              address: "",
+            });
+          }
         } else if (data) {
           setProfileData(data);
           setFormData({
@@ -182,7 +208,12 @@ export default function Profile() {
         const lvl = await getUserLevel(user.id, 'buyer');
         const ach = await getUserAchievements(user.id, 'buyer');
         if (mounted) { setLevel(lvl); setAchievements(ach); }
-      } catch {}
+      } catch (err) {
+        // Silently fail - achievements are optional
+        if (import.meta.env.DEV) {
+          console.warn('[Profile] Could not load achievements:', err);
+        }
+      }
     })();
     return () => { mounted = false; };
   }, [user]);
@@ -437,6 +468,17 @@ export default function Profile() {
                       <Heart className="w-5 h-5" />
                       <span>Wishlist</span>
                     </Link>
+                    <Link
+                      to="/price-alerts"
+                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                        location.pathname === '/price-alerts'
+                          ? 'bg-orange-50 text-orange-600 font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <BellRing className="w-5 h-5" />
+                      <span>Price Alerts</span>
+                    </Link>
                     {(isSeller || profileData?.user_type === 'seller') && (
                       <Link
                         to="/seller-dashboard"
@@ -488,395 +530,396 @@ export default function Profile() {
               {/* Main Content */}
               <div className="lg:col-span-3">
                 <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-200">
-              <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => setAvatarModalOpen(true)}
-                  className="relative group"
-                  title="View profile picture"
-                >
-                  {getAvatarUrl() ? (
-                    <img
-                      src={getAvatarUrl()}
-                      alt="Avatar"
-                      className="w-16 h-16 rounded-full object-cover border"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-orange-500 text-white flex items-center justify-center text-xl font-semibold">
-                      {(user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
-                    </div>
-                  )}
-                </button>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-                  <div className="mt-2 flex items-center gap-2 flex-wrap">
-                  {(userRole || profileData?.user_type) && (
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                        (isSeller || profileData?.user_type === 'seller')
-                          ? "bg-green-100 text-green-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
-                    >
-                      {(isSeller || profileData?.user_type === 'seller') ? "🏪 Seller" : "👤 Buyer"}
-                    </span>
-                  )}
-                  {level && (
-                    <LevelBadge
-                      levelName={level?.badge?.split('/')?.pop()?.replace('.svg','')}
-                      badge={level?.badge}
-                    />
-                  )}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
-              >
-                Logout
-              </button>
-            </div>
-
-            {/* Avatar controls */}
-            <div className="mb-8">
-              <div className="flex items-center gap-3">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarSelect}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={openFileDialog}
-                  disabled={uploadingAvatar}
-                  className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 disabled:opacity-50"
-                >
-                  {uploadingAvatar ? 'Uploading...' : (getAvatarUrl() ? 'Change Picture' : 'Add Picture')}
-                </button>
-                {getAvatarUrl() && (
-                  <button
-                    type="button"
-                    onClick={() => setAvatarModalOpen(true)}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    View Picture
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Messages */}
-            {error && (
-              <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-                {success}
-              </div>
-            )}
-
-            {/* Achievements section */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
-                <LevelBadge levelName={level?.badge?.split('/').pop()?.replace('.svg','')} badge={level?.badge} />
-              </div>
-              <div className="mt-3">
-                <LevelProgress xp={level?.xp || 0} next={level?.next_level_xp || 100} />
-              </div>
-              <div className="mt-4">
-                <AchievementList items={achievements} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Profile Information */}
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
-                  {!isEditing && (
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Edit
-                    </button>
-                  )}
-                </div>
-
-                {isEditing ? (
-                  <form onSubmit={handleSaveProfile} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="full_name"
-                        value={formData.full_name}
-                        onChange={handleChange}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                          validationErrors.full_name
-                            ? "border-red-300 focus:ring-red-500"
-                            : "border-gray-300 focus:ring-blue-500"
-                        }`}
-                        required
-                      />
-                      {validationErrors.full_name && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.full_name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Username *
-                      </label>
-                      <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                          validationErrors.username
-                            ? "border-red-300 focus:ring-red-500"
-                            : "border-gray-300 focus:ring-blue-500"
-                        }`}
-                        required
-                      />
-                      {validationErrors.username && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.username}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                      <input
-                        type="email"
-                        value={user?.email || ""}
-                        disabled
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-500"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Address
-                      </label>
-                      <textarea
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        rows={3}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div className="flex space-x-4 pt-4">
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                      >
-                        {loading ? "Saving..." : "Save Changes"}
-                      </button>
+                  {/* Header */}
+                  <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-200">
+                    <div className="flex items-center gap-4">
                       <button
                         type="button"
-                        onClick={() => {
-                          setIsEditing(false);
-                          setValidationErrors({});
-                          setError("");
-                        }}
-                        className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+                        onClick={() => setAvatarModalOpen(true)}
+                        className="relative group"
+                        title="View profile picture"
                       >
-                        Cancel
+                        {getAvatarUrl() ? (
+                          <img
+                            src={getAvatarUrl()}
+                            alt="Avatar"
+                            className="w-16 h-16 rounded-full object-cover border"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-orange-500 text-white flex items-center justify-center text-xl font-semibold">
+                            {(user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
+                          </div>
+                        )}
                       </button>
+                      <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+                        <div className="mt-2 flex items-center gap-2 flex-wrap">
+                          {(userRole || profileData?.user_type) && (
+                            <span
+                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                                (isSeller || profileData?.user_type === 'seller')
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }`}
+                            >
+                              {(isSeller || profileData?.user_type === 'seller') ? "🏪 Seller" : "👤 Buyer"}
+                            </span>
+                          )}
+                          {level && (
+                            <LevelBadge
+                              levelName={level?.badge?.split('/')?.pop()?.replace('.svg','')}
+                              badge={level?.badge}
+                            />
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </form>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                      <p className="text-gray-900">
-                        {profileData?.full_name || user?.user_metadata?.name || "Not provided"}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Username</label>
-                      <p className="text-gray-900">{profileData?.username || "Not set"}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Email</label>
-                      <p className="text-gray-900">{user?.email}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Phone</label>
-                      <p className="text-gray-900">{profileData?.phone || "Not provided"}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Address</label>
-                      <p className="text-gray-900">{profileData?.address || "Not provided"}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Account Information & Password */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900">Account Information</h2>
-
-                <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Member since</span>
-                    <span className="font-medium">
-                      {user?.created_at
-                        ? new Date(user.created_at).toLocaleDateString()
-                        : "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Email verified</span>
-                    <span
-                      className={`font-medium ${
-                        user?.email_confirmed_at ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {user?.email_confirmed_at ? "Yes" : "No"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Last seen</span>
-                    <span className="font-medium">
-                      {user?.last_sign_in_at
-                        ? new Date(user.last_sign_in_at).toLocaleDateString()
-                        : "Never"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Password Change Section */}
-                {!showPasswordChange ? (
-                  <div>
                     <button
-                      onClick={() => setShowPasswordChange(true)}
-                      className="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
+                      onClick={handleLogout}
+                      className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
                     >
-                      Change Password
+                      Logout
                     </button>
                   </div>
-                ) : (
-                  <form onSubmit={handleChangePassword} className="space-y-4 border-t pt-6">
-                    <h3 className="font-semibold text-gray-900 mb-4">Change Password</h3>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Current Password
-                      </label>
+                  {/* Avatar controls */}
+                  <div className="mb-8">
+                    <div className="flex items-center gap-3">
                       <input
-                        type="password"
-                        name="currentPassword"
-                        value={passwordData.currentPassword}
-                        onChange={handlePasswordChange}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                          validationErrors.currentPassword
-                            ? "border-red-300 focus:ring-red-500"
-                            : "border-gray-300 focus:ring-blue-500"
-                        }`}
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarSelect}
+                        className="hidden"
                       />
-                      {validationErrors.currentPassword && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {validationErrors.currentPassword}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        New Password
-                      </label>
-                      <input
-                        type="password"
-                        name="newPassword"
-                        value={passwordData.newPassword}
-                        onChange={handlePasswordChange}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                          validationErrors.newPassword
-                            ? "border-red-300 focus:ring-red-500"
-                            : "border-gray-300 focus:ring-blue-500"
-                        }`}
-                      />
-                      {validationErrors.newPassword && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.newPassword}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Confirm New Password
-                      </label>
-                      <input
-                        type="password"
-                        name="confirmPassword"
-                        value={passwordData.confirmPassword}
-                        onChange={handlePasswordChange}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                          validationErrors.confirmPassword
-                            ? "border-red-300 focus:ring-red-500"
-                            : "border-gray-300 focus:ring-blue-500"
-                        }`}
-                      />
-                      {validationErrors.confirmPassword && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {validationErrors.confirmPassword}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex space-x-4">
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                      >
-                        {loading ? "Updating..." : "Update Password"}
-                      </button>
                       <button
                         type="button"
-                        onClick={() => {
-                          setShowPasswordChange(false);
-                          setPasswordData({
-                            currentPassword: "",
-                            newPassword: "",
-                            confirmPassword: "",
-                          });
-                          setValidationErrors({});
-                        }}
-                        className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+                        onClick={openFileDialog}
+                        disabled={uploadingAvatar}
+                        className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 disabled:opacity-50"
                       >
-                        Cancel
+                        {uploadingAvatar ? 'Uploading...' : (getAvatarUrl() ? 'Change Picture' : 'Add Picture')}
                       </button>
+                      {getAvatarUrl() && (
+                        <button
+                          type="button"
+                          onClick={() => setAvatarModalOpen(true)}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          View Picture
+                        </button>
+                      )}
                     </div>
-                  </form>
-                )}
-              </div>
-            </div>
+                  </div>
+
+                  {/* Messages */}
+                  {error && (
+                    <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                      {error}
+                    </div>
+                  )}
+                  {success && (
+                    <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                      {success}
+                    </div>
+                  )}
+
+                  {/* Achievements section */}
+                  <div className="mb-8">
+                    <div className="flex items-center justify-between">
+                      <LevelBadge levelName={level?.badge?.split('/').pop()?.replace('.svg','')} badge={level?.badge} />
+                    </div>
+                    <div className="mt-3">
+                      <LevelProgress xp={level?.xp || 0} next={level?.next_level_xp || 100} />
+                    </div>
+                    <div className="mt-4">
+                      <AchievementList items={achievements} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Profile Information */}
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
+                        {!isEditing && (
+                          <button
+                            onClick={() => setIsEditing(true)}
+                            className="text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
+
+                      {isEditing ? (
+                        <form onSubmit={handleSaveProfile} className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Full Name *
+                            </label>
+                            <input
+                              type="text"
+                              name="full_name"
+                              value={formData.full_name}
+                              onChange={handleChange}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                                validationErrors.full_name
+                                  ? "border-red-300 focus:ring-red-500"
+                                  : "border-gray-300 focus:ring-blue-500"
+                              }`}
+                              required
+                            />
+                            {validationErrors.full_name && (
+                              <p className="mt-1 text-sm text-red-600">{validationErrors.full_name}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Username *
+                            </label>
+                            <input
+                              type="text"
+                              name="username"
+                              value={formData.username}
+                              onChange={handleChange}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                                validationErrors.username
+                                  ? "border-red-300 focus:ring-red-500"
+                                  : "border-gray-300 focus:ring-blue-500"
+                              }`}
+                              required
+                            />
+                            {validationErrors.username && (
+                              <p className="mt-1 text-sm text-red-600">{validationErrors.username}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input
+                              type="email"
+                              value={user?.email || ""}
+                              disabled
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-500"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                            <input
+                              type="tel"
+                              name="phone"
+                              value={formData.phone}
+                              onChange={handleChange}
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Address
+                            </label>
+                            <textarea
+                              name="address"
+                              value={formData.address}
+                              onChange={handleChange}
+                              rows={3}
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+
+                          <div className="flex space-x-4 pt-4">
+                            <button
+                              type="submit"
+                              disabled={loading}
+                              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                            >
+                              {loading ? "Saving..." : "Save Changes"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsEditing(false);
+                                setValidationErrors({});
+                                setError("");
+                              }}
+                              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                            <p className="text-gray-900">
+                              {profileData?.full_name || user?.user_metadata?.name || "Not provided"}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Username</label>
+                            <p className="text-gray-900">{profileData?.username || "Not set"}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Email</label>
+                            <p className="text-gray-900">{user?.email}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Phone</label>
+                            <p className="text-gray-900">{profileData?.phone || "Not provided"}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Address</label>
+                            <p className="text-gray-900">{profileData?.address || "Not provided"}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Account Information & Password */}
+                    <div className="space-y-6">
+                      <h2 className="text-xl font-semibold text-gray-900">Account Information</h2>
+
+                      <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Member since</span>
+                          <span className="font-medium">
+                            {user?.created_at
+                              ? new Date(user.created_at).toLocaleDateString()
+                              : "N/A"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Email verified</span>
+                          <span
+                            className={`font-medium ${
+                              user?.email_confirmed_at ? "text-green-600" : "text-red-600"
+                            }`}
+                          >
+                            {user?.email_confirmed_at ? "Yes" : "No"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Last seen</span>
+                          <span className="font-medium">
+                            {user?.last_sign_in_at
+                              ? new Date(user.last_sign_in_at).toLocaleDateString()
+                              : "Never"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Password Change Section */}
+                      {!showPasswordChange ? (
+                        <div>
+                          <button
+                            onClick={() => setShowPasswordChange(true)}
+                            className="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
+                          >
+                            Change Password
+                          </button>
+                        </div>
+                      ) : (
+                        <form onSubmit={handleChangePassword} className="space-y-4 border-t pt-6">
+                          <h3 className="font-semibold text-gray-900 mb-4">Change Password</h3>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Current Password
+                            </label>
+                            <input
+                              type="password"
+                              name="currentPassword"
+                              value={passwordData.currentPassword}
+                              onChange={handlePasswordChange}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                                validationErrors.currentPassword
+                                  ? "border-red-300 focus:ring-red-500"
+                                  : "border-gray-300 focus:ring-blue-500"
+                              }`}
+                            />
+                            {validationErrors.currentPassword && (
+                              <p className="mt-1 text-sm text-red-600">
+                                {validationErrors.currentPassword}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              New Password
+                            </label>
+                            <input
+                              type="password"
+                              name="newPassword"
+                              value={passwordData.newPassword}
+                              onChange={handlePasswordChange}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                                validationErrors.newPassword
+                                  ? "border-red-300 focus:ring-red-500"
+                                  : "border-gray-300 focus:ring-blue-500"
+                              }`}
+                            />
+                            {validationErrors.newPassword && (
+                              <p className="mt-1 text-sm text-red-600">{validationErrors.newPassword}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Confirm New Password
+                            </label>
+                            <input
+                              type="password"
+                              name="confirmPassword"
+                              value={passwordData.confirmPassword}
+                              onChange={handlePasswordChange}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                                validationErrors.confirmPassword
+                                  ? "border-red-300 focus:ring-red-500"
+                                  : "border-gray-300 focus:ring-blue-500"
+                              }`}
+                            />
+                            {validationErrors.confirmPassword && (
+                              <p className="mt-1 text-sm text-red-600">
+                                {validationErrors.confirmPassword}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex space-x-4">
+                            <button
+                              type="submit"
+                              disabled={loading}
+                              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                            >
+                              {loading ? "Updating..." : "Update Password"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowPasswordChange(false);
+                                setPasswordData({
+                                  currentPassword: "",
+                                  newPassword: "",
+                                  confirmPassword: "",
+                                });
+                                setValidationErrors({});
+                              }}
+                              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -74,10 +74,21 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   };
 
   const formatPrice = (price) => {
+    const currency = product.currency || 'ETB';
+    if (currency === 'ETB') {
+      return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(price);
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: product.currency || 'USD'
+      currency: currency
     }).format(price);
+  };
+
+  const getCurrencySymbol = () => {
+    return product.currency || 'ETB';
   };
 
   const renderStars = (rating) => {
@@ -115,11 +126,20 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
               onClick={handleImageClick}
             >
               <img
-                src={product.images?.[selectedImage]}
+                src={(() => {
+                  const imageSrc = product.images?.[selectedImage];
+                  const hasValidImage = imageSrc && typeof imageSrc === 'string' && imageSrc.trim().length > 0 && (imageSrc.startsWith('http://') || imageSrc.startsWith('https://') || imageSrc.startsWith('data:image'));
+                  const defaultPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
+                  return hasValidImage ? imageSrc : defaultPlaceholder;
+                })()}
                 alt={product.name}
                 className="w-full h-full object-cover transition-all duration-300 ease-in-out group-hover:scale-105"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/400?text=Image+Error';
+                  const currentSrc = e.target.src || '';
+                  if (!currentSrc.includes('data:image/svg')) {
+                    const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
+                    e.target.src = svgPlaceholder;
+                  }
                 }}
               />
             </div>
@@ -226,9 +246,21 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
                     title={`View image ${index + 1}`}
                   >
                     <img
-                      src={image}
+                      src={(() => {
+                        const isInvalidPlaceholder = image && typeof image === 'string' && image.includes('via.placeholder.com');
+                        const hasValidImage = image && typeof image === 'string' && image.trim().length > 0 && (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('data:image')) && !isInvalidPlaceholder;
+                        const defaultPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="10" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
+                        return hasValidImage ? image : defaultPlaceholder;
+                      })()}
                       alt={`Product image ${index + 1}`}
                       className="w-full h-full object-cover group-hover:brightness-110 transition-all duration-200"
+                      onError={(e) => {
+                        const currentSrc = e.target.src || '';
+                        if (!currentSrc.includes('data:image/svg')) {
+                          const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="10" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
+                          e.target.src = svgPlaceholder;
+                        }
+                      }}
                     />
                     {selectedImage === index && (
                       <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
@@ -370,7 +402,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
   return (
     <div 
-      className="product-card card-lift bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer glow-border"
+      className="product-card card-lift bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group cursor-pointer glow-border flex flex-col h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={(e) => {
@@ -392,22 +424,24 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           onClick={handleImageClick}
         >
           <img
-            src={product.images?.[selectedImage]}
+            src={(() => {
+              const imageSrc = product.images?.[selectedImage];
+              // Reject via.placeholder.com URLs even if they have https://
+              const isInvalidPlaceholder = imageSrc && typeof imageSrc === 'string' && imageSrc.includes('via.placeholder.com');
+              const hasValidImage = imageSrc && typeof imageSrc === 'string' && imageSrc.trim().length > 0 && (imageSrc.startsWith('http://') || imageSrc.startsWith('https://') || imageSrc.startsWith('data:image')) && !isInvalidPlaceholder;
+              const defaultPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
+              return hasValidImage ? imageSrc : defaultPlaceholder;
+            })()}
             alt={product.name}
             className="w-full h-full object-cover transition-all duration-300 ease-in-out group-hover:scale-105"
             onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/400?text=Image+Error';
+              const currentSrc = e.target.src || '';
+              if (!currentSrc.includes('data:image/svg')) {
+                const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
+                e.target.src = svgPlaceholder;
+              }
             }}
           />
-        </div>
-        
-        {/* AliExpress-style overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center pointer-events-none">
-          <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-              <Eye className="w-6 h-6 text-gray-700" />
-            </div>
-          </div>
         </div>
         
         {/* Navigation Arrows - Only show if multiple images */}
@@ -428,29 +462,6 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           </>
         )}
         
-        {/* Image Counter */}
-        {product.images && product.images.length > 1 && (
-          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded z-10">
-            {selectedImage + 1} / {product.images.length}
-          </div>
-        )}
-        
-        {/* Discount Badge */}
-        {product.discount && (
-          <div className="absolute top-2 left-2 badge-modern animate-bounce-in z-10">
-            -{product.discount}%
-          </div>
-        )}
-
-        {/* Enhanced Detail Button */}
-        <button
-          onClick={handleImageDetailClick}
-          className="absolute top-3 left-3 p-2.5 rounded-full bg-white/95 hover:bg-blue-500 text-gray-700 hover:text-white transition-all duration-300 shadow-lg z-10 hover:scale-110 backdrop-blur-sm"
-          title="Quick View Details"
-        >
-          <Eye className="w-4 h-4" />
-        </button>
-
         {/* Full Details Button */}
         <button
           onClick={handleNavigateToProduct}
@@ -476,156 +487,82 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
           <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
         </button>
 
-
-        {/* Quick Add to Cart (appears on hover) */}
-        {isHovered && (
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleAddToCart();
-              }}
-              className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-full font-medium hover:from-orange-600 hover:to-red-600 transition-all duration-300 flex items-center space-x-2 ripple hover-scale shadow-lg"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              <span>Add to Cart</span>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Mini Product Image Gallery */}
-      {product.images && product.images.length > 1 && (
-        <div className="px-4 pb-2">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-500 font-medium">Image Choices</span>
-            <span className="text-xs text-gray-400">{product.images.length} photos</span>
-          </div>
-          <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
-            {product.images.slice(0, 6).map((image, index) => (
-              <button
-                key={index}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedImage(index);
-                }}
-                className={`shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105 group relative ${
-                  selectedImage === index 
-                    ? 'border-blue-500 ring-2 ring-blue-200 shadow-md' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                title={`View image ${index + 1}`}
-              >
-                <img
-                  src={image}
-                  alt={`Product image ${index + 1}`}
-                  className="w-full h-full object-cover group-hover:brightness-110 transition-all duration-200"
-                />
-                {selectedImage === index && (
-                  <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
-                    <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">✓</span>
-                    </div>
-                  </div>
-                )}
-              </button>
-            ))}
-            {product.images.length > 6 && (
-              <div className="shrink-0 w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-medium border-2 border-dashed border-gray-300">
-                +{product.images.length - 6}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Product Info */}
-      <div className="p-4 product-info-area">
-        {/* Product Name */}
-        <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200 min-h-10">
-          {product.name}
-        </h3>
-
-        {/* Rating and Reviews */}
-        <div className="flex items-center space-x-2 mb-3">
-          <div className="flex items-center space-x-1">
-            {renderStars(product.rating)}
-            <span className="text-xs font-medium text-gray-700 ml-1">{product.rating}</span>
-          </div>
-          <span className="text-xs text-gray-500">({product.reviewCount.toLocaleString()})</span>
-        </div>
-
-        {/* Price Section */}
-        <div className="mb-3">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-orange-600">
-              {formatPrice(product.price)}
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
-          </div>
-          {product.discount && (
-            <div className="text-xs text-green-600 font-medium">
-              Save {formatPrice(product.originalPrice - product.price)}
-            </div>
-          )}
-        </div>
-
-        {/* Seller Info */}
-        {product.seller && (
-          <div className="flex items-center space-x-2 mb-3">
-            <span className="text-xs text-gray-600">by</span>
-            <span className="text-xs font-medium text-gray-900">{product.seller.name}</span>
-            {product.seller.verified && (
-              <div className="flex items-center space-x-1">
-                <Shield className="w-3 h-3 text-blue-500" />
-                <span className="text-xs text-blue-600 font-medium">Verified</span>
-              </div>
-            )}
+        {/* Image Counter - Bottom Left, above Full Details button */}
+        {product.images && product.images.length > 1 && (
+          <div className="absolute bottom-14 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded z-10">
+            {selectedImage + 1} / {product.images.length}
           </div>
         )}
 
-        {/* Features */}
-        {product.features && product.features.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {product.features.slice(0, 2).map((feature, index) => (
-              <span key={index} className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md font-medium">
-                {feature}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Shipping and Sold Info */}
-        <div className="flex items-center justify-between mb-3">
-          {product.shipping?.free && (
-            <div className="flex items-center space-x-1">
-              <Truck className="w-3 h-3 text-green-600" />
-              <span className="text-xs text-green-600 font-medium">Free Shipping</span>
-            </div>
-          )}
-          <div className="text-xs text-gray-500">
-            {product.sold.toLocaleString()}+ sold
-          </div>
-        </div>
-
-        {/* Add to Cart Button */}
+        {/* Add to Cart Icon - Bottom Right Corner */}
         <button
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             handleAddToCart();
           }}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2"
+          className="absolute bottom-3 right-3 p-2.5 rounded-full bg-white/95 hover:bg-orange-500 text-gray-700 hover:text-white transition-all duration-300 shadow-lg z-10 hover:scale-110 backdrop-blur-sm"
+          title="Add to Cart"
         >
-          <ShoppingCart className="w-4 h-4" />
-          <span>Add to Cart</span>
+          <ShoppingCart className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Product Info - Simplified */}
+      <div className="p-4 product-info-area flex flex-col flex-grow">
+        {/* Product Name */}
+        <h3 className="text-sm font-semibold text-gray-900 mb-3 line-clamp-2 hover:text-blue-600 transition-colors duration-200 min-h-[2.5rem]">
+          {product.name || 'Untitled Product'}
+        </h3>
+
+        {/* Price Section */}
+        <div className="space-y-2">
+          <div className="flex items-baseline space-x-2 flex-wrap">
+            <span className="text-xl font-bold text-gray-900">
+              {getCurrencySymbol()}{formatPrice(product.price || 0)}
+            </span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-sm text-gray-500 line-through">
+                {getCurrencySymbol()}{formatPrice(product.originalPrice)}
+              </span>
+            )}
+          </div>
+          
+          {/* Discount Badge - Calculate if not provided */}
+          {(() => {
+            let discountPercent = product.discount;
+            if (!discountPercent && product.originalPrice && product.price && product.originalPrice > product.price) {
+              discountPercent = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+            }
+            return discountPercent ? (
+              <div className="inline-block">
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                  -{discountPercent}%
+                </span>
+              </div>
+            ) : null;
+          })()}
+        </div>
+
+        {/* Shipping Type */}
+        <div className="mt-2">
+          {product.shipping?.free ? (
+            <div className="flex items-center space-x-1 text-green-600">
+              <Truck className="w-3 h-3" />
+              <span className="text-xs font-medium">Free Shipping</span>
+            </div>
+          ) : product.shipping?.express ? (
+            <div className="flex items-center space-x-1 text-blue-600">
+              <Truck className="w-3 h-3" />
+              <span className="text-xs font-medium">Express Shipping</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1 text-gray-500">
+              <Truck className="w-3 h-3" />
+              <span className="text-xs">Standard Shipping</span>
+            </div>
+          )}
+        </div>
 
       </div>
 

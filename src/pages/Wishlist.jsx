@@ -1,11 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Heart, ShoppingCart, Trash2, Eye } from "lucide-react";
+import { Heart, ShoppingCart, Trash2, Eye, CheckCircle } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
+import { useAuth } from "../contexts/SupabaseAuthContext";
 import ProductCard from "../components/ProductCard";
 
 export default function Wishlist() {
   const { wishlist, removeFromWishlist, addToCart } = useCart();
+  const { user } = useAuth();
 
   const handleMoveToCart = (product) => {
     addToCart(product, 1);
@@ -22,18 +24,135 @@ export default function Wishlist() {
   if (wishlist.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="text-center">
-            <div className="bg-white rounded-2xl shadow-lg p-12 max-w-md mx-auto">
-              <Heart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Your wishlist is empty</h1>
-              <p className="text-gray-600 mb-8">Save items you love for later by clicking the heart icon on any product.</p>
-              <Link
-                to="/shop"
-                className="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold"
-              >
-                Start Shopping
-              </Link>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Empty Wishlist Content */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                <h1 className="text-4xl font-bold text-gray-900 mb-8">Wishlist</h1>
+                
+                {/* Empty Wishlist Illustration */}
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="relative mb-8">
+                    {/* Modern 3D-style Heart Illustration */}
+                    <div className="relative w-64 h-64 mx-auto">
+                      {/* Large Empty Heart */}
+                      <svg width="200" height="200" viewBox="0 0 200 200" className="mx-auto">
+                        {/* Main Heart */}
+                        <path
+                          d="M100 170 C50 150, 20 120, 20 85 C20 60, 40 40, 60 40 C75 40, 100 60, 100 60 C100 60, 125 40, 140 40 C160 40, 180 60, 180 85 C180 120, 150 150, 100 170 Z"
+                          fill="#FCA5A5"
+                          stroke="#EF4444"
+                          strokeWidth="3"
+                        />
+                        {/* Empty indicator lines */}
+                        <path
+                          d="M70 85 L130 85 M100 70 L100 100"
+                          stroke="#DC2626"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          opacity="0.5"
+                        />
+                        {/* Floating small hearts */}
+                        <path
+                          d="M40 50 C35 48, 32 45, 32 40 C32 35, 36 32, 40 32 C43 32, 45 34, 45 34 C45 34, 47 32, 50 32 C54 32, 58 35, 58 40 C58 45, 55 48, 50 50"
+                          fill="#FEE2E2"
+                          opacity="0.8"
+                        />
+                        <path
+                          d="M155 55 C152 53, 150 50, 150 46 C150 42, 153 39, 156 39 C158 39, 160 41, 160 41 C160 41, 162 39, 164 39 C167 39, 170 42, 170 46 C170 50, 167 53, 164 55"
+                          fill="#FEE2E2"
+                          opacity="0.8"
+                        />
+                        {/* Cute face */}
+                        <circle cx="85" cy="95" r="6" fill="#1F2937" />
+                        <circle cx="115" cy="95" r="6" fill="#1F2937" />
+                        <path
+                          d="M75 115 Q100 125 125 115"
+                          stroke="#1F2937"
+                          strokeWidth="3"
+                          fill="none"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      
+                      {/* Notification badge showing 0 */}
+                      <div className="absolute top-4 right-4">
+                        <div className="w-10 h-10 bg-pink-500 rounded-lg shadow-lg flex items-center justify-center transform -rotate-12">
+                          <span className="text-white text-xs font-bold">0</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Your wishlist is empty</h2>
+                  <p className="text-gray-600 mb-8 text-center max-w-md">
+                    Save items you love for later by clicking the heart icon on any product.
+                  </p>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Link
+                      to="/shop"
+                      className="bg-red-600 hover:bg-red-700 text-white px-10 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                      Explore items
+                    </Link>
+                    {!user && (
+                      <Link
+                        to="/login"
+                        className="bg-gray-900 hover:bg-gray-800 text-white px-10 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Sign in
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-8">
+                <div className="p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Wishlist Summary</h2>
+                  
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-600 mb-2">Saved items</p>
+                    <p className="text-2xl font-bold text-gray-900">0 items</p>
+                  </div>
+
+                  {/* Buyer Protection */}
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3">Buyer protection</h3>
+                    <div className="flex items-start space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-gray-600">
+                        Get a full refund if the item is not as described or not delivered
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Tips */}
+                  <div className="border-t border-gray-200 pt-6 mt-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3">Tips</h3>
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li className="flex items-start space-x-2">
+                        <span className="text-red-600">♥</span>
+                        <span>Click the heart icon to save products</span>
+                      </li>
+                      <li className="flex items-start space-x-2">
+                        <span className="text-red-600">♥</span>
+                        <span>Compare prices before buying</span>
+                      </li>
+                      <li className="flex items-start space-x-2">
+                        <span className="text-red-600">♥</span>
+                        <span>Get notified when prices drop</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -63,9 +182,18 @@ export default function Wishlist() {
               {/* Image Container */}
               <div className="relative aspect-square overflow-hidden bg-gray-50">
                 <img
-                  src={product.images[0]}
+                  src={product.images?.[0] || `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    const currentSrc = e.target.src || '';
+                    if (!currentSrc.includes('data:image/svg')) {
+                      const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">Image Error</text></svg>`)}`;
+                      e.target.src = svgPlaceholder;
+                    } else {
+                      e.target.style.display = 'none';
+                    }
+                  }}
                 />
                 
                 {/* Discount Badge */}

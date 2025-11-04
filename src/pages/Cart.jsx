@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { 
   Trash2, 
   Plus, 
@@ -9,7 +9,8 @@ import {
   Heart,
   Truck,
   Shield,
-  CreditCard
+  CreditCard,
+  CheckCircle
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/SupabaseAuthContext";
@@ -86,17 +87,135 @@ export default function Cart() {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="text-center">
-            <ShoppingBag className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
-            <p className="text-gray-600 mb-8">Looks like you haven't added any items to your cart yet.</p>
-            <button
-              onClick={() => navigate('/shop')}
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-            >
-              Continue Shopping
-            </button>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Empty Cart Content */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                <h1 className="text-4xl font-bold text-gray-900 mb-8">Cart</h1>
+                
+                {/* Empty Cart Illustration */}
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="relative mb-8">
+                    {/* Modern 3D-style Cart Illustration */}
+                    <div className="relative w-64 h-64 mx-auto">
+                      {/* Shopping Basket */}
+                      <div className="absolute inset-x-0 bottom-0">
+                        <svg width="160" height="160" viewBox="0 0 160 160" className="mx-auto">
+                          {/* Red Shopping Basket */}
+                          <path
+                            d="M30 50 L30 130 L130 130 L130 50 Z"
+                            fill="#EF4444"
+                            stroke="#DC2626"
+                            strokeWidth="2.5"
+                            rx="5"
+                          />
+                          {/* Basket Handle */}
+                          <path
+                            d="M20 50 Q20 35 35 35 L50 35"
+                            fill="none"
+                            stroke="#DC2626"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                          />
+                          {/* Basket Wheels */}
+                          <circle cx="50" cy="145" r="10" fill="#1F2937" />
+                          <circle cx="110" cy="145" r="10" fill="#1F2937" />
+                          {/* Decorative dashed lines */}
+                          <path
+                            d="M140 60 L155 50 M140 80 L160 70 M140 100 L158 92"
+                            stroke="white"
+                            strokeWidth="1.5"
+                            strokeDasharray="3,3"
+                            opacity="0.3"
+                          />
+                        </svg>
+                      </div>
+                      
+                      {/* Yellow Blob Character */}
+                      <div className="absolute right-8 top-4">
+                        <svg width="80" height="90" viewBox="0 0 80 90">
+                          <ellipse cx="40" cy="45" rx="32" ry="38" fill="#FCD34D" />
+                          {/* Eyes */}
+                          <circle cx="32" cy="40" r="4" fill="#1F2937" />
+                          <circle cx="48" cy="40" r="4" fill="#1F2937" />
+                          {/* Mouth */}
+                          <path
+                            d="M28 52 Q40 58 52 52"
+                            stroke="#1F2937"
+                            strokeWidth="2.5"
+                            fill="none"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                      
+                      {/* Pink Notification Badge */}
+                      <div className="absolute top-0 right-0">
+                        <div className="relative">
+                          <div className="w-12 h-12 bg-pink-500 rounded-lg shadow-lg flex items-center justify-center transform rotate-6">
+                            <span className="text-white text-sm font-bold">0</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h2 className="text-3xl font-bold text-gray-900 mb-8">Your cart is empty</h2>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {!user && (
+                      <Link
+                        to="/login"
+                        className="bg-red-600 hover:bg-red-700 text-white px-10 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Sign in
+                      </Link>
+                    )}
+                    <Link
+                      to="/shop"
+                      className="bg-gray-900 hover:bg-gray-800 text-white px-10 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                      Explore items
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-8">
+                <div className="p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Summary</h2>
+                  
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-600 mb-2">Estimated total</p>
+                    <p className="text-2xl font-bold text-gray-900">ETB 0.00</p>
+                  </div>
+
+                  {/* Checkout Button (Disabled) */}
+                  <button
+                    disabled
+                    className="w-full bg-pink-200 text-gray-500 py-3 px-6 rounded-lg font-medium cursor-not-allowed mb-6"
+                  >
+                    Checkout (0)
+                  </button>
+
+                  {/* Buyer Protection */}
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3">Buyer protection</h3>
+                    <div className="flex items-start space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-gray-600">
+                        Get a full refund if the item is not as described or not delivered
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/SupabaseAuthContext';
 import { productService } from '../../services/productService';
 import { Link } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, Eye, Package } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
 
 const Products = () => {
   const { user, loading: authLoading } = useAuth();
@@ -72,6 +73,31 @@ const Products = () => {
     if (stock === 0) return { text: 'Out of Stock', color: 'text-red-600 bg-red-100' };
     if (stock < 10) return { text: 'Low Stock', color: 'text-yellow-600 bg-yellow-100' };
     return { text: 'In Stock', color: 'text-green-600 bg-green-100' };
+  };
+
+  // Helper function to convert image paths to public URLs
+  const convertToPublicUrl = (imagePath) => {
+    if (!imagePath || typeof imagePath !== 'string') {
+      return null;
+    }
+    
+    // If it's already a full URL (http/https), return as-is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    
+    // If it's a relative path, convert to public URL
+    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+    
+    try {
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(cleanPath);
+      return data?.publicUrl || null;
+    } catch (err) {
+      console.warn('Error converting image path to URL:', cleanPath, err);
+      return null;
+    }
   };
 
   if (loading) {
@@ -193,9 +219,10 @@ const Products = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredProducts.map((product) => {
                   const stockStatus = getStockStatus(product.stock);
-                  const mainImage = product.images && product.images.length > 0 
+                  const rawMainImage = product.images && product.images.length > 0 
                     ? product.images[0] 
                     : product.image_url;
+                  const mainImage = rawMainImage ? convertToPublicUrl(rawMainImage) : null;
 
                   return (
                     <tr key={product.id} className="hover:bg-gray-50">
@@ -207,12 +234,16 @@ const Products = () => {
                                 className="h-12 w-12 rounded-lg object-cover"
                                 src={mainImage}
                                 alt={product.name}
+                                onError={(e) => {
+                                  e.target.src = '';
+                                  e.target.style.display = 'none';
+                                  e.target.nextElementSibling?.classList.remove('hidden');
+                                }}
                               />
-                            ) : (
-                              <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
-                                <Package className="h-6 w-6 text-gray-400" />
-                              </div>
-                            )}
+                            ) : null}
+                            <div className={`h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center ${mainImage ? 'hidden' : ''}`}>
+                              <Package className="h-6 w-6 text-gray-400" />
+                            </div>
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">

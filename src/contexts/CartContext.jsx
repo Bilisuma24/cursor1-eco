@@ -95,12 +95,24 @@ export function CartProvider({ children }) {
 
       if (wishlistError) {
         // Graceful fallback when wishlist table doesn't exist yet
-        if (wishlistError.code === 'PGRST205' || /Could not find the table/i.test(wishlistError.message || '')) {
-          if (wishlistDbAvailable) setWishlistDbAvailable(false);
+        if (wishlistError.code === 'PGRST205' || wishlistError.code === 'PGRST116' || 
+            wishlistError.status === 404 || 
+            /Could not find the table/i.test(wishlistError.message || '') ||
+            /relation.*wishlist.*does not exist/i.test(wishlistError.message || '')) {
+          // Silently disable wishlist DB if table doesn't exist (avoid console spam)
+          if (wishlistDbAvailable) {
+            setWishlistDbAvailable(false);
+            if (import.meta.env.DEV) {
+              console.log('ℹ️ Wishlist table not found - using localStorage fallback');
+            }
+          }
           const savedWishlist = localStorage.getItem('wishlist');
           setWishlist(savedWishlist ? JSON.parse(savedWishlist) : []);
         } else {
-          console.error('Error loading wishlist:', wishlistError);
+          // Only log non-404 errors
+          if (wishlistError.status !== 404) {
+            console.error('Error loading wishlist:', wishlistError);
+          }
         }
       } else {
         const transformedWishlist = (wishlistData || []).map(item => {
@@ -172,10 +184,10 @@ export function CartProvider({ children }) {
       throw new Error('Invalid product');
     }
 
-    // If not authenticated, add locally (no redirect)
+    // If not authenticated, redirect to login
     if (!user) {
-      addToCartLocal(product, quantity, selectedColor, selectedSize);
-      pushToast({ type: 'success', title: 'Added to cart', message: `${product.name} added to cart` });
+      pushToast({ type: 'info', title: 'Login Required', message: 'Please log in to add items to your cart' });
+      window.location.href = '/login';
       return;
     }
 
@@ -230,7 +242,10 @@ export function CartProvider({ children }) {
         await loadUserCartAndWishlist(user.id);
       } catch (err) {
         console.error('Error adding to cart in database:', err);
-        pushToast({ type: 'error', title: 'Error', message: 'Failed to add item to cart. Please try again.' });
+        // Fallback to local storage if database operation fails
+        console.warn('Falling back to local storage for cart');
+        addToCartLocal(product, quantity, selectedColor, selectedSize);
+        pushToast({ type: 'info', title: 'Added to cart', message: `${product.name} added (local cart)` });
       }
     }
   }, [user, loadUserCartAndWishlist, addToCartLocal, getAuthToken, pushToast, isValidUuid]);
@@ -371,8 +386,15 @@ export function CartProvider({ children }) {
       throw new Error('Invalid product');
     }
 
-    // If not authenticated OR wishlist table unavailable, add locally
-    if (!user || !wishlistDbAvailable) {
+    // If not authenticated, redirect to login
+    if (!user) {
+      pushToast({ type: 'info', title: 'Login Required', message: 'Please log in to add items to your wishlist' });
+      window.location.href = '/login';
+      return;
+    }
+
+    // If wishlist table unavailable, add locally (fallback)
+    if (!wishlistDbAvailable) {
       addToWishlistLocal(product);
       pushToast({ type: 'success', title: 'Added to wishlist', message: `${product.name} added` });
       return;

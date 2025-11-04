@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Heart, ShoppingCart, Star, Truck, Shield, Check, Minus, Plus, Eye, ZoomIn, Share2, MessageCircle, Clock, Award, Users, TrendingUp } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import PriceAlertButton from './PriceAlertButton';
 
 export default function ProductImageDetailModal({ 
   product, 
@@ -24,8 +25,12 @@ export default function ProductImageDetailModal({
     if (isOpen) {
       setMounted(true);
       // Initialize selected options
-      setSelectedColor(product?.colors?.[0] || null);
-      setSelectedSize(product?.sizes?.[0] || null);
+      if (product?.colors && product.colors.length > 0) {
+        setSelectedColor(product.colors[0]);
+      }
+      if (product?.sizes && product.sizes.length > 0) {
+        setSelectedSize(product.sizes[0]);
+      }
       setQuantity(1);
       setShowShareMenu(false);
       setAddedToCart(false);
@@ -40,10 +45,17 @@ export default function ProductImageDetailModal({
     return null;
   }
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity, selectedColor, selectedSize);
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(product, quantity, selectedColor, selectedSize);
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2000);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      // Still show feedback even if there's an error
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2000);
+    }
   };
 
   const handleWishlistToggle = () => {
@@ -215,14 +227,29 @@ export default function ProductImageDetailModal({
           <div className="lg:w-1/2 p-6 flex items-center justify-center">
             <div className="relative group w-full max-w-lg">
               <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shadow-lg">
-                <img
-                  src={product.images?.[selectedImage]}
-                  alt={product.name}
-                  className="w-full h-full object-cover transition-all duration-300 ease-in-out"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/400?text=Image+Error';
-                  }}
-                />
+                {(() => {
+                  // Ensure we always have a valid image source
+                  const imageSrc = product.images?.[selectedImage];
+                  // Reject via.placeholder.com URLs even if they have https://
+                  const isInvalidPlaceholder = imageSrc && typeof imageSrc === 'string' && imageSrc.includes('via.placeholder.com');
+                  const hasValidImage = imageSrc && typeof imageSrc === 'string' && imageSrc.trim().length > 0 && (imageSrc.startsWith('http://') || imageSrc.startsWith('https://') || imageSrc.startsWith('data:image')) && !isInvalidPlaceholder;
+                  const defaultPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
+                  
+                  return (
+                    <img
+                      src={hasValidImage ? imageSrc : defaultPlaceholder}
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-all duration-300 ease-in-out"
+                      onError={(e) => {
+                        // If image fails to load, use SVG placeholder
+                        const currentSrc = e.target.src || '';
+                        if (!currentSrc.includes('data:image/svg')) {
+                          e.target.src = defaultPlaceholder;
+                        }
+                      }}
+                    />
+                  );
+                })()}
                 
                 {/* Enhanced Navigation Arrows */}
                 {product.images && product.images.length > 1 && (
@@ -284,9 +311,14 @@ export default function ProductImageDetailModal({
                         }`}
                       >
                         <img
-                          src={image}
+                          src={image || `data:image/svg+xml;base64,${btoa(`<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#f3f4f6"/></svg>`)}`}
                           alt={`Thumbnail ${index + 1}`}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            if (!e.target.src.includes('data:image/svg')) {
+                              e.target.src = `data:image/svg+xml;base64,${btoa(`<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#f3f4f6"/></svg>`)}`;
+                            }
+                          }}
                         />
                       </button>
                     ))}
@@ -382,7 +414,7 @@ export default function ProductImageDetailModal({
                           </div>
                           <div className="flex items-center space-x-1">
                             <Users className="w-3 h-3" />
-                            <span>{product.seller.followers.toLocaleString()} followers</span>
+                            <span>{(product.seller.followers || 0).toLocaleString()} followers</span>
                           </div>
                         </div>
                       </div>
@@ -394,73 +426,103 @@ export default function ProductImageDetailModal({
                 </div>
               )}
 
-              {/* Enhanced Color Selection */}
-              {product.colors && product.colors.length > 1 && (
+              {/* Gender Display */}
+              {product.gender && (
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Choose Color</h4>
-                  <div className="grid grid-cols-4 gap-3">
-                    {product.colors.slice(0, 8).map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`relative p-3 border-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 ${
-                          selectedColor === color
-                            ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200 shadow-lg'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <div 
-                            className="w-4 h-4 rounded-full border border-gray-300"
-                            style={{ backgroundColor: getColorValue(color) }}
-                          ></div>
-                          <span>{color}</span>
-                        </div>
-                        {selectedColor === color && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                    {product.colors.length > 8 && (
-                      <div className="p-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 flex items-center justify-center">
-                        +{product.colors.length - 8} more
-                      </div>
-                    )}
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Gender</h4>
+                  <div className="inline-block px-4 py-2 bg-purple-100 text-purple-800 rounded-lg text-sm font-medium">
+                    {product.gender}
                   </div>
                 </div>
               )}
 
-              {/* Enhanced Size Selection */}
-              {product.sizes && product.sizes.length > 1 && (
+              {/* Enhanced Color Selection */}
+              {product.colors && product.colors.length > 0 && (
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Choose Size</h4>
-                  <div className="grid grid-cols-6 gap-2">
-                    {product.sizes.slice(0, 12).map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`relative p-3 border-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
-                          selectedSize === size
-                            ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200 shadow-lg'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        {size}
-                        {selectedSize === size && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Choose Color {product.colors.length === 1 && <span className="text-gray-500 font-normal text-sm">({product.colors[0]})</span>}
+                  </h4>
+                  {product.colors.length > 1 ? (
+                    <div className="grid grid-cols-4 gap-3">
+                      {product.colors.slice(0, 8).map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => setSelectedColor(color)}
+                          className={`relative p-3 border-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 ${
+                            selectedColor === color
+                              ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200 shadow-lg'
+                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <div 
+                              className="w-4 h-4 rounded-full border border-gray-300"
+                              style={{ backgroundColor: getColorValue(color) }}
+                            ></div>
+                            <span>{color}</span>
                           </div>
-                        )}
-                      </button>
-                    ))}
-                    {product.sizes.length > 12 && (
-                      <div className="p-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 flex items-center justify-center">
-                        +{product.sizes.length - 12}
-                      </div>
-                    )}
-                  </div>
+                          {selectedColor === color && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                              <Check className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                      {product.colors.length > 8 && (
+                        <div className="p-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 flex items-center justify-center">
+                          +{product.colors.length - 8} more
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium inline-flex items-center space-x-2">
+                      <div 
+                        className="w-4 h-4 rounded-full border border-gray-300"
+                        style={{ backgroundColor: getColorValue(product.colors[0]) }}
+                      ></div>
+                      <span>{product.colors[0]}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Enhanced Size Selection */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Choose Size {product.sizes.length === 1 && <span className="text-gray-500 font-normal text-sm">({product.sizes[0]})</span>}
+                  </h4>
+                  {product.sizes.length > 1 ? (
+                    <div className="grid grid-cols-6 gap-2">
+                      {product.sizes.slice(0, 12).map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
+                          className={`relative p-3 border-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
+                            selectedSize === size
+                              ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200 shadow-lg'
+                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {size}
+                          {selectedSize === size && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                              <Check className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                      {product.sizes.length > 12 && (
+                        <div className="p-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 flex items-center justify-center">
+                          +{product.sizes.length - 12}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium inline-block">
+                      {product.sizes[0]}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -558,6 +620,8 @@ export default function ProductImageDetailModal({
                     <Heart className={`w-7 h-7 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                   </button>
                 </div>
+                {/* Price Alert Button */}
+                <PriceAlertButton product={product} currentPrice={product.price} />
                 
                 <div className="grid grid-cols-2 gap-4">
                   <button className="py-4 px-6 border-2 border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 font-medium flex items-center justify-center space-x-2 hover:scale-105">
@@ -582,9 +646,16 @@ export default function ProductImageDetailModal({
           >
             <div className="relative max-w-7xl max-h-full">
               <img
-                src={product.images?.[selectedImage]}
+                src={product.images?.[selectedImage] || `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`}
                 alt={`Zoomed product image ${selectedImage + 1}`}
                 className="max-w-full max-h-full object-contain rounded-lg"
+                onError={(e) => {
+                  const currentSrc = e.target.src || '';
+                  if (!currentSrc.includes('data:image/svg')) {
+                    const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
+                    e.target.src = svgPlaceholder;
+                  }
+                }}
               />
               <button
                 onClick={() => setIsZoomed(false)}

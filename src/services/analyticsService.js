@@ -18,7 +18,9 @@ export const analyticsService = {
         .select(`
           price_at_purchase,
           quantity,
-          product:seller_id
+          product!inner(
+            seller_id
+          )
         `)
         .eq('product.seller_id', sellerId);
 
@@ -34,7 +36,9 @@ export const analyticsService = {
           id,
           status,
           order_items!inner(
-            product:seller_id
+            product!inner(
+              seller_id
+            )
           )
         `)
         .eq('order_items.product.seller_id', sellerId);
@@ -55,10 +59,18 @@ export const analyticsService = {
         }
       });
 
+      const totalOrders = Object.values(ordersByStatus).reduce((sum, count) => sum + count, 0);
+
       return {
         totalProducts: totalProducts || 0,
         totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-        ordersByStatus
+        totalOrders,
+        pendingOrders: ordersByStatus.pending,
+        confirmedOrders: ordersByStatus.confirmed,
+        shippedOrders: ordersByStatus.shipped,
+        deliveredOrders: ordersByStatus.delivered,
+        cancelledOrders: ordersByStatus.cancelled,
+        ordersByStatus // Keep for backwards compatibility
       };
     } catch (error) {
       console.error('Error fetching seller stats:', error);
@@ -134,33 +146,37 @@ export const analyticsService = {
         .select(`
           product_id,
           quantity,
-          product:seller_id (
+          price_at_purchase,
+          product!inner(
             id,
             name,
             image_url,
-            price
+            price,
+            seller_id
           )
         `)
         .eq('product.seller_id', sellerId);
 
       if (error) throw error;
 
-      // Group by product and calculate total quantity sold
+      // Group by product and calculate total quantity sold and revenue
       const productSales = {};
       data.forEach(item => {
         const productId = item.product_id;
         if (!productSales[productId]) {
           productSales[productId] = {
-            ...item.product,
-            totalSold: 0
+            product: { ...item.product },
+            totalQuantity: 0,
+            totalRevenue: 0
           };
         }
-        productSales[productId].totalSold += item.quantity;
+        productSales[productId].totalQuantity += item.quantity;
+        productSales[productId].totalRevenue += item.price_at_purchase * item.quantity;
       });
 
-      // Convert to array and sort by total sold
+      // Convert to array and sort by total quantity sold
       const topProducts = Object.values(productSales)
-        .sort((a, b) => b.totalSold - a.totalSold)
+        .sort((a, b) => b.totalQuantity - a.totalQuantity)
         .slice(0, limit);
 
       return topProducts;
@@ -181,7 +197,9 @@ export const analyticsService = {
           total_price,
           created_at,
           order_items!inner(
-            product:seller_id
+            product!inner(
+              seller_id
+            )
           )
         `)
         .eq('order_items.product.seller_id', sellerId)

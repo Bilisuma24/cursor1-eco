@@ -77,12 +77,14 @@ export const productService = {
         console.warn('Could not get session from localStorage for fetch:', e);
       }
       
-      const response = await fetch(`${supabaseUrl}/rest/v1/product?seller_id=eq.${sellerId}&order=created_at.desc`, {
+      // Explicitly select all columns including images
+      const response = await fetch(`${supabaseUrl}/rest/v1/product?seller_id=eq.${sellerId}&order=created_at.desc&select=*`, {
         method: 'GET',
         headers: {
           'apikey': supabaseKey,
           'Authorization': `Bearer ${authToken}`,
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Prefer': 'return=representation'
         }
       });
 
@@ -94,6 +96,19 @@ export const productService = {
 
       const data = await response.json();
       console.log('Fetched products:', data.length);
+      
+      // Log first product's image data for debugging
+      if (data.length > 0) {
+        console.log('Sample product image data:', {
+          id: data[0].id,
+          name: data[0].name,
+          images: data[0].images,
+          image_url: data[0].image_url,
+          imagesType: typeof data[0].images,
+          imagesIsArray: Array.isArray(data[0].images)
+        });
+      }
+      
       return data;
     } catch (error) {
       console.error('Error fetching seller products:', error);
@@ -106,6 +121,34 @@ export const productService = {
     try {
       console.log('========== PRODUCT CREATION START ==========');
       console.log('Creating product with data:', JSON.stringify(productData, null, 2));
+      
+      // Remove null/undefined/empty array fields to avoid schema errors
+      const cleanedData = { ...productData };
+      
+      // Only include colors if it's a non-empty array
+      if (!cleanedData.colors || cleanedData.colors.length === 0) {
+        delete cleanedData.colors;
+      }
+      
+      // Only include sizes if it's a non-empty array
+      if (!cleanedData.sizes || cleanedData.sizes.length === 0) {
+        delete cleanedData.sizes;
+      }
+      
+      // Only include gender if it has a value
+      if (!cleanedData.gender) {
+        delete cleanedData.gender;
+      }
+      
+      // Only include shipping_cost if it's not null
+      if (cleanedData.shipping_cost === null || cleanedData.shipping_cost === undefined) {
+        delete cleanedData.shipping_cost;
+      }
+      
+      // Only include shipping flags if they exist (handle gracefully if columns don't exist)
+      // These will be kept if they have boolean values, removed if columns don't exist and error occurs
+      
+      console.log('Cleaned product data (null/empty fields removed):', JSON.stringify(cleanedData, null, 2));
       
       const supabaseUrl = 'https://azvslusinlvnjymaufhw.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6dnNsdXNpbmx2bmp5bWF1Zmh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NjYwNjYsImV4cCI6MjA3NTU0MjA2Nn0.4MdiznfE-UOdDn25X8XocML44UrCxpsJ2fIgvULevnw';
@@ -175,7 +218,7 @@ export const productService = {
           'Authorization': `Bearer ${authToken}`,
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify(productData)
+        body: JSON.stringify(cleanedData)
       });
 
       const endTime = Date.now();
@@ -192,6 +235,44 @@ export const productService = {
           errorObj = JSON.parse(errorText);
         } catch (e) {
           errorObj = { message: errorText };
+        }
+        
+        // If error is about missing columns, try again without those columns
+        const errorMessage = errorObj.message || errorText;
+        if (errorMessage.includes("Could not find the") && errorMessage.includes("column")) {
+          console.warn('Missing column detected, attempting retry without problematic fields...');
+          
+          // Extract column name from error message
+          const columnMatch = errorMessage.match(/Could not find the '(\w+)' column/);
+          if (columnMatch) {
+            const missingColumn = columnMatch[1];
+            console.warn(`Removing missing column '${missingColumn}' and retrying...`);
+            
+            // Create a new cleaned data without the missing column
+            const retryData = { ...cleanedData };
+            delete retryData[missingColumn];
+            
+            // Retry the request
+            const retryResponse = await fetch(`${supabaseUrl}/rest/v1/product`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${authToken}`,
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(retryData)
+            });
+            
+            if (retryResponse.ok) {
+              console.log('Product created successfully after removing missing column');
+              return { success: true, warning: `Product created but '${missingColumn}' field was not saved (column doesn't exist in database)` };
+            }
+            
+            // If retry also failed, check for more missing columns
+            const retryErrorText = await retryResponse.text();
+            console.error('Retry also failed:', retryErrorText);
+          }
         }
         
         throw new Error(`Database error (${response.status}): ${errorObj.message || errorText}`);
@@ -276,9 +357,35 @@ export const productService = {
   async updateProduct(productId, productData) {
     try {
       console.log('Updating product with data:', productData);
+      
+      // Remove null/undefined/empty array fields to avoid schema errors
+      const cleanedData = { ...productData };
+      
+      // Only include colors if it's a non-empty array
+      if (!cleanedData.colors || cleanedData.colors.length === 0) {
+        delete cleanedData.colors;
+      }
+      
+      // Only include sizes if it's a non-empty array
+      if (!cleanedData.sizes || cleanedData.sizes.length === 0) {
+        delete cleanedData.sizes;
+      }
+      
+      // Only include gender if it has a value
+      if (!cleanedData.gender) {
+        delete cleanedData.gender;
+      }
+      
+      // Only include shipping_cost if it's not null
+      if (cleanedData.shipping_cost === null || cleanedData.shipping_cost === undefined) {
+        delete cleanedData.shipping_cost;
+      }
+      
+      console.log('Cleaned update data (null/empty fields removed):', cleanedData);
+      
       const { data, error } = await supabase
         .from('product')
-        .update(productData)
+        .update(cleanedData)
         .eq('id', productId)
         .select()
         .single();

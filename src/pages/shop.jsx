@@ -21,46 +21,130 @@ export default function Shop() {
     fetchProducts();
   }, []);
 
+  // Refresh products when navigating to shop page
+  useEffect(() => {
+    const handleFocus = () => {
+      // Refresh products when page comes into focus (user might have added a product)
+      fetchProducts();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
       
       // Fetch products from database (seller-added products)
-      console.log('Fetching products from database...');
+      // IMPORTANT: Fetch ALL products without any filters so public shop can see everything
+      console.log('🛒 Fetching products from database for shop...');
+      console.log('Current Supabase client URL:', supabase.supabaseUrl);
+      
       const { data: dbProducts, error: dbError } = await supabase
         .from('product')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(1000); // Limit to prevent too many results
+      
+      console.log('Query executed. Results:', {
+        hasData: !!dbProducts,
+        dataLength: dbProducts?.length || 0,
+        hasError: !!dbError,
+        errorCode: dbError?.code,
+        errorMessage: dbError?.message
+      });
 
       if (dbError) {
-        console.error('❌ Error fetching products from database:', dbError);
+        console.error('❌❌❌ ERROR FETCHING PRODUCTS ❌❌❌');
         console.error('Error code:', dbError.code);
         console.error('Error message:', dbError.message);
         console.error('Error details:', JSON.stringify(dbError, null, 2));
         
         // Check if it's a permissions/RLS issue
-        if (dbError.code === '42501' || dbError.message?.includes('permission') || dbError.message?.includes('policy')) {
-          console.warn('⚠️ Possible RLS policy issue. Products might not be publicly viewable.');
+        if (dbError.code === '42501' || dbError.code === 'PGRST301' || 
+            dbError.message?.includes('permission') || 
+            dbError.message?.includes('policy') ||
+            dbError.message?.includes('row-level security')) {
+          console.error('🚫🚫🚫 RLS POLICY BLOCKING ACCESS! 🚫🚫🚫');
+          console.error('The product table is blocked from public viewing.');
+          console.error('SOLUTION: Run the SQL in URGENT-FIX-PRODUCT-VISIBILITY.sql');
+          console.error('Or run this SQL in Supabase:');
+          console.error(`
+CREATE POLICY "public_read_products"
+  ON "product"
+  FOR SELECT
+  TO public
+  USING (true);
+          `);
+          
+          // Show alert to user
+          alert('⚠️ Products cannot be viewed! RLS policy is blocking access.\n\nPlease run the SQL fix in Supabase Dashboard:\n\nCREATE POLICY "public_read_products"\n  ON "product"\n  FOR SELECT\n  TO public\n  USING (true);');
         }
         
         // Still continue with static products
       } else {
-        console.log(`✅ Successfully fetched ${dbProducts?.length || 0} products from database`);
         if (dbProducts && dbProducts.length > 0) {
-          console.log('Sample product:', {
-            id: dbProducts[0].id,
-            name: dbProducts[0].name,
-            price: dbProducts[0].price,
-            category: dbProducts[0].category,
-            seller_id: dbProducts[0].seller_id,
-            image_url: dbProducts[0].image_url
-          });
+          console.log(`✅✅✅ SUCCESS! Fetched ${dbProducts.length} products from database ✅✅✅`);
+          console.log('Products breakdown:');
+          const sellerProducts = dbProducts.filter(p => p.seller_id);
+          const adminProducts = dbProducts.filter(p => !p.seller_id);
+          console.log(`  - Seller products: ${sellerProducts.length}`);
+          console.log(`  - Admin/Other products: ${adminProducts.length}`);
+          
+          if (sellerProducts.length > 0) {
+            console.log('Sample seller product:', {
+              id: sellerProducts[0].id,
+              name: sellerProducts[0].name,
+              price: sellerProducts[0].price,
+              seller_id: sellerProducts[0].seller_id
+            });
+          }
+        } else {
+          console.warn('⚠️ Query succeeded but returned 0 products.');
+          console.warn('This could mean:');
+          console.warn('  1. No products in database');
+          console.warn('  2. RLS policy is filtering them out');
+          console.warn('  3. All products are being blocked');
         }
       }
 
       // Transform database products to match ProductCard format
       const transformedDbProducts = (dbProducts || []).map(product => {
         console.log('Transforming product:', product.id, product.name);
+        console.log('Product images data:', {
+          images: product.images,
+          image_url: product.image_url,
+          imagesType: typeof product.images,
+          imagesIsArray: Array.isArray(product.images),
+          imagesLength: Array.isArray(product.images) ? product.images.length : 'N/A'
+        });
+        
+        // Helper function to convert image paths to public URLs
+        const convertToPublicUrl = (imagePath) => {
+          if (!imagePath || typeof imagePath !== 'string') {
+            return null;
+          }
+          
+          // If it's already a full URL (http/https), return as-is
+          if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+            return imagePath;
+          }
+          
+          // If it's a relative path, convert to public URL
+          // Remove leading slash if present
+          const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+          
+          try {
+            const { data } = supabase.storage
+              .from('product-images')
+              .getPublicUrl(cleanPath);
+            return data?.publicUrl || null;
+          } catch (err) {
+            console.warn('Error converting image path to URL:', cleanPath, err);
+            return null;
+          }
+        };
+        
         return {
         id: product.id,
         name: product.name || 'Untitled Product',
@@ -68,19 +152,82 @@ export default function Shop() {
         price: parseFloat(product.price) || 0,
         images: (() => {
           // Handle different image formats
-          if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-            return product.images;
+          let imageArray = [];
+          
+          // Check product.images array first
+          if (product.images) {
+            if (Array.isArray(product.images) && product.images.length > 0) {
+              imageArray = product.images.filter(img => img != null && img !== '');
+            } else if (typeof product.images === 'string' && product.images.trim()) {
+              // Handle case where images might be stored as a single string instead of array
+              try {
+                const parsed = JSON.parse(product.images);
+                if (Array.isArray(parsed)) {
+                  imageArray = parsed.filter(img => img != null && img !== '');
+                } else {
+                  imageArray = [product.images];
+                }
+              } catch {
+                imageArray = [product.images];
+              }
+            }
           }
-          if (product.image_url) {
+          
+          // Check product.image_url (could be array or string) if images is empty
+          if (imageArray.length === 0 && product.image_url) {
             if (Array.isArray(product.image_url)) {
-              return product.image_url;
-            }
-            if (typeof product.image_url === 'string' && product.image_url.trim()) {
-              return [product.image_url];
+              imageArray = product.image_url.filter(img => img != null && img !== '');
+            } else if (typeof product.image_url === 'string' && product.image_url.trim()) {
+              imageArray = [product.image_url];
             }
           }
-          // Default placeholder
-          return ['https://via.placeholder.com/400?text=No+Image'];
+          
+          // Convert all image paths to public URLs
+          const convertedImages = imageArray
+            .map(img => {
+              if (typeof img === 'string' && img.trim()) {
+                const trimmed = img.trim();
+                // Skip ALL via.placeholder.com URLs (they don't work and cause errors)
+                if (trimmed.includes('via.placeholder.com')) {
+                  return null;
+                }
+                // If it's already a full URL, return it
+                if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image')) {
+                  return trimmed;
+                }
+                // Try to convert relative path to public URL
+                const publicUrl = convertToPublicUrl(trimmed);
+                // Only return if we got a valid URL back
+                if (publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://'))) {
+                  return publicUrl;
+                }
+                // If conversion failed, skip it
+                return null;
+              }
+              return null;
+            })
+            .filter(img => {
+              // Only keep valid URLs that start with http/https or data URIs
+              if (typeof img === 'string' && img.trim().length > 0) {
+                const trimmed = img.trim();
+                return trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image');
+              }
+              return false;
+            });
+          
+          // Return converted images or placeholder
+          if (convertedImages.length > 0) {
+            console.log(`✅ Product ${product.id} has ${convertedImages.length} images:`, convertedImages);
+            return convertedImages;
+          }
+          
+          // Default placeholder - use data URI SVG to avoid external service issues
+          console.warn(`⚠️ Product ${product.id} has no images, using SVG placeholder`);
+          const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+            <rect width="400" height="400" fill="#f3f4f6"/>
+            <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text>
+          </svg>`)}`;
+          return [svgPlaceholder];
         })(),
         category: product.category || 'General',
         rating: product.rating || 4.0,
@@ -100,16 +247,21 @@ export default function Shop() {
         features: product.features || [],
         originalPrice: product.original_price || null,
         discount: product.discount || null,
+        colors: product.colors && Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : null,
+        sizes: product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : null,
+        gender: product.gender || null,
         isFromDatabase: true, // Flag to identify database products
       };
       });
 
-      console.log(`Transformed ${transformedDbProducts.length} database products`);
+      console.log(`✅ Transformed ${transformedDbProducts.length} database products`);
 
       // Combine database products with static products
       // Database products will take precedence (avoid duplicates by ID)
       const staticProducts = productsData.products || [];
-      console.log(`Using ${staticProducts.length} static products`);
+      console.log(`📦 Using ${staticProducts.length} static products`);
+      
+      // Prioritize database products (seller products) over static
       const combinedProducts = [...transformedDbProducts, ...staticProducts];
       
       // Remove duplicates based on ID (database products first)
@@ -120,8 +272,20 @@ export default function Shop() {
         return acc;
       }, []);
 
-      console.log(`Total unique products: ${uniqueProducts.length}`);
-      console.log(`Database products: ${transformedDbProducts.length}, Static products: ${staticProducts.length}`);
+      const sellerProductCount = transformedDbProducts.length;
+      const totalCount = uniqueProducts.length;
+      
+      console.log(`📊 Product Summary:`);
+      console.log(`   - Seller/Database products: ${sellerProductCount}`);
+      console.log(`   - Static products: ${staticProducts.length}`);
+      console.log(`   - Total unique products: ${totalCount}`);
+      
+      if (sellerProductCount === 0 && dbProducts && dbProducts.length === 0) {
+        console.warn('⚠️ No products found in database. Products may be blocked by RLS policies.');
+      } else if (dbError && dbError.code === '42501') {
+        console.error('🚫 RLS POLICY ERROR: Products are blocked from public viewing!');
+        console.error('   Run the SQL fix in fix-shop-product-visibility.sql');
+      }
 
       setProducts(uniqueProducts);
       setFilteredProducts(uniqueProducts);
@@ -264,13 +428,31 @@ export default function Shop() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Results Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {searchTerm ? `Search results for "${searchTerm}"` : 'All Products'}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {searchTerm ? `Search results for "${searchTerm}"` : 'All Products'}
+              </h1>
+              <button
+                onClick={() => {
+                  setLoading(true);
+                  fetchProducts();
+                }}
+                disabled={loading}
+                className="px-3 py-1.5 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Refresh products"
+              >
+                {loading ? 'Refreshing...' : '🔄 Refresh'}
+              </button>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
               {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+              {products.some(p => p.isFromDatabase) && (
+                <span className="ml-2 text-xs text-green-600 dark:text-green-400">
+                  ({products.filter(p => p.isFromDatabase).length} from sellers)
+                </span>
+              )}
             </p>
                 </div>
 

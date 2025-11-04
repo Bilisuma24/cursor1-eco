@@ -32,7 +32,10 @@ export const orderService = {
             id,
             quantity,
             price_at_purchase,
-            product_id
+            product_id,
+            product (
+              name
+            )
           )
         `)
         .order('created_at', { ascending: false });
@@ -63,7 +66,29 @@ export const orderService = {
   async getRecentOrders(sellerId, limit = 5) {
     try {
       const orders = await this.fetchSellerOrders(sellerId);
-      return orders.slice(0, limit);
+      
+      // Transform orders to match dashboard expectations
+      const transformedOrders = orders.slice(0, limit).map(order => {
+        // Calculate seller revenue from order items
+        const sellerRevenue = order.order_items.reduce((sum, item) => 
+          sum + (item.price_at_purchase * item.quantity), 0
+        );
+        
+        // Transform order_items to sellerItems format
+        const sellerItems = order.order_items.map(item => ({
+          productName: item.product?.name || 'Unknown Product',
+          quantity: item.quantity,
+          price: item.price_at_purchase
+        }));
+        
+        return {
+          ...order,
+          sellerRevenue,
+          sellerItems
+        };
+      });
+      
+      return transformedOrders;
     } catch (error) {
       console.error('Error fetching recent orders:', error);
       throw error;

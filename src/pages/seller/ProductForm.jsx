@@ -21,8 +21,16 @@ const ProductForm = () => {
     description: '',
     price: '',
     stock: '',
-    category: ''
+    category: '',
+    free_shipping: false,
+    express_shipping: false,
+    shipping_cost: '',
+    colors: [],
+    sizes: [],
+    gender: ''
   });
+  const [colorInput, setColorInput] = useState('');
+  const [sizeInput, setSizeInput] = useState('');
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -73,7 +81,13 @@ const ProductForm = () => {
         description: product.description || '',
         price: product.price || '',
         stock: product.stock || '',
-        category: product.category || ''
+        category: product.category || '',
+        free_shipping: product.free_shipping || false,
+        express_shipping: product.express_shipping || false,
+        shipping_cost: product.shipping_cost || '',
+        colors: product.colors || [],
+        sizes: product.sizes || [],
+        gender: product.gender || ''
       });
 
       // Convert existing images to the format expected by ImageUploader
@@ -95,11 +109,82 @@ const ProductForm = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  // Category-specific requirements
+  const getCategoryRequirements = (category) => {
+    const requirements = {
+      'Fashion': { colors: true, sizes: true, gender: true },
+      'Clothing': { colors: true, sizes: true, gender: true },
+      'Shoes': { colors: true, sizes: true, gender: true },
+      'Sports & Outdoors': { colors: true, sizes: true, gender: true },
+      'Health & Beauty': { colors: false, sizes: false, gender: true },
+      'Beauty': { colors: false, sizes: false, gender: true },
+      'Electronics': { colors: false, sizes: false, gender: false },
+      'Home & Garden': { colors: false, sizes: false, gender: false },
+      'Home': { colors: false, sizes: false, gender: false },
+      'Garden': { colors: false, sizes: false, gender: false },
+      'Automotive': { colors: true, sizes: false, gender: false },
+      'Toys & Games': { colors: false, sizes: false, gender: false }
+    };
+    
+    // Try to match category (case-insensitive, partial match)
+    for (const [key, value] of Object.entries(requirements)) {
+      if (category.toLowerCase().includes(key.toLowerCase())) {
+        return value;
+      }
+    }
+    
+    // Default: all optional
+    return { colors: false, sizes: false, gender: false };
+  };
+
+  const requirements = getCategoryRequirements(formData.category);
+
+  const handleAddColor = () => {
+    if (colorInput.trim() && !formData.colors.includes(colorInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        colors: [...prev.colors, colorInput.trim()]
+      }));
+      setColorInput('');
+    }
+  };
+
+  const handleRemoveColor = (colorToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.filter(color => color !== colorToRemove)
+    }));
+  };
+
+  const handleAddSize = () => {
+    if (sizeInput.trim() && !formData.sizes.includes(sizeInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        sizes: [...prev.sizes, sizeInput.trim()]
+      }));
+      setSizeInput('');
+    }
+  };
+
+  const handleRemoveSize = (sizeToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.filter(size => size !== sizeToRemove)
+    }));
+  };
+
+  const commonColors = ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Pink', 'Purple', 'Orange', 'Brown', 'Gray', 'Navy', 'Beige', 'Cream'];
+  const commonSizes = {
+    'Clothing': ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+    'Shoes': ['6', '7', '8', '9', '10', '11', '12', '13'],
+    'General': ['Small', 'Medium', 'Large', 'Extra Large', 'One Size']
   };
 
   const validateForm = () => {
@@ -115,6 +200,22 @@ const ProductForm = () => {
       setError('Valid stock quantity is required');
       return false;
     }
+
+    // Category-specific validation
+    const requirements = getCategoryRequirements(formData.category);
+    if (requirements.colors && formData.colors.length === 0) {
+      setError('At least one color is required for this category');
+      return false;
+    }
+    if (requirements.sizes && formData.sizes.length === 0) {
+      setError('At least one size is required for this category');
+      return false;
+    }
+    if (requirements.gender && !formData.gender) {
+      setError('Gender selection is required for this category');
+      return false;
+    }
+
     // Temporarily disable image requirement for testing
     // if (!testMode && images.length === 0) {
     //   setError('At least one product image is required');
@@ -204,28 +305,77 @@ const ProductForm = () => {
         throw new Error('Cannot reach Supabase service. Please check your internet connection.');
       }
       
-      setUploadProgress('Creating product...');
-      setProgress(25);
+      setUploadProgress('Uploading images...');
+      setProgress(20);
 
-      // Create the most basic product data possible
-      const basicProductData = {
+      // Upload images if there are new files to upload
+      let allImageUrls = [];
+      if (images && images.length > 0) {
+        try {
+          // Separate existing images (already uploaded) from new files
+          const existingImages = images.filter(img => img.isExisting && img.preview).map(img => img.preview);
+          const newFiles = images.filter(img => !img.isExisting && img.file);
+          
+          console.log('Existing images:', existingImages);
+          console.log('New files to upload:', newFiles);
+          
+          // Upload new files if any
+          if (newFiles.length > 0) {
+            setUploadProgress(`Uploading ${newFiles.length} image(s)...`);
+            // Use product ID for edit mode, user ID for new products
+            const folderKey = isEdit ? id : user.id;
+            const uploadedUrls = await productService.uploadProductImages(newFiles, folderKey);
+            console.log('Uploaded image URLs:', uploadedUrls);
+            allImageUrls = [...existingImages, ...uploadedUrls];
+          } else {
+            allImageUrls = existingImages;
+          }
+        } catch (uploadError) {
+          console.error('Error uploading images:', uploadError);
+          // Continue without images rather than failing completely
+          setError('Warning: Product created but image upload failed. ' + uploadError.message);
+        }
+      }
+
+      setUploadProgress(isEdit ? 'Updating product...' : 'Creating product...');
+      setProgress(50);
+
+      // Create the product data with images
+      const productData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         category: formData.category || 'General',
-        seller_id: user.id // Include seller_id from user context
+        seller_id: user.id,
+        free_shipping: formData.free_shipping || false,
+        express_shipping: formData.express_shipping || false,
+        shipping_cost: formData.free_shipping ? 0 : (formData.shipping_cost ? parseFloat(formData.shipping_cost) : null),
+        colors: formData.colors.length > 0 ? formData.colors : null,
+        sizes: formData.sizes.length > 0 ? formData.sizes : null,
+        gender: formData.gender || null,
+        // Use empty array instead of null for PostgreSQL TEXT[] compatibility
+        images: allImageUrls.length > 0 ? allImageUrls : []
       };
 
-      console.log('Creating product with basic data:', basicProductData);
-      setProgress(50);
+      console.log(isEdit ? 'Updating product with data:' : 'Creating product with data:', productData);
+      setProgress(60);
 
-      // Try to create product with minimal data first
-      const result = await productService.createProduct(basicProductData);
-      console.log('Product created successfully:', result);
-      setProgress(75);
+      // Try to create or update product
+      let result;
+      if (isEdit) {
+        // Update existing product
+        result = await productService.updateProduct(id, productData);
+        console.log('Product updated successfully:', result);
+        setUploadProgress('Product updated successfully!');
+      } else {
+        // Create new product
+        result = await productService.createProduct(productData);
+        console.log('Product created successfully:', result);
+        setUploadProgress('Product created successfully!');
+      }
+      setProgress(90);
 
-      setUploadProgress('Product created successfully!');
       setProgress(100);
       setSuccess(true);
       
@@ -234,8 +384,8 @@ const ProductForm = () => {
       }, 2000);
     } catch (err) {
       console.error('========== FORM SUBMISSION ERROR ==========');
-      console.error('Error creating product:', err);
-      setError(`Failed to create product: ${err.message}`);
+      console.error(`Error ${isEdit ? 'updating' : 'creating'} product:`, err);
+      setError(`Failed to ${isEdit ? 'update' : 'create'} product: ${err.message}`);
     } finally {
       setSaving(false);
       setUploadProgress('');
@@ -404,6 +554,237 @@ const ProductForm = () => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Product Options - Colors, Sizes, Gender */}
+            <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Product Options</h3>
+
+              {/* Colors */}
+              {(requirements.colors || formData.colors.length > 0) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Colors {requirements.colors && <span className="text-red-500">*</span>}
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={colorInput}
+                      onChange={(e) => setColorInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddColor())}
+                      placeholder="Enter color name"
+                      className="flex-1 form-input border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddColor}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {/* Quick color selection */}
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {commonColors.slice(0, 8).map(color => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => {
+                          if (!formData.colors.includes(color)) {
+                            setFormData(prev => ({ ...prev, colors: [...prev.colors, color] }));
+                          }
+                        }}
+                        className="px-2 py-1 text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                      >
+                        + {color}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Selected colors */}
+                  {formData.colors.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.colors.map((color, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs"
+                        >
+                          {color}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveColor(color)}
+                            className="hover:text-red-600"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Sizes */}
+              {(requirements.sizes || formData.sizes.length > 0) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Sizes {requirements.sizes && <span className="text-red-500">*</span>}
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={sizeInput}
+                      onChange={(e) => setSizeInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSize())}
+                      placeholder="Enter size (e.g., S, M, L, XL)"
+                      className="flex-1 form-input border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddSize}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {/* Quick size selection */}
+                  {(() => {
+                    const category = formData.category?.toLowerCase() || '';
+                    const sizeList = category.includes('shoe') || category.includes('footwear') 
+                      ? commonSizes.Shoes 
+                      : category.includes('clothing') || category.includes('fashion') || category.includes('apparel')
+                      ? commonSizes.Clothing
+                      : commonSizes.General;
+                    
+                    return (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {sizeList.map(size => (
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => {
+                              if (!formData.sizes.includes(size)) {
+                                setFormData(prev => ({ ...prev, sizes: [...prev.sizes, size] }));
+                              }
+                            }}
+                            className="px-2 py-1 text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                          >
+                            + {size}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  {/* Selected sizes */}
+                  {formData.sizes.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.sizes.map((size, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs"
+                        >
+                          {size}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSize(size)}
+                            className="hover:text-red-600"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Gender */}
+              {(requirements.gender || formData.gender) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Gender {requirements.gender && <span className="text-red-500">*</span>}
+                  </label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    className="w-full form-select border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Unisex">Unisex</option>
+                    <option value="Kids">Kids</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Show message if no options needed for category */}
+              {!requirements.colors && !requirements.sizes && !requirements.gender && formData.category && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  Optional: You can add colors, sizes, or gender options if applicable to your product.
+                </p>
+              )}
+            </div>
+
+            {/* Shipping Options */}
+            <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Shipping & Delivery</h3>
+              
+              {/* Free Shipping */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="free_shipping"
+                  name="free_shipping"
+                  checked={formData.free_shipping}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label htmlFor="free_shipping" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                  Free Shipping
+                </label>
+              </div>
+
+              {/* Express Shipping */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="express_shipping"
+                  name="express_shipping"
+                  checked={formData.express_shipping}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label htmlFor="express_shipping" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                  Express Shipping Available
+                </label>
+              </div>
+
+              {/* Shipping Cost - Only show if not free shipping */}
+              {!formData.free_shipping && (
+                <div>
+                  <FloatingLabelInput
+                    id="shipping_cost"
+                    label="Shipping Cost ($)"
+                    type="number"
+                    name="shipping_cost"
+                    value={formData.shipping_cost}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Leave empty if shipping cost varies or will be calculated at checkout
+                  </p>
+                </div>
+              )}
+
+              {formData.free_shipping && (
+                <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                  ✓ Customers will receive free shipping for this product
+                </p>
+              )}
             </div>
           </div>
 
