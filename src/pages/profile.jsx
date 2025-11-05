@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { User, ShoppingBag, Settings, LogOut, Heart, Package, Home, BellRing } from "lucide-react";
+import { User, ShoppingBag, Settings, LogOut, Heart, Package, Home, BellRing, CreditCard, MapPin, Globe, Shield, Lock, Mail, Trash2, Plus, Edit, Check, X, Eye, EyeOff, Share2, Download } from "lucide-react";
 import LevelBadge from "../components/achievements/LevelBadge";
 import LevelProgress from "../components/achievements/LevelProgress";
 import AchievementList from "../components/achievements/AchievementList";
@@ -40,6 +40,27 @@ export default function Profile() {
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef(null);
+  
+  // New features state
+  const [shippingAddresses, setShippingAddresses] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [notifications, setNotifications] = useState({
+    email: true,
+    sms: false,
+    orderUpdates: true,
+    promotions: true,
+    newsletters: false,
+  });
+  const [preferences, setPreferences] = useState({
+    language: 'en',
+    currency: 'ETB',
+    theme: 'light',
+  });
+  const [showAddAddress, setShowAddAddress] = useState(false);
+  const [showAddPayment, setShowAddPayment] = useState(false);
+  const [newAddress, setNewAddress] = useState({ name: '', address: '', city: '', zip: '', country: '', phone: '', isDefault: false });
+  const [newPayment, setNewPayment] = useState({ cardNumber: '', expiryDate: '', cvv: '', name: '', isDefault: false });
+  const [orderStats, setOrderStats] = useState({ total: 0, pending: 0, completed: 0 });
 
   // Fetch profile data
   useEffect(() => {
@@ -216,6 +237,29 @@ export default function Profile() {
       }
     })();
     return () => { mounted = false; };
+  }, [user]);
+
+  // Fetch order statistics
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const { data: orders } = await supabase
+          .from('order')
+          .select('status')
+          .eq('user_id', user.id);
+        
+        if (orders) {
+          setOrderStats({
+            total: orders.length,
+            pending: orders.filter(o => ['pending', 'confirmed'].includes(o.status)).length,
+            completed: orders.filter(o => o.status === 'delivered').length,
+          });
+        }
+      } catch (err) {
+        console.warn('Could not load order stats:', err);
+      }
+    })();
   }, [user]);
 
   const validateProfileForm = () => {
@@ -415,6 +459,18 @@ export default function Profile() {
       setUploadingAvatar(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleDeleteAddress = (id) => {
+    setShippingAddresses(shippingAddresses.filter(addr => addr.id !== id));
+    setSuccess('Address deleted successfully!');
+    setTimeout(() => setSuccess(""), 2500);
+  };
+
+  const handleDeletePayment = (id) => {
+    setPaymentMethods(paymentMethods.filter(method => method.id !== id));
+    setSuccess('Payment method deleted successfully!');
+    setTimeout(() => setSuccess(""), 2500);
   };
 
   return (
@@ -917,6 +973,397 @@ export default function Profile() {
                           </div>
                         </form>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Order Statistics */}
+                  <div className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <ShoppingBag className="w-5 h-5" />
+                      Order Statistics
+                    </h2>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-white rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-600">{orderStats.total}</div>
+                        <div className="text-sm text-gray-600 mt-1">Total Orders</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-yellow-600">{orderStats.pending}</div>
+                        <div className="text-sm text-gray-600 mt-1">Pending</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-green-600">{orderStats.completed}</div>
+                        <div className="text-sm text-gray-600 mt-1">Completed</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Shipping Addresses */}
+                  <div className="mt-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                        <MapPin className="w-5 h-5" />
+                        Shipping Addresses
+                      </h2>
+                      <button
+                        onClick={() => setShowAddAddress(!showAddAddress)}
+                        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Address
+                      </button>
+                    </div>
+                    {showAddAddress && (
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
+                        <input
+                          type="text"
+                          placeholder="Full Name"
+                          value={newAddress.name}
+                          onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        />
+                        <textarea
+                          placeholder="Street Address"
+                          value={newAddress.address}
+                          onChange={(e) => setNewAddress({...newAddress, address: e.target.value})}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          rows={2}
+                        />
+                        <div className="grid grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            placeholder="City"
+                            value={newAddress.city}
+                            onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                            className="border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                          <input
+                            type="text"
+                            placeholder="ZIP Code"
+                            value={newAddress.zip}
+                            onChange={(e) => setNewAddress({...newAddress, zip: e.target.value})}
+                            className="border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="checkbox"
+                            checked={newAddress.isDefault}
+                            onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
+                            className="rounded"
+                          />
+                          <label className="text-sm text-gray-700">Set as default address</label>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              if (newAddress.name && newAddress.address) {
+                                setShippingAddresses([...shippingAddresses, {...newAddress, id: Date.now()}]);
+                                setNewAddress({ name: '', address: '', city: '', zip: '', country: '', phone: '', isDefault: false });
+                                setShowAddAddress(false);
+                                setSuccess('Address added successfully!');
+                              }
+                            }}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setShowAddAddress(false)}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="space-y-3">
+                      {shippingAddresses.length === 0 ? (
+                        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
+                          No shipping addresses saved yet
+                        </div>
+                      ) : (
+                        shippingAddresses.map((addr) => (
+                          <div key={addr.id} className="bg-white border border-gray-200 rounded-lg p-4 flex justify-between items-start">
+                            <div>
+                              <div className="font-medium text-gray-900">{addr.name}</div>
+                              <div className="text-sm text-gray-600 mt-1">{addr.address}</div>
+                              {addr.city && <div className="text-sm text-gray-600">{addr.city}, {addr.zip}</div>}
+                              {addr.isDefault && <span className="inline-block mt-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Default</span>}
+                            </div>
+                            <button 
+                              onClick={() => handleDeleteAddress(addr.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Payment Methods */}
+                  <div className="mt-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                        <CreditCard className="w-5 h-5" />
+                        Payment Methods
+                      </h2>
+                      <button
+                        onClick={() => setShowAddPayment(!showAddPayment)}
+                        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Card
+                      </button>
+                    </div>
+                    {showAddPayment && (
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
+                        <input
+                          type="text"
+                          placeholder="Cardholder Name"
+                          value={newPayment.name}
+                          onChange={(e) => setNewPayment({...newPayment, name: e.target.value})}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Card Number"
+                          value={newPayment.cardNumber}
+                          onChange={(e) => setNewPayment({...newPayment, cardNumber: e.target.value})}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          maxLength={19}
+                        />
+                        <div className="grid grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            placeholder="MM/YY"
+                            value={newPayment.expiryDate}
+                            onChange={(e) => setNewPayment({...newPayment, expiryDate: e.target.value})}
+                            className="border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                          <input
+                            type="text"
+                            placeholder="CVV"
+                            value={newPayment.cvv}
+                            onChange={(e) => setNewPayment({...newPayment, cvv: e.target.value})}
+                            className="border border-gray-300 rounded-lg px-3 py-2"
+                            maxLength={4}
+                          />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="checkbox"
+                            checked={newPayment.isDefault}
+                            onChange={(e) => setNewPayment({...newPayment, isDefault: e.target.checked})}
+                            className="rounded"
+                          />
+                          <label className="text-sm text-gray-700">Set as default payment method</label>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              if (newPayment.name && newPayment.cardNumber) {
+                                setPaymentMethods([...paymentMethods, {...newPayment, id: Date.now()}]);
+                                setNewPayment({ cardNumber: '', expiryDate: '', cvv: '', name: '', isDefault: false });
+                                setShowAddPayment(false);
+                                setSuccess('Payment method added successfully!');
+                              }
+                            }}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setShowAddPayment(false)}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="space-y-3">
+                      {paymentMethods.length === 0 ? (
+                        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
+                          No payment methods saved yet
+                        </div>
+                      ) : (
+                        paymentMethods.map((method) => (
+                          <div key={method.id} className="bg-white border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                              <CreditCard className="w-8 h-8 text-gray-400" />
+                              <div>
+                                <div className="font-medium text-gray-900">**** **** **** {method.cardNumber.slice(-4)}</div>
+                                <div className="text-sm text-gray-600">{method.name} • Expires {method.expiryDate}</div>
+                                {method.isDefault && <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Default</span>}
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => handleDeletePayment(method.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Notification Preferences */}
+                  <div className="mt-8">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <BellRing className="w-5 h-5" />
+                      Notification Preferences
+                    </h2>
+                    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">Email Notifications</div>
+                          <div className="text-sm text-gray-600">Receive updates via email</div>
+                        </div>
+                        <button
+                          onClick={() => setNotifications({...notifications, email: !notifications.email})}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${notifications.email ? 'bg-blue-600' : 'bg-gray-300'}`}
+                        >
+                          <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.email ? 'translate-x-6' : ''}`}></div>
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">SMS Notifications</div>
+                          <div className="text-sm text-gray-600">Receive updates via SMS</div>
+                        </div>
+                        <button
+                          onClick={() => setNotifications({...notifications, sms: !notifications.sms})}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${notifications.sms ? 'bg-blue-600' : 'bg-gray-300'}`}
+                        >
+                          <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.sms ? 'translate-x-6' : ''}`}></div>
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">Order Updates</div>
+                          <div className="text-sm text-gray-600">Get notified about order status changes</div>
+                        </div>
+                        <button
+                          onClick={() => setNotifications({...notifications, orderUpdates: !notifications.orderUpdates})}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${notifications.orderUpdates ? 'bg-blue-600' : 'bg-gray-300'}`}
+                        >
+                          <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.orderUpdates ? 'translate-x-6' : ''}`}></div>
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">Promotions & Offers</div>
+                          <div className="text-sm text-gray-600">Receive special offers and discounts</div>
+                        </div>
+                        <button
+                          onClick={() => setNotifications({...notifications, promotions: !notifications.promotions})}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${notifications.promotions ? 'bg-blue-600' : 'bg-gray-300'}`}
+                        >
+                          <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.promotions ? 'translate-x-6' : ''}`}></div>
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">Newsletters</div>
+                          <div className="text-sm text-gray-600">Subscribe to our monthly newsletter</div>
+                        </div>
+                        <button
+                          onClick={() => setNotifications({...notifications, newsletters: !notifications.newsletters})}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${notifications.newsletters ? 'bg-blue-600' : 'bg-gray-300'}`}
+                        >
+                          <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.newsletters ? 'translate-x-6' : ''}`}></div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Language & Preferences */}
+                  <div className="mt-8">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Globe className="w-5 h-5" />
+                      Language & Preferences
+                    </h2>
+                    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                        <select
+                          value={preferences.language}
+                          onChange={(e) => setPreferences({...preferences, language: e.target.value})}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        >
+                          <option value="en">English</option>
+                          <option value="am">አማርኛ</option>
+                          <option value="fr">Français</option>
+                          <option value="es">Español</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                        <select
+                          value={preferences.currency}
+                          onChange={(e) => setPreferences({...preferences, currency: e.target.value})}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        >
+                          <option value="ETB">ETB - Ethiopian Birr</option>
+                          <option value="USD">USD - US Dollar</option>
+                          <option value="EUR">EUR - Euro</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                        <select
+                          value={preferences.theme}
+                          onChange={(e) => setPreferences({...preferences, theme: e.target.value})}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        >
+                          <option value="light">Light</option>
+                          <option value="dark">Dark</option>
+                          <option value="auto">Auto</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Security & Privacy */}
+                  <div className="mt-8">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Shield className="w-5 h-5" />
+                      Security & Privacy
+                    </h2>
+                    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">Two-Factor Authentication</div>
+                          <div className="text-sm text-gray-600">Add an extra layer of security</div>
+                        </div>
+                        <button className="text-blue-600 hover:text-blue-700 font-medium">Enable</button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">Login Activity</div>
+                          <div className="text-sm text-gray-600">View your recent login history</div>
+                        </div>
+                        <button className="text-blue-600 hover:text-blue-700 font-medium">View</button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">Download Your Data</div>
+                          <div className="text-sm text-gray-600">Export all your account data</div>
+                        </div>
+                        <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+                          <Download className="w-4 h-4" />
+                          Download
+                        </button>
+                      </div>
+                      <div className="border-t pt-4">
+                        <button className="text-red-600 hover:text-red-700 font-medium">Delete Account</button>
+                        <div className="text-sm text-gray-600 mt-1">Permanently delete your account and all data</div>
+                      </div>
                     </div>
                   </div>
                 </div>

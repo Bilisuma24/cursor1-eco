@@ -133,8 +133,8 @@ const Navbar = () => {
   const getAvatarUrl = () => user?.user_metadata?.avatar_url || "";
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3 mobile-container">
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 overflow-x-hidden shadow-sm">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-2.5 md:py-3 mobile-container">
         <Link
           to="/"
           className="text-lg font-bold text-gray-900 whitespace-nowrap"

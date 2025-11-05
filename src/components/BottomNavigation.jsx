@@ -68,14 +68,14 @@ export default function BottomNavigation() {
           }`}>Cart</span>
         </Link>
         <Link
-          to="/profile"
+          to="/account"
           className="flex flex-col items-center gap-1"
         >
           <User className={`w-6 h-6 ${
-            isActive('/profile') ? 'text-red-500' : 'text-gray-600'
+            isActive('/account') || isActive('/profile') ? 'text-red-500' : 'text-gray-600'
           }`} />
           <span className={`text-xs font-medium ${
-            isActive('/profile') ? 'text-red-500' : 'text-gray-600'
+            isActive('/account') || isActive('/profile') ? 'text-red-500' : 'text-gray-600'
           }`}>Account</span>
         </Link>
       </div>

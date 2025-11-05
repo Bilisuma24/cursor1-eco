@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Star, ShoppingCart, User, Grid, TrendingUp, Truck, Shield, Award, Users, ChevronRight, ChevronLeft, Sparkles, Zap, Heart, Timer, Copy } from "lucide-react";
+import { Search, Star, ShoppingCart, User, Grid, TrendingUp, Truck, Shield, Award, Users, ChevronRight, ChevronLeft, Sparkles, Zap, Heart, Timer, Copy, Menu, ChevronDown } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
 import productsData from "../data/products.js";
@@ -11,7 +11,9 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [topDealIndex, setTopDealIndex] = useState(0);
   const bannerTimer = useRef(null);
+  const topDealTimer = useRef(null);
 
   // Fetch products from database and combine with static products
   useEffect(() => {
@@ -120,10 +122,20 @@ export default function Home() {
 
   useEffect(() => {
     bannerTimer.current = setInterval(() => {
-      setBannerIndex((i) => (i + 1) % 3);
+      setBannerIndex((i) => (i + 1) % 2);
     }, 5000);
     return () => bannerTimer.current && clearInterval(bannerTimer.current);
   }, []);
+
+  // Auto-rotate Top Deals products
+  useEffect(() => {
+    if (trendingProducts.length > 0) {
+      topDealTimer.current = setInterval(() => {
+        setTopDealIndex((i) => (i + 1) % Math.min(5, trendingProducts.length));
+      }, 4000);
+      return () => topDealTimer.current && clearInterval(topDealTimer.current);
+    }
+  }, [trendingProducts.length]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
@@ -156,14 +168,33 @@ export default function Home() {
       subtitle: "Trending styles and accessories",
       image: productsData.products?.[4]?.images?.[0],
       cta: { label: "Shop Fashion", to: "/shop?category=Fashion" }
-    },
-    {
-      title: "Home & Garden Savings",
-      subtitle: "Everything for your space",
-      image: productsData.products?.[9]?.images?.[0],
-      cta: { label: "Shop Home", to: "/shop?category=Home%20%26%20Garden" }
     }
   ];
+
+  // Discount coupons data
+  const discountCoupons = [
+    {
+      discount: "ETB11,759.3 OFF",
+      minOrder: "ETB95,586.31+",
+      code: "CD1170"
+    },
+    {
+      discount: "ETB9,239.45 OFF",
+      minOrder: "ETB75,427.51+",
+      code: "CD1155"
+    },
+    {
+      discount: "ETB7,559.55 OFF",
+      minOrder: "ETB61,988.31+",
+      code: "CD1145"
+    }
+  ];
+
+  // Copy coupon code to clipboard
+  const copyCouponCode = (code) => {
+    navigator.clipboard.writeText(code);
+    // You might want to add a toast notification here
+  };
 
   // Categories for desktop
   const categories = productsData.categories || [];
@@ -269,68 +300,142 @@ export default function Home() {
             )}
           </div>
 
-          {/* Main Banner - AliExpress Style */}
-          <div className="bg-white px-4 py-4 border-b border-gray-200">
-            <div className="relative rounded-xl overflow-hidden shadow-sm" style={{ height: '200px' }}>
-              {banners.map((b, i) => (
-                <div 
-                  key={i} 
-                  className={`absolute inset-0 transition-opacity duration-500 ${
-                    i === bannerIndex ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  {/* Gradient Background */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-400 via-gray-300 to-gray-100"></div>
-                  
-                  {/* Product Image - Right Side */}
-                  {b.image && (
-                    <div className="absolute right-0 bottom-0 w-32 h-32 flex items-end justify-end pr-4 pb-4">
-                      <img
-                        src={b.image}
-                        alt={b.title}
-                        className="w-full h-full object-contain drop-shadow-lg"
-                      />
-                    </div>
-                  )}
-                  
-                  {/* Text Content - Left Side */}
-                  <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-center pl-4 pr-24 z-10">
-                    <h2 className="text-2xl font-bold text-white mb-2">{b.title}</h2>
-                    <p className="text-sm text-white mb-4 opacity-95">{b.subtitle}</p>
-                    <Link
-                      to={b.cta.to}
-                      className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md transition-colors w-fit"
-                    >
-                      {b.cta.label}
-                    </Link>
-                  </div>
-                </div>
-              ))}
-              
-              {/* Carousel Indicators - Bottom Center */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 items-center z-20">
-                {banners.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setBannerIndex(i)}
-                    className="rounded-full transition-all"
-                    style={{ 
-                      width: i === bannerIndex ? '6px' : '4px',
-                      height: i === bannerIndex ? '6px' : '4px',
-                      backgroundColor: i === bannerIndex ? '#f97316' : '#ffffff'
-                    }}
-                  />
-                ))}
+          {/* Category Navigation Bar */}
+          <div className="bg-white border-b border-gray-200">
+            <div className="px-4 py-2 overflow-x-auto">
+              <div className="flex items-center gap-4 min-w-max">
+                <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded whitespace-nowrap">
+                  <Menu className="w-4 h-4" />
+                  <span>All Categories</span>
+                </button>
+                <Link to="/shop" className="px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded whitespace-nowrap">
+                  Choice
+                </Link>
+                <Link to="/shop" className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded whitespace-nowrap">
+                  SuperDeals
+                </Link>
+                <Link to="/shop" className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded whitespace-nowrap">
+                  AliExpress Business
+                </Link>
+                <Link to="/shop" className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded whitespace-nowrap">
+                  Home Improvement & Lighting
+                </Link>
+                <button className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded whitespace-nowrap">
+                  <span>More</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Promotional Bar - AliExpress Style */}
-          <div className="bg-orange-500 px-4 py-3">
-            <div className="flex items-center justify-center gap-2 text-white text-sm">
-              <span className="font-semibold">Flash Sale</span>
-              <span className="w-1 h-1 bg-white rounded-full"></span>
-              <span>Up to 70% OFF</span>
+          {/* Promotional Section with Discount Codes */}
+          <div className="bg-orange-200 px-2 sm:px-3 py-2 border-b border-gray-200">
+            {/* Sale Timer Header - Single Line */}
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[9px] sm:text-[10px] font-semibold text-gray-900 flex-shrink-0">Sale Ends: Nov 8, 10:59 (GMT+3)</span>
+              <div className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+                <span className="text-[9px] sm:text-[10px]">Up to 70% off</span>
+                <ChevronRight className="w-2.5 h-2.5" />
+              </div>
+            </div>
+
+            {/* Horizontal Layout: Coupons | Product | Festive Graphic */}
+            <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+              {/* Discount Coupon Boxes */}
+              <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
+                {discountCoupons.map((coupon, index) => (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-br from-white to-pink-50 border-2 border-dashed border-pink-400 rounded-md p-1.5 sm:p-2 min-w-[80px] sm:min-w-[90px] flex-shrink-0 shadow-sm hover:shadow-md transition-all active:scale-95 touch-manipulation"
+                    onClick={() => copyCouponCode(coupon.code)}
+                  >
+                    <div className="text-center">
+                      <div className="text-[8px] sm:text-[9px] font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-0.5 leading-tight">{coupon.discount}</div>
+                      <div className="text-[7px] sm:text-[8px] text-gray-600 mb-0.5 leading-tight">orders {coupon.minOrder}</div>
+                      <div className="text-red-600 font-bold text-[8px] sm:text-[9px] flex items-center justify-center gap-0.5 w-full hover:text-red-700">
+                        Code: {coupon.code}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Product Listing Section - Carousel */}
+              <div className="bg-blue-50 rounded-md p-1.5 sm:p-2 flex-shrink-0 w-[120px] sm:w-[140px] md:w-[150px] border border-blue-200 shadow-sm relative overflow-hidden">
+                <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1.5 sm:mb-2 text-center">Top deals</h3>
+                {trendingProducts.length > 0 && (
+                  <div className="relative">
+                    {trendingProducts.slice(0, Math.min(5, trendingProducts.length)).map((product, idx) => (
+                      <div
+                        key={product.id}
+                        className={`flex flex-col items-center transition-opacity duration-500 ${
+                          idx === topDealIndex ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                        }`}
+                      >
+                        <div className="w-full aspect-square bg-white rounded-md flex items-center justify-center mb-1.5 sm:mb-2 shadow-sm border border-gray-200 overflow-hidden">
+                          <img
+                            src={product.images?.[0]}
+                            alt={product.name}
+                            className="w-full h-full object-contain p-0.5 sm:p-1"
+                          />
+                        </div>
+                        <div className="w-full bg-gray-800 text-white text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-md text-center">
+                          ETB{formatPrice(product.price)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Festive Graphics Section */}
+              <div className="relative bg-gradient-to-r from-red-500 via-orange-500 to-pink-500 rounded-md p-1.5 sm:p-2 flex-shrink-0 w-[115px] sm:w-[130px] md:w-[140px] overflow-hidden shadow-lg active:scale-95 transition-transform touch-manipulation">
+                {/* Animated background gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-transparent to-purple-500/20 animate-pulse"></div>
+                
+                {/* Sparkle effects */}
+                <div className="absolute top-1 left-2 w-1 h-1 bg-white rounded-full animate-ping"></div>
+                <div className="absolute top-3 right-4 w-1 h-1 bg-yellow-300 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+                <div className="absolute bottom-2 left-1/3 w-1 h-1 bg-white rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+                
+                <div className="relative z-10 flex flex-col h-full">
+                  {/* Header with icon and text */}
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      <div className="relative">
+                        <span className="text-[10px] sm:text-xs">🎄</span>
+                        <Sparkles className="absolute -top-1 -right-1 w-2 h-2 text-yellow-300 animate-pulse" />
+                      </div>
+                      <div className="text-[7px] sm:text-[8px] font-bold text-white leading-tight drop-shadow-md">1ST EVERY MONTH</div>
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      <span className="text-[9px] sm:text-[10px] animate-bounce" style={{animationDelay: '0s'}}>🎮</span>
+                      <span className="text-[9px] sm:text-[10px] animate-bounce" style={{animationDelay: '0.3s'}}>🧸</span>
+                    </div>
+                  </div>
+                  
+                  {/* Decorative elements */}
+                  <div className="flex items-center justify-center gap-1 mt-auto">
+                    <Star className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-yellow-300 fill-yellow-300" />
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                    <Star className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-yellow-300 fill-yellow-300" />
+                  </div>
+                </div>
+                
+                {/* Decorative background effects */}
+                <div className="absolute right-0 bottom-0 opacity-30">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-700 rounded-full -mr-4 -mb-4 sm:-mr-5 sm:-mb-5 blur-sm"></div>
+                </div>
+                <div className="absolute left-0 top-0 opacity-20">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-300 rounded-full -ml-2 -mt-2 sm:-ml-3 sm:-mt-3 blur-sm"></div>
+                </div>
+                <div className="absolute top-1/2 right-2 opacity-25">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-pink-400 rounded-full blur-sm"></div>
+                </div>
+                
+                {/* Animated border glow */}
+                <div className="absolute inset-0 rounded-md border-2 border-white/30 animate-pulse"></div>
+              </div>
             </div>
           </div>
 
@@ -346,115 +451,162 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Bottom Navigation Bar */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-            <div className="flex justify-around py-2">
-              <Link
-                to="/"
-                className="flex flex-col items-center gap-1"
-              >
-                <div className="w-6 h-6 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-red-500 rounded-sm flex items-center justify-center">
-                    <div className="w-2 h-2 bg-red-500 rounded-sm"></div>
-                  </div>
-                </div>
-                <span className="text-xs text-red-500 font-medium">Home</span>
-              </Link>
-              <Link
-                to="/shop"
-                className="flex flex-col items-center gap-1"
-              >
-                <Grid className="w-6 h-6 text-gray-600" />
-                <span className="text-xs text-gray-600">Category</span>
-              </Link>
-              <Link
-                to="/cart"
-                className="flex flex-col items-center gap-1 relative"
-              >
-                <ShoppingCart className="w-6 h-6 text-gray-600" />
-                {getCartItemsCount() > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {getCartItemsCount()}
-                  </span>
-                )}
-                <span className="text-xs text-gray-600">Cart</span>
-              </Link>
-              <Link
-                to="/profile"
-                className="flex flex-col items-center gap-1"
-              >
-                <User className="w-6 h-6 text-gray-600" />
-                <span className="text-xs text-gray-600">Account</span>
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* DESKTOP ONLY: Clean Professional Layout */}
       <div className="hidden md:block">
-        <div className="min-h-screen bg-gray-50">
-          {/* Hero Banner */}
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+          {/* Category Navigation Bar */}
           <div className="bg-white border-b border-gray-200">
-            <div className="max-w-7xl mx-auto px-6 py-6">
-              <div className="relative h-96 overflow-hidden rounded-xl shadow-sm">
-                {banners.map((b, i) => (
-                  <div 
-                    key={i} 
-                    className={`absolute inset-0 transition-opacity duration-700 ${
-                      i === bannerIndex ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  >
-                    <img 
-                      src={b.image} 
-                      alt={b.title} 
-                      className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent"></div>
-                    <div className="absolute bottom-8 left-8 text-white">
-                      <h2 className="text-3xl font-bold mb-2">{b.title}</h2>
-                      <p className="text-lg mb-4">{b.subtitle}</p>
-                      <Link
-                        to={b.cta.to}
-                        className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-                      >
-                        {b.cta.label}
-                      </Link>
+            <div className="max-w-7xl mx-auto px-6 py-3">
+              <div className="flex items-center gap-6">
+                <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded">
+                  <Menu className="w-5 h-5" />
+                  <span>All Categories</span>
+                </button>
+                <Link to="/shop" className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded">
+                  Choice
+                </Link>
+                <Link to="/shop" className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded">
+                  SuperDeals
+                </Link>
+                <Link to="/shop" className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded">
+                  AliExpress Business
+                </Link>
+                <Link to="/shop" className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded">
+                  Home Improvement & Lighting
+                </Link>
+                <button className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded">
+                  <span>More</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Promotional Section with Discount Codes */}
+          <div className="bg-orange-200 border-b border-gray-200 shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
+              {/* Sale Timer Header - Single Line */}
+              <div className="mb-2.5 flex items-center justify-between gap-2">
+                <span className="text-xs md:text-sm font-semibold text-gray-900 flex-shrink-0">Sale Ends: Nov 8, 10:59 (GMT+3)</span>
+                <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-2.5 md:px-3 py-1 rounded-full font-bold shadow-md flex-shrink-0">
+                  <span className="text-xs md:text-sm">Up to 70% off</span>
+                  <ChevronRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                </div>
+              </div>
+
+              {/* Horizontal Layout: Coupons | Product | Festive Graphic */}
+              <div className="flex gap-2.5 md:gap-3 lg:gap-4 items-start overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 md:mx-0 md:px-0" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+                {/* Discount Coupon Boxes */}
+                <div className="flex gap-2 md:gap-2.5 lg:gap-3 flex-shrink-0 md:flex-1">
+                  {discountCoupons.map((coupon, index) => (
+                    <div
+                      key={index}
+                      className="bg-gradient-to-br from-white to-pink-50 border-2 border-dashed border-pink-400 rounded-md p-2 md:p-2.5 min-w-[100px] md:min-w-[120px] lg:min-w-[140px] flex-shrink-0 md:flex-1 hover:shadow-lg transition-all cursor-pointer hover:scale-105 active:scale-95 touch-manipulation"
+                      onClick={() => copyCouponCode(coupon.code)}
+                    >
+                      <div className="text-center">
+                        <div className="text-xs md:text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-0.5">{coupon.discount}</div>
+                        <div className="text-[10px] md:text-xs text-gray-600 mb-1">orders {coupon.minOrder}</div>
+                        <div className="text-red-600 font-bold text-xs md:text-sm hover:text-red-700">
+                          Code: {coupon.code}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Product Listing Section - Carousel */}
+                <div className="bg-blue-50 rounded-md p-2.5 md:p-3 flex-shrink-0 w-[140px] md:w-[160px] lg:w-[180px] border border-blue-200 shadow-sm relative overflow-hidden">
+                  <h3 className="text-sm md:text-base font-semibold text-blue-900 mb-2 text-center">Top deals</h3>
+                  {trendingProducts.length > 0 && (
+                    <div className="relative">
+                      {trendingProducts.slice(0, Math.min(5, trendingProducts.length)).map((product, idx) => (
+                        <div
+                          key={product.id}
+                          className={`flex flex-col items-center transition-opacity duration-500 ${
+                            idx === topDealIndex ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                          }`}
+                        >
+                          <div className="w-full aspect-square bg-white rounded-md flex items-center justify-center mb-2 shadow-sm border border-gray-200 overflow-hidden">
+                            <img
+                              src={product.images?.[0]}
+                              alt={product.name}
+                              className="w-full h-full object-contain p-1 md:p-1.5"
+                            />
+                          </div>
+                          <div className="w-full bg-gray-800 text-white text-xs md:text-sm font-bold px-2 md:px-3 py-1.5 md:py-2 rounded-md text-center">
+                            ETB{formatPrice(product.price)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Festive Graphics Section */}
+                <div className="relative bg-gradient-to-r from-red-500 via-orange-500 to-pink-500 rounded-md p-2.5 md:p-3 flex-shrink-0 w-[130px] md:w-[150px] lg:w-[170px] overflow-hidden shadow-lg hover:shadow-xl transition-shadow active:scale-95 touch-manipulation">
+                  {/* Animated background gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-transparent to-purple-500/20 animate-pulse"></div>
+                  
+                  {/* Sparkle effects */}
+                  <div className="absolute top-2 left-3 w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+                  <div className="absolute top-4 right-6 w-1.5 h-1.5 bg-yellow-300 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+                  <div className="absolute bottom-3 left-1/3 w-1.5 h-1.5 bg-white rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+                  <div className="absolute top-1/2 right-3 w-1 h-1 bg-yellow-200 rounded-full animate-ping" style={{animationDelay: '1.5s'}}></div>
+                  
+                  <div className="relative z-10 flex flex-col h-full">
+                    {/* Header with icon and text */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <div className="relative">
+                          <span className="text-sm md:text-base">🎄</span>
+                          <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-300 animate-pulse" />
+                        </div>
+                        <div className="text-[10px] md:text-xs font-bold text-white drop-shadow-md">1ST EVERY MONTH</div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs md:text-sm animate-bounce" style={{animationDelay: '0s'}}>🎮</span>
+                        <span className="text-xs md:text-sm animate-bounce" style={{animationDelay: '0.3s'}}>🧸</span>
+                      </div>
+                    </div>
+                    
+                    {/* Decorative elements */}
+                    <div className="flex items-center justify-center gap-2 mt-auto">
+                      <Star className="w-3 h-3 md:w-4 md:h-4 text-yellow-300 fill-yellow-300" />
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                      <Star className="w-3 h-3 md:w-4 md:h-4 text-yellow-300 fill-yellow-300" />
                     </div>
                   </div>
-                ))}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                  {banners.map((_, i) => (
-                    <button 
-                      key={i} 
-                      onClick={() => setBannerIndex(i)} 
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        i === bannerIndex ? 'bg-orange-500' : 'bg-white/70'
-                      }`} 
-                    />
-                  ))}
+                  
+                  {/* Decorative background effects */}
+                  <div className="absolute right-0 bottom-0 opacity-30">
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-red-700 rounded-full -mr-6 -mb-6 md:-mr-8 md:-mb-8 blur-sm"></div>
+                  </div>
+                  <div className="absolute left-0 top-0 opacity-20">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-300 rounded-full -ml-4 -mt-4 md:-ml-5 md:-mt-5 blur-sm"></div>
+                  </div>
+                  <div className="absolute top-1/2 right-3 opacity-25">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-pink-400 rounded-full blur-sm"></div>
+                  </div>
+                  
+                  {/* Animated border glow */}
+                  <div className="absolute inset-0 rounded-md border-2 border-white/30 animate-pulse"></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Promotional Banner */}
-          <div className="bg-orange-500 py-3">
-            <div className="max-w-7xl mx-auto px-6">
-              <div className="flex items-center justify-center gap-4 text-white text-base">
-                <span className="font-semibold">Flash Sale</span>
-                <span>•</span>
-                <span>Up to 70% OFF</span>
-              </div>
-            </div>
-          </div>
-
           {/* Today's Deals Section */}
-          <div className="bg-white py-8">
+          <div className="bg-white py-6 shadow-sm">
             <div className="max-w-7xl mx-auto px-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Today's Deals</h2>
-                <Link to="/shop" className="text-base text-orange-500 hover:text-orange-600 font-medium">View All →</Link>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xl font-bold text-gray-900">Today's Deals</h2>
+                <Link to="/shop" className="text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1">
+                  View All <ChevronRight className="w-4 h-4" />
+                </Link>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {trendingProducts.slice(0, 6).map((product) => (
@@ -465,18 +617,18 @@ export default function Home() {
           </div>
 
           {/* Categories Section */}
-          <div className="bg-gray-50 py-8 border-t border-gray-200">
+          <div className="bg-white py-6 border-t border-gray-100">
             <div className="max-w-7xl mx-auto px-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
-              <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-5">Shop by Category</h2>
+              <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
                 {categories.map((category, index) => (
                   <Link
                     key={index}
                     to="/shop"
-                    className="bg-white rounded-lg border border-gray-200 p-6 text-center hover:border-orange-500 hover:shadow-md transition-all"
+                    className="bg-gray-50 rounded-lg border border-gray-200 p-4 text-center hover:border-orange-500 hover:bg-orange-50 hover:shadow-md transition-all duration-200"
                   >
-                    <div className="text-4xl mb-3">{category.icon || '📦'}</div>
-                    <div className="text-sm text-gray-900 font-medium">{category.name}</div>
+                    <div className="text-3xl mb-2">{category.icon || '📦'}</div>
+                    <div className="text-xs text-gray-900 font-medium">{category.name}</div>
                   </Link>
                 ))}
               </div>
@@ -484,11 +636,13 @@ export default function Home() {
           </div>
 
           {/* Featured Products */}
-          <div className="bg-white py-8 border-t border-gray-200">
+          <div className="bg-gray-50 py-6 border-t border-gray-100">
             <div className="max-w-7xl mx-auto px-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>
-                <Link to="/shop" className="text-base text-orange-500 hover:text-orange-600 font-medium">View All →</Link>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xl font-bold text-gray-900">Featured Products</h2>
+                <Link to="/shop" className="text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1">
+                  View All <ChevronRight className="w-4 h-4" />
+                </Link>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {featuredProducts.slice(0, 12).map((product) => (
@@ -502,3 +656,4 @@ export default function Home() {
     </div>
   );
 }
+

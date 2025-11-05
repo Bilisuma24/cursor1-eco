@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Globe, MapPin, LogOut, ChevronUp } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
@@ -10,6 +10,7 @@ import Contact from "./pages/Contact";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Profile from "./pages/profile";
+import Account from "./pages/Account";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
@@ -493,21 +494,36 @@ function FooterContent() {
   );
 }
 
-function App() {
-  // Wrap Router with providers here so NavbarContent can access Supabase auth
-  return (
-    <SupabaseAuthProvider>
-      <CartProvider>
-        <ToastProvider>
-          <Router>
-        <ScrollToTop />
-        {/* Header (simple horizontal navbar) */}
-        <header className="bg-white shadow-md sticky top-0 z-50">
-          <NavbarContent />
-        </header>
+function AppContent() {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
-          {/* Page Routes */}
-          <main>
+  return (
+    <>
+      <ScrollToTop />
+      {/* Header - Logo always visible, rest only on home page */}
+      <header className="bg-white shadow-md sticky top-0 z-50">
+        {isHomePage ? (
+          <NavbarContent />
+        ) : (
+          <div className="bg-white shadow-sm border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+              <div className="flex items-center justify-between py-3 sm:py-4">
+                {/* Logo - Always visible */}
+                <Link to="/" className="flex items-center space-x-2">
+                  <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-xl">A</span>
+                  </div>
+                  <span className="text-2xl font-bold text-gray-900">AliStyle</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* Page Routes */}
+      <main>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
@@ -529,6 +545,7 @@ function App() {
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/price-alerts" element={<PriceAlerts />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/account" element={<Account />} />
               <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
               <Route path="/admin/*" element={<AdminDashboard />} />
               
@@ -539,11 +556,26 @@ function App() {
               <Route path="/cart-test" element={<CartTest />} />
               <Route path="/simple-cart-test" element={<SimpleCartTest />} />
             </Routes>
-          </main>
+      </main>
 
-          {/* Footer - MOBILE-FIRST: Enhanced with collapsible sections */}
-          <FooterContent />
-        </Router>
+      {/* Mobile Bottom Navigation - Global */}
+      <BottomNavigation />
+
+      {/* Footer - MOBILE-FIRST: Enhanced with collapsible sections */}
+      <FooterContent />
+    </>
+  );
+}
+
+function App() {
+  // Wrap Router with providers here so NavbarContent can access Supabase auth
+  return (
+    <SupabaseAuthProvider>
+      <CartProvider>
+        <ToastProvider>
+          <Router>
+            <AppContent />
+          </Router>
         </ToastProvider>
       </CartProvider>
     </SupabaseAuthProvider>
