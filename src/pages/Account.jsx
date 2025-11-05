@@ -435,56 +435,8 @@ export default function Account() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-md mx-auto px-4 py-4">
-        {/* Profile Menu Card */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-          <div className="space-y-1">
-            <Link
-              to="/account"
-              className="flex items-center gap-3 px-3 py-3 rounded-lg bg-orange-50 text-orange-600 font-medium"
-            >
-              <User className="w-5 h-5" />
-              <span>Profile</span>
-            </Link>
-            <Link
-              to="/orders"
-              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              <span>Orders</span>
-            </Link>
-            <Link
-              to="/wishlist"
-              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <Heart className="w-5 h-5" />
-              <span>Wishlist</span>
-            </Link>
-            <Link
-              to="/price-alerts"
-              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <BellRing className="w-5 h-5" />
-              <span>Price Alerts</span>
-            </Link>
-            <Link
-              to="/profile"
-              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <Settings className="w-5 h-5" />
-              <span>Settings</span>
-            </Link>
-            <Link
-              to="/"
-              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <Home className="w-5 h-5" />
-              <span>Home</span>
-            </Link>
-          </div>
-        </div>
-
         {/* User Profile Summary Card */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -529,6 +481,54 @@ export default function Account() {
             >
               Logout
             </button>
+          </div>
+        </div>
+
+        {/* Profile Menu - Horizontal */}
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="flex items-center justify-between gap-2 overflow-x-auto">
+            <Link
+              to="/account"
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg bg-orange-50 text-orange-600 font-medium min-w-[60px]"
+            >
+              <User className="w-5 h-5" />
+              <span className="text-xs">Profile</span>
+            </Link>
+            <Link
+              to="/orders"
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              <span className="text-xs">Orders</span>
+            </Link>
+            <Link
+              to="/wishlist"
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
+            >
+              <Heart className="w-5 h-5" />
+              <span className="text-xs">Wishlist</span>
+            </Link>
+            <Link
+              to="/price-alerts"
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
+            >
+              <BellRing className="w-5 h-5" />
+              <span className="text-xs">Price Alerts</span>
+            </Link>
+            <Link
+              to="/profile"
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
+            >
+              <Settings className="w-5 h-5" />
+              <span className="text-xs">Settings</span>
+            </Link>
+            <Link
+              to="/"
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
+            >
+              <Home className="w-5 h-5" />
+              <span className="text-xs">Home</span>
+            </Link>
           </div>
         </div>
       </div>
