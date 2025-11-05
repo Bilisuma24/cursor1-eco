@@ -220,7 +220,7 @@ export default function Cart() {
               Cart
                   </h1>
                 </div>
-
+                
           {/* Empty Cart Content - Centered */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 md:p-12 mb-6">
             <div className="flex flex-col items-center justify-center py-8 md:py-12">
@@ -231,25 +231,25 @@ export default function Cart() {
                   
               {/* Action Buttons - Stacked Vertically */}
               <div className="flex flex-col gap-3 items-center">
-                {!user && (
-                  <Link
-                    to="/login"
+                    {!user && (
+                      <Link
+                        to="/login"
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg inline-flex items-center justify-center space-x-2 w-44 whitespace-nowrap"
                   >
                     <User className="w-4 h-4" />
-                    <span>Sign in</span>
+                          <span>Sign in</span>
                     <ArrowRight className="w-4 h-4" />
-                  </Link>
-                )}
-                <Link
-                  to="/shop"
+                      </Link>
+                    )}
+                    <Link
+                      to="/shop"
                   className="bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg inline-flex items-center justify-center space-x-2 w-44 whitespace-nowrap"
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  <span className="font-bold">Explore items</span>
+                        <span className="font-bold">Explore items</span>
                   <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
+                    </Link>
+                </div>
               </div>
             </div>
             
@@ -288,8 +288,8 @@ export default function Cart() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  Shopping Cart ({`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`})
-                </h1>
+                    Shopping Cart ({`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`})
+                  </h1>
                 {cartItems.length > 0 && (
                   <button
                     onClick={handleClearCart}

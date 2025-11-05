@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, ShoppingBag, Settings, LogOut, Heart, Package, Home, BellRing, CreditCard, MapPin, Globe, Shield, Lock, Mail, Trash2, Plus, Edit, Check, X, Eye, EyeOff, Share2, Download, ShoppingCart, Search, ArrowLeft, Ticket, DollarSign, Truck, FileCheck, HelpCircle, MessageSquare, ChevronRight } from "lucide-react";
+import { User, ShoppingBag, Settings, LogOut, Heart, Package, Home, BellRing, CreditCard, MapPin, Globe, Shield, Lock, Mail, Trash2, Plus, Edit, Check, X, Eye, EyeOff, Share2, Download, ShoppingCart, Truck, CheckCircle, ChevronRight, Wallet, Ticket, FileCheck, DollarSign } from "lucide-react";
 import LevelBadge from "../components/achievements/LevelBadge";
 import LevelProgress from "../components/achievements/LevelProgress";
 import AchievementList from "../components/achievements/AchievementList";
@@ -433,150 +433,103 @@ export default function Account() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 mb-4">
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center gap-3">
-              <Link to="/" className="text-gray-700">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <div>
-                <div className="text-sm text-gray-600">AliStyle</div>
-                <div className="text-lg font-semibold text-gray-900">Account</div>
-              </div>
-            </div>
-            <Search className="w-5 h-5 text-gray-700" />
-          </div>
-        </div>
-
-        {/* User Profile Section */}
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-md mx-auto px-4 py-4">
+        {/* Profile Menu Card */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => setAvatarModalOpen(true)}
-              className="relative group"
+          <div className="space-y-1">
+            <Link
+              to="/account"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg bg-orange-50 text-orange-600 font-medium"
             >
-              {getAvatarUrl() ? (
-                <img
-                  src={getAvatarUrl()}
-                  alt="Avatar"
-                  className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-gray-300 text-white flex items-center justify-center text-xl font-semibold">
-                  {(user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
-                </div>
-              )}
-            </button>
-            <div className="flex-1">
-              {user ? (
-                <div>
-                  <div className="text-lg font-semibold text-gray-900">
-                    {profileData?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0]}
+              <User className="w-5 h-5" />
+              <span>Profile</span>
+            </Link>
+            <Link
+              to="/orders"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              <span>Orders</span>
+            </Link>
+            <Link
+              to="/wishlist"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Heart className="w-5 h-5" />
+              <span>Wishlist</span>
+            </Link>
+            <Link
+              to="/price-alerts"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <BellRing className="w-5 h-5" />
+              <span>Price Alerts</span>
+            </Link>
+            <Link
+              to="/profile"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Settings className="w-5 h-5" />
+              <span>Settings</span>
+            </Link>
+            <Link
+              to="/"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Home className="w-5 h-5" />
+              <span>Home</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* User Profile Summary Card */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setAvatarModalOpen(true)}
+                className="relative group"
+                title="View profile picture"
+              >
+                {getAvatarUrl() ? (
+                  <img
+                    src={getAvatarUrl()}
+                    alt="Avatar"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-2xl font-semibold">
+                    {(user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
                   </div>
-                  <div className="text-sm text-gray-600">{user?.email}</div>
+                )}
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Profile</h1>
+                <div className="flex items-center gap-2">
+                  {(userRole || profileData?.user_type) && (
+                    <span
+                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                        (isSeller || profileData?.user_type === 'seller')
+                          ? "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
+                      <User className="w-3 h-3" />
+                      {(isSeller || profileData?.user_type === 'seller') ? "Seller" : "Buyer"}
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <Link to="/login" className="text-lg font-semibold text-gray-900">
-                  Sign In / Register
-                </Link>
-              )}
+              </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 transition font-medium"
+            >
+              Logout
+            </button>
           </div>
-        </div>
-
-        {/* Quick Links */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-          <div className="flex justify-around items-center">
-            <Link to="/wishlist" className="flex flex-col items-center gap-2 text-gray-700">
-              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
-                <Heart className="w-6 h-6 text-red-600" />
-              </div>
-              <span className="text-xs font-medium">Wish List</span>
-            </Link>
-            <Link to="/" className="flex flex-col items-center gap-2 text-gray-700">
-              <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center">
-                <Ticket className="w-6 h-6 text-orange-600" />
-              </div>
-              <span className="text-xs font-medium">Coupons</span>
-            </Link>
-            <Link to="/" className="flex flex-col items-center gap-2 text-gray-700">
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-blue-600" />
-              </div>
-              <span className="text-xs font-medium">Shopping credit</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* My Orders Section */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">My Orders</h2>
-            <Link to="/orders" className="text-sm text-gray-600 flex items-center gap-1">
-              View All <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-4 gap-4 mb-4">
-            <Link to="/orders?status=unpaid" className="flex flex-col items-center gap-2 text-gray-700">
-              <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center">
-                <ShoppingBag className="w-7 h-7 text-orange-600" />
-              </div>
-              <span className="text-xs font-medium text-center">Unpaid</span>
-            </Link>
-            <Link to="/orders?status=shipping" className="flex flex-col items-center gap-2 text-gray-700">
-              <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
-                <Package className="w-7 h-7 text-blue-600" />
-              </div>
-              <span className="text-xs font-medium text-center">To be shipped</span>
-            </Link>
-            <Link to="/orders?status=shipped" className="flex flex-col items-center gap-2 text-gray-700">
-              <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
-                <Truck className="w-7 h-7 text-green-600" />
-              </div>
-              <span className="text-xs font-medium text-center">Shipped</span>
-            </Link>
-            <Link to="/orders?status=review" className="flex flex-col items-center gap-2 text-gray-700">
-              <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
-                <FileCheck className="w-7 h-7 text-purple-600" />
-              </div>
-              <span className="text-xs font-medium text-center">To be reviewed</span>
-            </Link>
-          </div>
-
-          <Link to="/orders?status=dispute" className="flex items-center justify-between py-3 border-t border-gray-200 text-gray-700">
-            <span className="text-sm font-medium">In dispute</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        {/* Settings Section */}
-        <div className="bg-white rounded-lg shadow-sm mb-4">
-          <Link to="/settings" className="flex items-center justify-between p-4 border-b border-gray-200 text-gray-700">
-            <div className="flex items-center gap-3">
-              <Settings className="w-5 h-5 text-gray-600" />
-              <span className="text-sm font-medium">Settings</span>
-            </div>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-          <Link to="/help" className="flex items-center justify-between p-4 border-b border-gray-200 text-gray-700">
-            <div className="flex items-center gap-3">
-              <HelpCircle className="w-5 h-5 text-gray-600" />
-              <span className="text-sm font-medium">Help center</span>
-            </div>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-          <Link to="/contact" className="flex items-center justify-between p-4 text-gray-700">
-            <div className="flex items-center gap-3">
-              <MessageSquare className="w-5 h-5 text-gray-600" />
-              <span className="text-sm font-medium">Suggestion</span>
-            </div>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
         </div>
       </div>
 
