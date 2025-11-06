@@ -712,17 +712,17 @@ export default function ProductDetail() {
           </div>
 
         {/* Product Details Tabs - Mobile optimized */}
-        <div className="mt-4 sm:mt-6 lg:mt-8">
-          <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+        <div className="mt-6 sm:mt-8 lg:mt-10">
+          <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md">
             <nav className="flex overflow-x-auto scrollbar-hide">
               {['description', 'choices', 'specifications', 'reviews'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-3 px-3 sm:px-4 border-b-2 font-bold text-xs sm:text-sm capitalize whitespace-nowrap touch-manipulation transition-all ${
+                  className={`flex-1 py-4 px-4 sm:px-6 border-b-2 font-bold text-sm sm:text-base capitalize whitespace-nowrap touch-manipulation transition-all ${
                     activeTab === tab
-                      ? 'border-red-600 text-red-600 bg-red-50'
-                      : 'border-transparent text-gray-500'
+                      ? 'border-red-600 text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 dark:border-red-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
                   {tab}
@@ -731,19 +731,20 @@ export default function ProductDetail() {
             </nav>
           </div>
 
-          {/* RESPONSIVE: Aggressively reduced padding on mobile */}
-          <div className="py-3 sm:py-4 lg:py-6">
+          {/* RESPONSIVE: Content area with better padding */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md mt-4">
+            <div className="py-6 sm:py-8 lg:py-10 px-4 sm:px-6 lg:px-8">
             {activeTab === 'description' && (
-              <div className="prose max-w-none">
-                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{product.description}</p>
-                {product.features && (
-                  <div className="mt-4 sm:mt-6">
-                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Key Features</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+              <div className="prose max-w-none dark:prose-invert">
+                <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">{product.description}</p>
+                {product.features && product.features.length > 0 && (
+                  <div className="mt-8">
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">Key Features</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {product.features.map((feature, index) => (
-                        <div key={index} className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-green-50 rounded-lg border border-green-200">
-                          <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 shrink-0" />
-                          <span className="text-xs sm:text-sm text-gray-700 font-medium">{feature}</span>
+                        <div key={index} className="flex items-start space-x-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 hover:shadow-md transition-shadow">
+                          <Check className="w-5 h-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
+                          <span className="text-sm sm:text-base text-gray-800 dark:text-gray-200 font-medium">{feature}</span>
                         </div>
                       ))}
                     </div>
@@ -753,9 +754,9 @@ export default function ProductDetail() {
             )}
 
             {activeTab === 'choices' && (
-              <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+              <div className="space-y-6 sm:space-y-8">
                 <div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Available Choices</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">Available Choices</h3>
                   
                   {/* Colors */}
                   {product.colors && product.colors.length > 1 && (
@@ -847,53 +848,64 @@ export default function ProductDetail() {
             )}
 
             {activeTab === 'specifications' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Object.entries(product.specifications || {}).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="font-medium text-gray-900">{key}</span>
-                    <span className="text-gray-700">{value}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'reviews' && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-1">
-                    {renderStars(product.rating)}
-                  </div>
-                  <span className="text-2xl font-bold">{product.rating}</span>
-                  <span className="text-gray-600">({product.reviewCount} reviews)</span>
-                </div>
-
-                <div className="space-y-4">
-                  {product.reviews?.map((review) => (
-                    <div key={review.id} className="border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{review.user}</span>
-                          {review.verified && (
-                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                              Verified Purchase
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          {renderReviewStars(review.rating)}
-                        </div>
-                      </div>
-                      <h4 className="font-medium text-gray-900 mb-2">{review.title}</h4>
-                      <p className="text-gray-700 mb-3">{review.comment}</p>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>{new Date(review.date).toLocaleDateString()}</span>
-                        <span>{review.helpful} people found this helpful</span>
-                      </div>
+              <div>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">Specifications</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(product.specifications || {}).map(([key, value]) => (
+                    <div key={key} className="flex justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
+                      <span className="font-semibold text-gray-900 dark:text-gray-200">{key}</span>
+                      <span className="text-gray-700 dark:text-gray-300">{value}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
+
+            {activeTab === 'reviews' && (
+              <div className="space-y-6">
+                <div className="flex items-center space-x-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center space-x-1">
+                    {renderStars(product.rating)}
+                  </div>
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">{product.rating}</span>
+                  <span className="text-gray-600 dark:text-gray-400 text-lg">({product.reviewCount} reviews)</span>
+                </div>
+
+                <div className="space-y-6">
+                  {product.reviews && product.reviews.length > 0 ? (
+                    product.reviews.map((review) => (
+                      <div key={review.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-gray-50 dark:bg-gray-700/30 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-3">
+                            <span className="font-semibold text-gray-900 dark:text-white">{review.user}</span>
+                            {review.verified && (
+                              <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full font-medium">
+                                Verified Purchase
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            {renderReviewStars(review.rating)}
+                          </div>
+                        </div>
+                        <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-lg">{review.title}</h4>
+                        <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{review.comment}</p>
+                        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                          <span>{new Date(review.date).toLocaleDateString()}</span>
+                          <span>{review.helpful} people found this helpful</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 dark:text-gray-400 text-lg">No reviews yet. Be the first to review this product!</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            </div>
+          </div>
         </div>
       </div>
 
