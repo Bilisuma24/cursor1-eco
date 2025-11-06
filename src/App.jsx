@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Profile from "./pages/profile";
 import Account from "./pages/Account";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
 import Wishlist from "./pages/Wishlist";
@@ -425,6 +426,7 @@ function AppContent() {
               
               {/* Protected Routes */}
               <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/price-alerts" element={<PriceAlerts />} />

@@ -73,14 +73,14 @@ export default function SearchAndFilter({
           {/* Filter Controls - RESPONSIVE: Hide on mobile unless open, show on desktop */}
           <div className={`${isFilterOpen ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4`}>
             {/* Categories */}
-            <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
-              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Category:</span>
+            <div className="flex items-center space-x-1 sm:space-x-1.5 min-w-0">
+              <span className="text-[10px] sm:text-xs font-medium text-gray-700 whitespace-nowrap">Category:</span>
               <select
                 value={localFilters.category || ''}
                 onChange={(e) => handleFilterChange('category', e.target.value)}
-                className="flex-1 sm:flex-none min-w-[120px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="flex-1 sm:flex-none min-w-[90px] border border-gray-300 rounded-md px-1.5 sm:px-2 py-1 sm:py-1.5 text-[10px] sm:text-xs focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">All Categories</option>
+                <option value=""></option>
                 {categories.map(category => (
                   <option key={category.id} value={category.name}>
                     {category.name}
@@ -96,7 +96,7 @@ export default function SearchAndFilter({
                 onChange={(e) => handleFilterChange('subcategory', e.target.value)}
                 className="min-w-[120px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">All</option>
+                <option value=""></option>
                 {categories
                   .find(c => c.name === (localFilters.category || ''))?.subcategories?.map((sub) => (
                     <option key={sub} value={sub}>{sub}</option>
@@ -112,7 +112,7 @@ export default function SearchAndFilter({
                 onChange={(e) => handleFilterChange('priceRange', e.target.value)}
                 className="flex-1 sm:flex-none min-w-[120px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">Any Price</option>
+                <option value=""></option>
                 <option value="0-25">Under $25</option>
                 <option value="25-50">$25 - $50</option>
                 <option value="50-100">$50 - $100</option>
@@ -129,7 +129,7 @@ export default function SearchAndFilter({
                 onChange={(e) => handleFilterChange('rating', e.target.value)}
                 className="flex-1 sm:flex-none min-w-[120px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">Any Rating</option>
+                <option value=""></option>
                 <option value="4.5">4.5+ Stars</option>
                 <option value="4">4+ Stars</option>
                 <option value="3">3+ Stars</option>
@@ -179,7 +179,7 @@ export default function SearchAndFilter({
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                 className="flex-1 sm:flex-none min-w-[140px] border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">Featured</option>
+                <option value=""></option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="rating">Customer Rating</option>
@@ -206,13 +206,13 @@ export default function SearchAndFilter({
           <div className="lg:hidden bg-gray-50 rounded-lg p-4 space-y-4">
             {/* Categories */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Category</label>
               <select
                 value={localFilters.category || ''}
                 onChange={(e) => handleFilterChange('category', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">All Categories</option>
+                <option value=""></option>
                 {categories.map(category => (
                   <option key={category.id} value={category.name}>
                     {category.name}
@@ -229,7 +229,7 @@ export default function SearchAndFilter({
                 onChange={(e) => handleFilterChange('subcategory', e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">All</option>
+                <option value=""></option>
                 {categories
                   .find(c => c.name === (localFilters.category || ''))?.subcategories?.map((sub) => (
                     <option key={sub} value={sub}>{sub}</option>
@@ -245,7 +245,7 @@ export default function SearchAndFilter({
                 onChange={(e) => handleFilterChange('priceRange', e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">Any Price</option>
+                <option value=""></option>
                 <option value="0-25">Under $25</option>
                 <option value="25-50">$25 - $50</option>
                 <option value="50-100">$50 - $100</option>
@@ -262,7 +262,7 @@ export default function SearchAndFilter({
                 onChange={(e) => handleFilterChange('rating', e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">Any Rating</option>
+                <option value=""></option>
                 <option value="4.5">4.5+ Stars</option>
                 <option value="4">4+ Stars</option>
                 <option value="3">3+ Stars</option>
@@ -314,7 +314,7 @@ export default function SearchAndFilter({
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="">Featured</option>
+                <option value=""></option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="rating">Customer Rating</option>

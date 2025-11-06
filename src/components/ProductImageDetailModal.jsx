@@ -692,10 +692,6 @@ export default function ProductImageDetailModal({
                     </div>
                   )}
                   <div className="flex items-center space-x-2 text-gray-700">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium">30-day return policy</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-gray-700">
                     <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     <span className="text-xs sm:text-sm font-medium">Fast delivery: 2-5 business days</span>
                   </div>

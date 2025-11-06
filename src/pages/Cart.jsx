@@ -283,7 +283,7 @@ export default function Cart() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className={cartGridClass}>
           {/* Left Column - Cart Items */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-5">
             {/* Cart Header */}
             <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 lg:p-6">
               <div className="flex items-center justify-between">
@@ -304,86 +304,119 @@ export default function Cart() {
 
             {/* Cart Items */}
             {cartItems.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                {/* Product Card */}
-                <div className="p-3 sm:p-4 lg:p-6">
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative">
+                {/* Delete Button - Right Corner */}
+                <button
+                  onClick={() => handleRemoveItem(item)}
+                  className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 lg:top-3 lg:right-3 z-10 p-1 lg:p-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                  aria-label="Remove item"
+                >
+                  <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                </button>
+
+                {/* Product Card - Mobile: Compact, Desktop: Spacious */}
+                <div className="p-0 lg:p-0 overflow-hidden">
+                  <div className="flex items-stretch lg:items-start">
                     {/* Product Image */}
-                    <Link to={`/product/${item.id}`} className="flex-shrink-0">
-                      <div className="relative w-full sm:w-28 lg:w-32 h-28 sm:h-28 lg:h-32 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden group">
+                    <Link to={`/product/${item.id}`} className="flex-shrink-0 self-stretch lg:self-auto">
+                      <div className="relative w-24 sm:w-28 lg:w-40 xl:w-48 h-full lg:h-auto lg:min-h-[140px] xl:min-h-[160px] min-h-[70px] sm:min-h-[80px] bg-gray-100 dark:bg-gray-700 overflow-hidden group lg:rounded-l-lg">
                         <img
                           src={item.images?.[0] || item.image || '/placeholder-product.jpg'}
                           alt={item.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          className="w-full h-full lg:h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                         {item.originalPrice && item.originalPrice > item.price && (
-                          <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
-                            {Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}% OFF
+                          <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-red-500 text-white text-[9px] sm:text-[10px] lg:text-xs font-bold px-1 py-0.5 lg:px-2 lg:py-1 rounded">
+                            {Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
                           </div>
                         )}
                       </div>
                     </Link>
 
                     {/* Product Details */}
-                    <div className="flex-1 flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4">
-                      <div className="flex-1">
-                        <Link to={`/product/${item.id}`} className="block">
-                          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-1.5 sm:mb-2 line-clamp-2">
+                    <div className="flex-1 min-w-0 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 p-3 sm:p-3.5 lg:p-6">
+                      {/* Left Section: Product Info */}
+                      <div className="flex-1 min-w-0 lg:pr-4">
+                        <Link to={`/product/${item.id}`} className="block mb-2 lg:mb-3">
+                          <h3 className="text-sm lg:text-base xl:text-lg font-medium lg:font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2 lg:line-clamp-none">
                             {item.name}
                           </h3>
                         </Link>
-                        <div className="flex items-center space-x-2 mb-1.5 sm:mb-2">
-                          <span className="text-base sm:text-lg lg:text-xl font-bold text-red-600 dark:text-red-400">
-                            ETB{formatPrice(item.price)}
-                          </span>
-                          {item.originalPrice && item.originalPrice > item.price && (
-                            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-through">
-                              ETB{formatPrice(item.originalPrice)}
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4 space-y-1 lg:space-y-0">
+                          <div className="flex items-center space-x-2 lg:space-x-3">
+                            <span className="text-sm lg:text-lg xl:text-xl font-bold text-red-600 dark:text-red-400">
+                              ETB{formatPrice(item.price)}
                             </span>
-                          )}
-                        </div>
-                        {item.color && (
-                          <div className="flex items-center space-x-2 mb-2">
-                            <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Color:</span>
-                            <div
-                              className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-gray-300 dark:border-gray-600"
-                              style={{ backgroundColor: item.color }}
-                            ></div>
+                            {item.originalPrice && item.originalPrice > item.price && (
+                              <span className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 line-through">
+                                ETB{formatPrice(item.originalPrice)}
+                              </span>
+                            )}
                           </div>
-                        )}
+                          {/* Quantity Controls - Desktop */}
+                          <div className="hidden lg:flex items-center space-x-3">
+                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Quantity:</span>
+                            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1.5 border border-gray-200 dark:border-gray-600">
+                              <button
+                                onClick={() => handleQuantityChange(item, Math.max(1, item.quantity - 1))}
+                                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={item.quantity <= 1}
+                              >
+                                <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                              </button>
+                              <span className="text-base font-semibold text-gray-900 dark:text-white min-w-[2rem] text-center">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => handleQuantityChange(item, item.quantity + 1)}
+                                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                              >
+                                <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Quantity Controls */}
-                      <div className="flex items-center justify-between sm:flex-col sm:items-end sm:justify-center gap-3 sm:gap-4">
-                        <div className="flex items-center space-x-2 sm:space-x-3 bg-gray-100 dark:bg-gray-700 rounded-lg p-1.5 sm:p-2">
+                      {/* Right Section: Price & Actions */}
+                      <div className="flex lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-3 lg:gap-4 lg:min-w-[180px]">
+                        {/* Quantity Controls - Mobile */}
+                        <div className="flex lg:hidden items-center space-x-1.5 bg-gray-100 dark:bg-gray-700 rounded p-1">
                           <button
                             onClick={() => handleQuantityChange(item, Math.max(1, item.quantity - 1))}
-                            className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors disabled:opacity-50"
+                            className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors disabled:opacity-50"
                             disabled={item.quantity <= 1}
                           >
-                            <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
+                            <Minus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                           </button>
-                          <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white min-w-[1.5rem] sm:min-w-[2rem] text-center">
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white min-w-[1.5rem] text-center">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => handleQuantityChange(item, item.quantity + 1)}
-                            className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                            className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                           >
-                            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
+                            <Plus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                           </button>
                         </div>
 
-                        <div className="flex flex-col items-end">
-                          <span className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2">
-                            ETB{formatPrice(item.price * item.quantity)}
-                          </span>
+                        {/* Total Price & Checkout */}
+                        <div className="flex flex-col items-end lg:items-end gap-2 lg:gap-3">
+                          <div className="text-right">
+                            <span className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 block lg:hidden">Total:</span>
+                            <span className="text-sm lg:text-xl xl:text-2xl font-bold text-gray-900 dark:text-white">
+                              ETB{formatPrice(item.price * item.quantity)}
+                            </span>
+                          </div>
+                          {/* Proceed to Checkout Button */}
                           <button
-                            onClick={() => handleRemoveItem(item)}
-                            className="flex items-center space-x-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs sm:text-sm font-medium transition-colors"
+                            onClick={handleCheckout}
+                            disabled={isCheckingOut || !user}
+                            className="flex items-center justify-center space-x-1.5 lg:space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-1.5 lg:px-4 lg:py-2.5 rounded text-xs lg:text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md lg:w-full"
                           >
-                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            <span>Remove</span>
+                            <CreditCard className="w-4 h-4 lg:w-5 lg:h-5" />
+                            <span className="hidden sm:inline lg:inline">{isCheckingOut ? 'Processing...' : 'Checkout'}</span>
+                            <span className="sm:hidden lg:hidden">{isCheckingOut ? '...' : 'Buy'}</span>
                           </button>
                         </div>
                       </div>
@@ -434,25 +467,6 @@ export default function Cart() {
                   </div>
                 </div>
 
-                {/* Enhanced Checkout Button */}
-                <button
-                  onClick={handleCheckout}
-                  disabled={isCheckingOut}
-                  className="w-full relative py-3 sm:py-3.5 lg:py-4 px-4 sm:px-5 lg:px-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-700 hover:via-indigo-700 hover:to-cyan-700 dark:from-blue-500 dark:via-indigo-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:via-indigo-600 dark:hover:to-cyan-600 text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] overflow-hidden mb-4 sm:mb-5 lg:mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {/* Decorative background effects */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 opacity-0 hover:opacity-100 transition-opacity"></div>
-                  <div className="absolute -top-2 -right-2 w-16 h-16 sm:w-20 sm:h-20 bg-white/10 rounded-full blur-xl hover:scale-150 transition-transform duration-500"></div>
-                  
-                  <span className="relative z-10 flex items-center justify-center space-x-2">
-                    <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>{isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}</span>
-                    {!isCheckingOut && <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />}
-                  </span>
-                  
-                  {/* Shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-1000"></div>
-                </button>
 
                 {/* Enhanced Buyer Protection Cards */}
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-5 lg:pt-6 space-y-3 sm:space-y-4">

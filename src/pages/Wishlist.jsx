@@ -317,7 +317,7 @@ export default function Wishlist() {
           {sortedWishlist.map((product) => (
             <div key={product.id} className="bg-white dark:bg-gray-800 rounded-md sm:rounded-xl shadow-sm sm:shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden group flex flex-col h-full">
               {/* Image Container - Smaller on mobile */}
-              <div className="relative aspect-square overflow-hidden bg-gray-50 flex-shrink-0 max-h-[140px] sm:max-h-none">
+              <div className="relative aspect-square overflow-hidden bg-gray-50 flex-shrink-0 max-h-[140px] sm:max-h-none border border-gray-100 bg-white rounded">
                 <img
                   src={product.images?.[0] || `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`}
                   alt={product.name}

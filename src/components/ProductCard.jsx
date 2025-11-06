@@ -57,7 +57,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         onClick={() => navigate(`/product/${product.id}`)}
       >
         <div className="flex">
-          <div className="relative w-32 h-32 sm:w-48 sm:h-48 shrink-0">
+          <div className="relative w-32 h-32 sm:w-48 sm:h-48 shrink-0 border border-gray-100 bg-white rounded overflow-hidden">
             <img
               src={product.images?.[0] || 'https://via.placeholder.com/200'}
               alt={product.name}
@@ -101,7 +101,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
       onClick={() => navigate(`/product/${product.id}`)}
     >
       {/* Image */}
-      <div className="relative aspect-square bg-gray-50">
+      <div className="relative aspect-square bg-gray-50 border border-gray-100 bg-white rounded overflow-hidden">
         <img
           src={product.images?.[selectedImage] || 'https://via.placeholder.com/300'}
           alt={product.name}
