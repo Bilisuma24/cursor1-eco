@@ -44,12 +44,41 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
       <div className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group">
         <div className="flex">
           {/* Image Container */}
-          <div className="relative w-48 h-48 flex-shrink-0 bg-gray-50">
+          <div className="relative w-48 h-48 flex-shrink-0 bg-gray-50 group/image">
             <img
               src={product.images[selectedImage]}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
+            
+            {/* Image navigation for list view */}
+            {product.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage((selectedImage - 1 + product.images.length) % product.images.length);
+                  }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage((selectedImage + 1) % product.images.length);
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity"
+                >
+                  ›
+                </button>
+                
+                {/* Image counter for list view */}
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                  {selectedImage + 1}/{product.images.length}
+                </div>
+              </>
+            )}
             
             {/* Discount Badge */}
             {product.discount && (
@@ -69,6 +98,13 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
             >
               <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>
+
+            {/* Multiple images indicator */}
+            {product.images.length > 1 && (
+              <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                {product.images.length} photos
+              </div>
+            )}
           </div>
 
           {/* Content */}
@@ -210,20 +246,35 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         {/* Image Thumbnails */}
         {product.images.length > 1 && (
           <div className="absolute bottom-3 left-3 right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {product.images.slice(0, 3).map((image, index) => (
+            {product.images.slice(0, 4).map((image, index) => (
               <button
                 key={index}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedImage(index);
                 }}
-                className={`w-8 h-8 rounded border-2 shadow-sm ${
-                  selectedImage === index ? 'border-blue-500' : 'border-white'
+                className={`w-8 h-8 rounded border-2 shadow-sm transition-all duration-200 ${
+                  selectedImage === index 
+                    ? 'border-blue-500 ring-2 ring-blue-200 scale-110' 
+                    : 'border-white hover:border-blue-300 hover:scale-105'
                 }`}
+                title={`View image ${index + 1}`}
               >
-                <img src={image} alt="" className="w-full h-full object-cover rounded" />
+                <img src={image} alt={`View ${index + 1}`} className="w-full h-full object-cover rounded" />
               </button>
             ))}
+            {product.images.length > 4 && (
+              <div className="w-8 h-8 rounded border-2 border-white bg-black/50 flex items-center justify-center text-white text-xs font-bold">
+                +{product.images.length - 4}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Image counter */}
+        {product.images.length > 1 && (
+          <div className="absolute top-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            {selectedImage + 1}/{product.images.length}
           </div>
         )}
 

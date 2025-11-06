@@ -30,6 +30,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   useEffect(() => {
     const foundProduct = productsData.products.find(p => p.id === parseInt(id));
@@ -59,6 +60,26 @@ export default function ProductDetail() {
       if (autoplayRef.current) clearInterval(autoplayRef.current);
     };
   }, [product, isAutoplaying]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!product || product.images.length <= 1) return;
+      
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length);
+        setIsAutoplaying(false);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setSelectedImage((prev) => (prev + 1) % product.images.length);
+        setIsAutoplaying(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [product]);
 
   if (!product) {
     return (
@@ -141,10 +162,18 @@ export default function ProductDetail() {
               <img
                 src={product.images[selectedImage]}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                 onMouseEnter={() => setIsAutoplaying(false)}
                 onMouseLeave={() => setIsAutoplaying(true)}
+                onClick={() => setIsImageViewerOpen(true)}
               />
+              
+              {/* Image counter */}
+              {product.images.length > 1 && (
+                <div className="absolute top-3 left-3 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                  {selectedImage + 1} / {product.images.length}
+                </div>
+              )}
 
               {/* Prev/Next Controls */}
               {product.images.length > 1 && (
@@ -182,18 +211,26 @@ export default function ProductDetail() {
 
             {/* Thumbnail Images */}
             {product.images.length > 1 && (
-              <div className="flex space-x-2 overflow-x-auto">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                      selectedImage === index ? 'border-blue-500' : 'border-gray-200'
-                    }`}
-                  >
-                    <img src={image} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-gray-900">Select Image</h3>
+                <div className="flex space-x-2 overflow-x-auto pb-2">
+                  {product.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                        selectedImage === index 
+                          ? 'border-blue-500 ring-2 ring-blue-200 scale-105' 
+                          : 'border-gray-200 hover:border-blue-300 hover:scale-102'
+                      }`}
+                    >
+                      <img src={image} alt={`Product view ${index + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+                <div className="text-xs text-gray-500 text-center">
+                  {selectedImage + 1} of {product.images.length} images
+                </div>
               </div>
             )}
           </div>
@@ -484,6 +521,61 @@ export default function ProductDetail() {
           </div>
         )}
         </div>
+
+        {/* Image Viewer Modal */}
+        {isImageViewerOpen && (
+          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+            <div className="relative max-w-4xl max-h-full">
+              <button
+                onClick={() => setIsImageViewerOpen(false)}
+                className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              
+              <img
+                src={product.images[selectedImage]}
+                alt={product.name}
+                className="max-w-full max-h-full object-contain"
+              />
+              
+              {/* Navigation controls in modal */}
+              {product.images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImage((selectedImage - 1 + product.images.length) % product.images.length)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-12 h-12 rounded-full flex items-center justify-center"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    onClick={() => setSelectedImage((selectedImage + 1) % product.images.length)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-12 h-12 rounded-full flex items-center justify-center"
+                  >
+                    ›
+                  </button>
+                  
+                  {/* Thumbnail strip in modal */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                    {product.images.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className={`w-12 h-12 rounded border-2 overflow-hidden ${
+                          selectedImage === index ? 'border-white' : 'border-white/50'
+                        }`}
+                      >
+                        <img src={image} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
     </div>
   );
 }

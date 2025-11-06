@@ -4,17 +4,19 @@ import { useState, useContext } from "react";
 import productsData from "./data/products.js";
 
 import Home from "./pages/Home";
-import Shop from "./pages/Shop";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import SignUp from "./pages/SignUp";
+import Shop from "./pages/shop";
+import About from "./pages/about";
+import Contact from "./pages/contact";
+import SignUp from "./pages/Signup";
 import Login from "./pages/Login";
-import Profile from "./pages/Profile";
+import Profile from "./pages/profile";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
 import Wishlist from "./pages/Wishlist";
 import ScrollToTop from "./components/ScrollToTop";
+import ImageSelectionTest from "./components/ImageSelectionTest";
+import ImageTest from "./pages/ImageTest";
 
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { AuthProvider, AuthContext } from "./contexts/AuthContext";
@@ -253,6 +255,8 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/image-test" element={<ImageSelectionTest />} />
+              <Route path="/image-test/:id" element={<ImageTest />} />
             </Routes>
           </main>
 
