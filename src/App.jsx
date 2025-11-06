@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, Globe, MapPin, LogOut, ChevronUp } from "lucide-react";
+import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
 
@@ -38,8 +38,7 @@ import { PublicRoute } from "./components/ProtectedRoute";
 function NavbarContent() {
   const { user, signOut, loading: authLoading } = useAuth();
   const { userRole, isSeller, isAdmin, loading: roleLoading } = useUserRole();
-  const { getCartItemsCount, wishlist } = useCart();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { wishlist } = useCart();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
@@ -117,9 +116,9 @@ function NavbarContent() {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">A</span>
+              <span className="text-white font-bold text-xl">E</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">AliStyle</span>
+            <span className="text-2xl font-bold text-gray-900">Eco Store</span>
           </Link>
 
           {/* Search Bar - RESPONSIVE: Improved mobile layout */}
@@ -185,16 +184,6 @@ function NavbarContent() {
               {wishlist.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {wishlist.length}
-                </span>
-              )}
-            </Link>
-
-            {/* Cart */}
-            <Link to="/cart" className="relative p-2 text-gray-700 hover:text-orange-600 transition-colors duration-200">
-              <ShoppingCart className="w-6 h-6" />
-              {getCartItemsCount() > 0 && (
-                <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {getCartItemsCount()}
                 </span>
               )}
             </Link>
@@ -305,187 +294,78 @@ function NavbarContent() {
               </div>
             )}
 
-            {/* Mobile Menu Button - RESPONSIVE: Better touch target */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="sm:hidden p-2 text-gray-700 hover:text-orange-600 touch-manipulation"
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile Menu - RESPONSIVE: Improved spacing and scrolling */}
-        {isMobileMenuOpen && (
-          <div className="sm:hidden border-t border-gray-200 py-4 max-h-[calc(100vh-120px)] overflow-y-auto">
-            {/* Mobile Search */}
-            <div className="px-3 mb-4">
-              <form onSubmit={handleSearch} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
-                />
-                <button
-                  type="submit"
-                  className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Search
-                </button>
-              </form>
-            </div>
-            <div className="flex flex-col space-y-2">
-              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium rounded-lg transition-colors touch-manipulation">
-                Home
-              </Link>
-              <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium rounded-lg transition-colors touch-manipulation">
-                Shop
-              </Link>
-              <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium rounded-lg transition-colors touch-manipulation">
-                About
-              </Link>
-              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium rounded-lg transition-colors touch-manipulation">
-                Contact
-              </Link>
-              {user && (
-                <>
-                  <div className="border-t border-gray-200 px-6 py-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                        {getUserInitials()}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <Link to="/profile" className="text-gray-700 hover:text-orange-600 font-medium">
-                    Profile
-                  </Link>
-                  <Link to="/orders" className="text-gray-700 hover:text-orange-600 font-medium">
-                    Orders
-                  </Link>
-                  {isSeller && (
-                    <Link to="/seller-dashboard" className="text-gray-700 hover:text-orange-600 font-medium">
-                      Seller Dashboard
-                    </Link>
-                  )}
-                  {isAdmin && (
-                    <Link to="/admin" className="text-gray-700 hover:text-orange-600 font-medium">
-                      Admin Dashboard
-                    </Link>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
 function FooterContent() {
-  const [openSections, setOpenSections] = useState({});
-  
-  const toggleSection = (section) => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
-
   return (
-    <footer className="bg-gray-900 text-white mt-auto">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 lg:py-12 mobile-container">
-        {/* MOBILE-FIRST: Collapsible sections on mobile, grid on desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-          {/* Company Info - Always visible */}
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-lg sm:text-xl">E</span>
-              </div>
-              <span className="text-xl sm:text-2xl font-bold">EcoShop</span>
-            </div>
-            <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-              Your trusted partner for quality products at unbeatable prices.
-            </p>
-            <div className="flex space-x-3">
-              <button className="min-w-[44px] min-h-[44px] w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 touch-manipulation">
-                <span className="text-sm">f</span>
-              </button>
-              <button className="min-w-[44px] min-h-[44px] w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 touch-manipulation">
-                <span className="text-sm">t</span>
-              </button>
-              <button className="min-w-[44px] min-h-[44px] w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors duration-200 touch-manipulation">
-                <span className="text-sm">i</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Links - Collapsible on mobile */}
-          <div className="sm:block">
-            <button
-              onClick={() => toggleSection('quickLinks')}
-              className="w-full sm:pointer-events-none flex items-center justify-between sm:justify-start py-2 text-base sm:text-lg font-semibold touch-manipulation"
-            >
-              <span>Quick Links</span>
-              <ChevronDown className={`w-5 h-5 sm:hidden transition-transform duration-200 ${openSections.quickLinks ? 'rotate-180' : ''}`} />
-            </button>
-            <ul className={`space-y-2 overflow-hidden transition-all duration-300 ${openSections.quickLinks ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0 sm:max-h-96 sm:opacity-100 sm:mt-3'}`}>
-              <li><Link to="/" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Home</Link></li>
-              <li><Link to="/shop" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Shop</Link></li>
-              <li><Link to="/about" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">About Us</Link></li>
-              <li><Link to="/contact" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Contact</Link></li>
+    <footer className="bg-gray-900 mt-auto">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 py-1.5">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-1.5">
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-[8px] font-semibold text-white mb-0.5">Quick Links</h3>
+            <ul className="space-y-0">
+              <li><Link to="/" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Home</Link></li>
+              <li><Link to="/shop" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Shop</Link></li>
+              <li><Link to="/about" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">About</Link></li>
+              <li><Link to="/contact" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Contact</Link></li>
             </ul>
           </div>
 
-          {/* Customer Service - Collapsible on mobile */}
-          <div className="sm:block">
-            <button
-              onClick={() => toggleSection('customerService')}
-              className="w-full sm:pointer-events-none flex items-center justify-between sm:justify-start py-2 text-base sm:text-lg font-semibold touch-manipulation"
-            >
-              <span>Customer Service</span>
-              <ChevronDown className={`w-5 h-5 sm:hidden transition-transform duration-200 ${openSections.customerService ? 'rotate-180' : ''}`} />
-            </button>
-            <ul className={`space-y-2 overflow-hidden transition-all duration-300 ${openSections.customerService ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0 sm:max-h-96 sm:opacity-100 sm:mt-3'}`}>
-              <li><Link to="/orders" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">My Orders</Link></li>
-              <li><Link to="/wishlist" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Wishlist</Link></li>
-              <li><a href="#" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Help Center</a></li>
-              <li><a href="#" className="text-sm sm:text-base text-gray-400 hover:text-white transition-colors duration-200 block py-2 min-h-[44px] flex items-center touch-manipulation">Returns</a></li>
+          {/* Customer Service */}
+          <div>
+            <h3 className="text-[8px] font-semibold text-white mb-0.5">Support</h3>
+            <ul className="space-y-0">
+              <li><Link to="/orders" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">My Orders</Link></li>
+              <li><Link to="/wishlist" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Wishlist</Link></li>
+              <li><a href="#" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Help Center</a></li>
+              <li><a href="#" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Returns</a></li>
             </ul>
           </div>
 
-          {/* Contact Info - Collapsible on mobile */}
-          <div className="sm:block">
-            <button
-              onClick={() => toggleSection('contactInfo')}
-              className="w-full sm:pointer-events-none flex items-center justify-between sm:justify-start py-2 text-base sm:text-lg font-semibold touch-manipulation"
-            >
-              <span>Contact Info</span>
-              <ChevronDown className={`w-5 h-5 sm:hidden transition-transform duration-200 ${openSections.contactInfo ? 'rotate-180' : ''}`} />
-            </button>
-            <div className={`space-y-2 overflow-hidden transition-all duration-300 ${openSections.contactInfo ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0 sm:max-h-96 sm:opacity-100 sm:mt-3'}`}>
-              <p className="text-sm sm:text-base text-gray-400 break-words">📧 support@ecoshop.com</p>
-              <p className="text-sm sm:text-base text-gray-400">📞 1-800-ECO-SHOP</p>
-              <p className="text-sm sm:text-base text-gray-400 break-words">📍 123 Commerce St, Business City, BC 12345</p>
-            </div>
+          {/* Legal */}
+          <div>
+            <h3 className="text-[7px] font-medium text-white mb-0">Legal</h3>
+            <ul className="space-y-0 leading-tight">
+              <li><a href="#" className="text-[7px] text-gray-400 hover:text-white transition-colors">Privacy</a></li>
+              <li><a href="#" className="text-[7px] text-gray-400 hover:text-white transition-colors">Terms</a></li>
+              <li><a href="#" className="text-[7px] text-gray-400 hover:text-white transition-colors">Cookies</a></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="text-[7px] font-medium text-white mb-0">Contact</h3>
+            <ul className="space-y-0 leading-tight">
+              <li><a href="mailto:support@ecoshop.com" className="text-[7px] text-gray-400 hover:text-white transition-colors">support@ecoshop.com</a></li>
+              <li><a href="tel:+1800ECOSHOP" className="text-[7px] text-gray-400 hover:text-white transition-colors">1-800-ECO-SHOP</a></li>
+            </ul>
           </div>
         </div>
 
-        {/* Footer bottom section */}
-        <div className="border-t border-gray-800 mt-6 sm:mt-8 lg:mt-12 pt-4 sm:pt-6 lg:pt-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
-            <p className="text-xs sm:text-sm text-gray-400 text-center sm:text-left">© {new Date().getFullYear()} EcoShop. All rights reserved.</p>
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 lg:gap-6">
-              <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors duration-200 min-h-[44px] flex items-center touch-manipulation">Privacy Policy</a>
-              <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors duration-200 min-h-[44px] flex items-center touch-manipulation">Terms of Service</a>
-              <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors duration-200 min-h-[44px] flex items-center touch-manipulation">Cookie Policy</a>
+        {/* Footer Bottom */}
+        <div className="border-t border-gray-800 pt-1">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-1.5">
+            <p className="text-[8px] text-gray-400">© {new Date().getFullYear()} EcoShop. All rights reserved.</p>
+            <div className="flex gap-1.5">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <span className="sr-only">Facebook</span>
+                <span className="text-[10px]">f</span>
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <span className="sr-only">Twitter</span>
+                <span className="text-[10px]">t</span>
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <span className="sr-only">Instagram</span>
+                <span className="text-[10px]">i</span>
+              </a>
             </div>
           </div>
         </div>
@@ -497,6 +377,7 @@ function FooterContent() {
 function AppContent() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const isProductDetailPage = location.pathname.startsWith('/product/');
 
   return (
     <>
@@ -505,6 +386,9 @@ function AppContent() {
       <header className="bg-white shadow-md sticky top-0 z-50">
         {isHomePage ? (
           <NavbarContent />
+        ) : isProductDetailPage ? (
+          // No header on product detail page
+          null
         ) : (
           <div className="bg-white shadow-sm border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
@@ -512,9 +396,9 @@ function AppContent() {
                 {/* Logo - Always visible */}
                 <Link to="/" className="flex items-center space-x-2">
                   <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-xl">A</span>
+                    <span className="text-white font-bold text-xl">E</span>
                   </div>
-                  <span className="text-2xl font-bold text-gray-900">AliStyle</span>
+                  <span className="text-2xl font-bold text-gray-900">Eco Store</span>
                 </Link>
               </div>
             </div>
@@ -561,8 +445,8 @@ function AppContent() {
       {/* Mobile Bottom Navigation - Global */}
       <BottomNavigation />
 
-      {/* Footer - MOBILE-FIRST: Enhanced with collapsible sections */}
-      <FooterContent />
+      {/* Footer - Only on home page */}
+      {isHomePage && <FooterContent />}
     </>
   );
 }

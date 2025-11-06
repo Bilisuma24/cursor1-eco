@@ -442,16 +442,16 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden pb-20 sm:pb-0">
+    <div className="bg-gray-50 dark:bg-gray-900 overflow-x-hidden pb-20 sm:pb-0">
       {/* Breadcrumb - MOBILE-FIRST: Enhanced */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2.5 sm:py-3 mobile-container">
-          <div className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 overflow-x-auto scrollbar-hide">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2">
+          <div className="flex items-center space-x-1 sm:space-x-2 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 overflow-x-auto scrollbar-hide">
             <button 
               onClick={() => navigate(-1)} 
-              className="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400 shrink-0 touch-manipulation min-h-[44px] px-2"
+              className="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400 shrink-0 touch-manipulation min-h-[36px] px-1.5 sm:px-2"
             >
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="font-medium">Back</span>
             </button>
             <span>/</span>
@@ -462,68 +462,64 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* MOBILE-FIRST: Compact vertical layout with swipe support */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-8 mobile-container">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-start">
-          {/* Product Media Viewer - MOBILE-FIRST: Swipe-enabled image gallery */}
-          <div 
-            className="space-y-3 sm:space-y-3 lg:space-y-4 w-full max-w-full"
-            onTouchStart={onTouchStartImage}
-            onTouchMove={onTouchMoveImage}
-            onTouchEnd={onTouchEndImage}
-          >
-            {/* MOBILE-FIRST: Swipe-enabled image gallery */}
-            <div className="w-full max-w-full overflow-hidden flex justify-center">
-              <div className="w-full max-w-full sm:max-w-full md:max-w-full relative">
-                <AliExpressImageZoom
-                  images={product.images}
-                  initialIndex={selectedImage}
-                  onChange={setSelectedImage}
+      {/* Product Media Viewer - Full width image */}
+      <div 
+        className="w-full"
+        onTouchStart={onTouchStartImage}
+        onTouchMove={onTouchMoveImage}
+        onTouchEnd={onTouchEndImage}
+      >
+        <div className="w-full overflow-hidden">
+          <AliExpressImageZoom
+            images={product.images}
+            initialIndex={selectedImage}
+            onChange={setSelectedImage}
+          />
+          {/* Swipe indicators for mobile */}
+          {product.images && product.images.length > 1 && (
+            <div className="flex sm:hidden justify-center gap-1.5 mt-2 pb-2">
+              {product.images.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === selectedImage ? 'w-6 bg-blue-600' : 'w-1.5 bg-gray-300'
+                  }`}
                 />
-                {/* Swipe indicators for mobile */}
-                {product.images && product.images.length > 1 && (
-                  <div className="flex sm:hidden justify-center gap-1.5 mt-2">
-                    {product.images.map((_, i) => (
-                      <div
-                        key={i}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          i === selectedImage ? 'w-6 bg-blue-600' : 'w-1.5 bg-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
-          </div>
+          )}
+        </div>
+      </div>
 
-          {/* Product Info - MOBILE: AliExpress-style compact vertical layout */}
-          <div className="space-y-3 sm:space-y-3 md:space-y-4 lg:space-y-6">
+      {/* MOBILE-FIRST: Compact vertical layout with swipe support */}
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-5 lg:py-6">
+        {/* Product Info - MOBILE: AliExpress-style compact vertical layout */}
+        <div className="space-y-4 sm:space-y-4 md:space-y-5">
             {/* Product Title - MOBILE: More prominent */}
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mb-2 leading-tight break-words">{product.name}</h1>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                <div className="flex items-center space-x-1">
+            <div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 leading-tight break-words">{product.name}</h1>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm sm:text-base">
+                <div className="flex items-center space-x-1.5">
                   {renderStars(product.rating)}
-                  <span className="text-gray-600">({product.reviewCount})</span>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">({product.reviewCount})</span>
                 </div>
-                <span className="text-gray-500">{product.sold}+ sold</span>
+                <span className="text-gray-500 dark:text-gray-400">{product.sold}+ sold</span>
               </div>
             </div>
 
             {/* Price - MOBILE: More prominent */}
-            <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-4 border border-red-100">
-              <div className="flex flex-wrap items-baseline gap-3">
-                <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-red-600">
+            <div>
+              <div className="flex flex-wrap items-baseline gap-3 sm:gap-4">
+                <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-red-600 dark:text-red-400">
                   {formatPrice(product.price)}
                 </span>
                 {product.originalPrice && (
-                  <span className="text-base sm:text-lg lg:text-xl text-gray-500 line-through">
+                  <span className="text-base sm:text-lg lg:text-xl text-gray-500 dark:text-gray-400 line-through">
                     {formatPrice(product.originalPrice)}
                   </span>
                 )}
                 {product.discount && (
-                  <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                  <span className="bg-red-600 dark:bg-red-500 text-white px-3 py-1.5 rounded-full text-sm sm:text-base font-bold shadow-sm">
                     -{product.discount}% OFF
                   </span>
                 )}
@@ -531,128 +527,80 @@ export default function ProductDetail() {
             </div>
 
             {/* MOBILE-FIRST: Quantity Selector and Action Buttons */}
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-4">
               {/* Quantity Selector */}
               <div className="flex items-center gap-3 sm:gap-4">
-                <span className="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">Quantity:</span>
-                <div className="flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Quantity:</span>
+                <div className="flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden shadow-sm">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="min-w-[44px] min-h-[44px] px-3 flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors touch-manipulation"
+                    className="min-w-[44px] min-h-[44px] px-3 flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 transition-colors touch-manipulation"
                     aria-label="Decrease quantity"
                   >
-                    <Minus className="w-4 h-4" />
+                    <Minus className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   </button>
-                  <span className="min-w-[44px] min-h-[44px] px-4 flex items-center justify-center font-semibold text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600">
+                  <span className="min-w-[50px] min-h-[44px] px-4 flex items-center justify-center font-bold text-lg text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(Math.min(product.stock || 999, quantity + 1))}
                     disabled={product.stock !== undefined && product.stock !== null && quantity >= product.stock}
-                    className="min-w-[44px] min-h-[44px] px-3 flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="min-w-[44px] min-h-[44px] px-3 flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Increase quantity"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   </button>
                 </div>
               </div>
 
               {/* Action Buttons - Desktop */}
-              <div className="hidden sm:flex gap-3 md:gap-4">
+              <div className="hidden sm:flex gap-2 sm:gap-3">
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stock !== undefined && product.stock !== null && product.stock === 0}
-                  className="flex-1 min-h-[48px] bg-gradient-to-r from-red-600 to-red-700 text-white py-3.5 px-4 rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 font-bold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-red-600 disabled:hover:to-red-700 text-base touch-manipulation shadow-lg shadow-red-200 active:scale-95"
+                  className="flex-1 min-h-[44px] bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 px-4 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 font-bold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-red-600 disabled:hover:to-red-700 text-sm sm:text-base touch-manipulation shadow-md shadow-red-200 active:scale-95"
                 >
-                  <ShoppingCart className="w-5 h-5 flex-shrink-0" />
+                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                   <span className="truncate">{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
                 </button>
                 <button
                   onClick={handleWishlistToggle}
-                  className={`min-w-[48px] min-h-[48px] px-4 py-3.5 rounded-xl border-2 transition-all duration-200 flex items-center justify-center touch-manipulation active:scale-95 ${
+                  className={`min-w-[44px] min-h-[44px] px-3 py-2.5 rounded-lg border-2 transition-all duration-200 flex items-center justify-center touch-manipulation active:scale-95 ${
                     isInWishlist(product.id)
                       ? 'border-red-500 bg-red-50 text-red-600'
                       : 'border-gray-300 bg-white hover:border-red-500 hover:text-red-600'
                   }`}
                 >
-                  <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                  <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                 </button>
-                <button className="min-w-[48px] min-h-[48px] px-4 py-3.5 border-2 border-gray-300 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 touch-manipulation active:scale-95">
-                  <Share2 className="w-5 h-5" />
+                <button className="min-w-[44px] min-h-[44px] px-3 py-2.5 border-2 border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 touch-manipulation active:scale-95">
+                  <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
 
             {/* Shipping Info - MOBILE: Compact cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {product.shipping?.free && (
-                <div className="flex items-center space-x-2 bg-green-50 border border-green-200 rounded-lg p-3">
-                  <Truck className="w-5 h-5 flex-shrink-0 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">Free Shipping</span>
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center">
+                    <Truck className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <span className="text-sm sm:text-base font-semibold text-green-800 dark:text-green-300">Free Shipping</span>
                 </div>
               )}
-              <div className="flex items-center space-x-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <Check className="w-5 h-5 flex-shrink-0 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">30-Day Returns</span>
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center">
+                  <Check className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-sm sm:text-base font-semibold text-blue-800 dark:text-blue-300">30-Day Returns</span>
               </div>
             </div>
 
-            {/* Seller/Store Info - Mobile compact */}
-            {product.seller && (
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    {/* Seller Avatar */}
-                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 ring-2 ring-blue-100">
-                      {product.seller.avatar ? (
-                        <img 
-                          src={product.seller.avatar} 
-                          alt={product.seller.name}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-white font-bold text-base">
-                          {product.seller.name.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    {/* Seller Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-base text-gray-900 truncate">
-                          {product.seller.name}
-                        </span>
-                        {product.seller.verified && (
-                          <div className="flex items-center space-x-1 flex-shrink-0">
-                            <Shield className="w-4 h-4 text-blue-500" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="font-medium">{product.seller.rating || 4.5}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* View Store Button */}
-                  {product.seller.id && (
-                    <button 
-                      onClick={() => navigate(`/seller/${product.seller.id}`)}
-                      className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors duration-200 touch-manipulation whitespace-nowrap active:scale-95"
-                    >
-                      Store
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Enhanced Product Choices - Compact mobile cards */}
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm overflow-hidden">
-              <h3 className="text-base font-bold text-gray-900 mb-4">Choose Your Options</h3>
-              <div className="space-y-4">
+            <div className="bg-white rounded-lg p-3 sm:p-4 border border-gray-200 shadow-sm overflow-hidden">
+              <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-3">Choose Your Options</h3>
+              <div className="space-y-3">
                 {/* Color Selection */}
                 {product.colors && product.colors.length > 0 && (
                   <div>
@@ -762,17 +710,16 @@ export default function ProductDetail() {
             )}
 
           </div>
-        </div>
 
         {/* Product Details Tabs - Mobile optimized */}
-        <div className="mt-6 sm:mt-8 lg:mt-12 px-3 sm:px-0">
-          <div className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+        <div className="mt-4 sm:mt-6 lg:mt-8">
+          <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm">
             <nav className="flex overflow-x-auto scrollbar-hide">
               {['description', 'choices', 'specifications', 'reviews'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-4 px-4 border-b-2 font-bold text-xs sm:text-sm capitalize whitespace-nowrap touch-manipulation transition-all ${
+                  className={`flex-1 py-3 px-3 sm:px-4 border-b-2 font-bold text-xs sm:text-sm capitalize whitespace-nowrap touch-manipulation transition-all ${
                     activeTab === tab
                       ? 'border-red-600 text-red-600 bg-red-50'
                       : 'border-transparent text-gray-500'
@@ -785,7 +732,7 @@ export default function ProductDetail() {
           </div>
 
           {/* RESPONSIVE: Aggressively reduced padding on mobile */}
-          <div className="py-2 sm:py-4 lg:py-8">
+          <div className="py-3 sm:py-4 lg:py-6">
             {activeTab === 'description' && (
               <div className="prose max-w-none">
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{product.description}</p>
@@ -952,10 +899,10 @@ export default function ProductDetail() {
 
         {/* Suggested Products - RESPONSIVE: Horizontal scrollable on mobile */}
         {suggestedProducts.length > 0 && (
-          <div className="mt-6 sm:mt-8 md:mt-12 lg:mt-16 overflow-x-hidden">
-            <h2 className="text-xl sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 sm:mb-4 md:mb-6 lg:mb-8 px-3 sm:px-0">You might also like</h2>
+          <div className="mt-4 sm:mt-6 lg:mt-8 overflow-x-hidden">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">You might also like</h2>
             {/* RESPONSIVE: Horizontal scroll on mobile, grid on desktop */}
-            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-4 lg:gap-6 overflow-x-auto sm:overflow-x-visible pb-4 sm:pb-0 px-3 sm:px-0 scrollbar-hide">
+            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto sm:overflow-x-visible pb-4 sm:pb-0 scrollbar-hide">
               {suggestedProducts.map((suggestedProduct) => (
                 <div
                   key={suggestedProduct.id}
@@ -993,8 +940,7 @@ export default function ProductDetail() {
             </div>
           </div>
         )}
-
-        </div>
+      </div>
     </div>
   );
 }

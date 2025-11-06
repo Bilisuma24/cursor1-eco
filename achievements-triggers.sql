@@ -80,3 +80,4 @@ for each row execute function public.fn_metrics_on_review_change();
 
 
 
+

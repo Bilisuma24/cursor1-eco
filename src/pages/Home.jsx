@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, Star, ShoppingCart, User, Grid, TrendingUp, Truck, Shield, Award, Users, ChevronRight, ChevronLeft, Sparkles, Zap, Heart, Timer, Copy, Menu, ChevronDown } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
@@ -8,6 +8,7 @@ import { supabase } from "../lib/supabaseClient";
 
 export default function Home() {
   const { getCartItemsCount } = useCart();
+  const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [bannerIndex, setBannerIndex] = useState(0);
@@ -171,30 +172,8 @@ export default function Home() {
     }
   ];
 
-  // Discount coupons data
-  const discountCoupons = [
-    {
-      discount: "ETB11,759.3 OFF",
-      minOrder: "ETB95,586.31+",
-      code: "CD1170"
-    },
-    {
-      discount: "ETB9,239.45 OFF",
-      minOrder: "ETB75,427.51+",
-      code: "CD1155"
-    },
-    {
-      discount: "ETB7,559.55 OFF",
-      minOrder: "ETB61,988.31+",
-      code: "CD1145"
-    }
-  ];
-
-  // Copy coupon code to clipboard
-  const copyCouponCode = (code) => {
-    navigator.clipboard.writeText(code);
-    // You might want to add a toast notification here
-  };
+  // Get top 3 deal products for the boxes
+  const topDealProducts = trendingProducts.slice(0, 3);
 
   // Categories for desktop
   const categories = productsData.categories || [];
@@ -204,33 +183,6 @@ export default function Home() {
       {/* MOBILE ONLY: AliExpress-style Layout */}
       <div className="md:hidden">
         <div className="bg-white pb-20">
-          {/* Top Browser Bar */}
-          <div className="bg-gray-800 text-white text-xs py-1 px-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-600 rounded"></div>
-              <span className="text-gray-300">ecostore.com</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-600 rounded"></div>
-              <div className="w-6 h-4 bg-gray-600 rounded text-xs flex items-center justify-center">15</div>
-              <div className="w-4 h-4 bg-gray-600 rounded"></div>
-            </div>
-          </div>
-
-          {/* Header */}
-          <div className="bg-white border-b border-gray-200">
-            <div className="px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-gray-900">Eco</span>
-                <span className="text-xl font-bold text-orange-500">Store</span>
-              </div>
-              <div className="flex items-center gap-1 text-sm text-gray-700">
-                <span className="text-xs">📍</span>
-                <span>Deliver to Ethiopia</span>
-              </div>
-            </div>
-          </div>
-
           {/* Search Bar */}
           <div className="bg-white px-4 py-3 border-b border-gray-200">
             <div className="flex items-center gap-2">
@@ -247,46 +199,22 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Icon Row */}
-          <div className="bg-white px-4 py-4 border-b border-gray-200">
-            <div className="flex justify-around">
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mb-1">
-                  <Star className="w-6 h-6 text-yellow-400 fill-current" />
-                </div>
-                <span className="text-xs text-gray-700">Coins</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mb-1">
-                  <span className="text-white text-lg">⚡</span>
-                </div>
-                <span className="text-xs text-gray-700">Super Deals</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-1">
-                  <span className="text-white text-lg">🌳</span>
-                </div>
-                <span className="text-xs text-gray-700">Prize Land</span>
-              </div>
-            </div>
-          </div>
-
           {/* Categories Section - Mobile */}
-          <div className="bg-white px-4 py-4 border-b border-gray-200">
-            <div className="mb-3">
-              <h2 className="text-sm font-semibold text-gray-900">Categories</h2>
+          <div className="bg-white px-4 py-3 border-b border-gray-200">
+            <div className="mb-2">
+              <h2 className="text-xs font-semibold text-gray-900">Categories</h2>
             </div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-2">
               {categories.slice(0, 8).map((category, index) => (
                 <Link
                   key={index}
                   to={`/shop?category=${encodeURIComponent(category.name)}`}
                   className="flex flex-col items-center"
                 >
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-1">
-                    <span className="text-2xl">{category.icon || '📦'}</span>
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mb-0.5">
+                    <span className="text-xl">{category.icon || '📦'}</span>
                   </div>
-                  <span className="text-xs text-gray-700 text-center line-clamp-2">{category.name}</span>
+                  <span className="text-[10px] text-gray-700 text-center line-clamp-2">{category.name}</span>
                 </Link>
               ))}
             </div>
@@ -332,60 +260,35 @@ export default function Home() {
           <div className="bg-orange-200 px-2 sm:px-3 py-2 border-b border-gray-200">
             {/* Sale Timer Header - Single Line */}
             <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="text-[9px] sm:text-[10px] font-semibold text-gray-900 flex-shrink-0">Sale Ends: Nov 8, 10:59 (GMT+3)</span>
+              <span className="text-sm sm:text-base font-bold text-gray-900 flex-shrink-0">Super Deal</span>
               <div className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
                 <span className="text-[9px] sm:text-[10px]">Up to 70% off</span>
                 <ChevronRight className="w-2.5 h-2.5" />
               </div>
             </div>
 
-            {/* Horizontal Layout: Coupons | Product | Festive Graphic */}
-            <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-              {/* Discount Coupon Boxes */}
-              <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
-                {discountCoupons.map((coupon, index) => (
+            {/* Horizontal Layout: Top Deal Products | Product | Festive Graphic */}
+            <div className="flex gap-2 sm:gap-2.5 pb-2 px-2">
+              {/* Top Deal Product Boxes - Horizontal Row */}
+              <div className="flex gap-2 sm:gap-2.5 w-full">
+                {topDealProducts.map((product, index) => (
                   <div
-                    key={index}
-                    className="bg-gradient-to-br from-white to-pink-50 border-2 border-dashed border-pink-400 rounded-md p-1.5 sm:p-2 min-w-[80px] sm:min-w-[90px] flex-shrink-0 shadow-sm hover:shadow-md transition-all active:scale-95 touch-manipulation"
-                    onClick={() => copyCouponCode(coupon.code)}
+                    key={product.id || index}
+                    className="bg-gradient-to-br from-white to-pink-50 border-2 border-dashed border-pink-400 rounded-md p-2 sm:p-2.5 flex-1 shadow-sm hover:shadow-md transition-all active:scale-95 touch-manipulation cursor-pointer flex flex-col"
+                    onClick={() => navigate(`/product/${product.id}`)}
                   >
-                    <div className="text-center">
-                      <div className="text-[8px] sm:text-[9px] font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-0.5 leading-tight">{coupon.discount}</div>
-                      <div className="text-[7px] sm:text-[8px] text-gray-600 mb-0.5 leading-tight">orders {coupon.minOrder}</div>
-                      <div className="text-red-600 font-bold text-[8px] sm:text-[9px] flex items-center justify-center gap-0.5 w-full hover:text-red-700">
-                        Code: {coupon.code}
-                      </div>
+                    <div className="w-full aspect-square bg-white rounded-md flex items-center justify-center mb-1.5 sm:mb-2 shadow-sm border border-gray-200 overflow-hidden">
+                      <img
+                        src={product.images?.[0] || 'https://via.placeholder.com/100'}
+                        alt={product.name}
+                        className="w-full h-full object-contain p-1 sm:p-1.5"
+                      />
+                    </div>
+                    <div className="w-full bg-gray-800 text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-md text-center">
+                      ETB{formatPrice(product.price || 0)}
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Product Listing Section - Carousel */}
-              <div className="bg-blue-50 rounded-md p-1.5 sm:p-2 flex-shrink-0 w-[120px] sm:w-[140px] md:w-[150px] border border-blue-200 shadow-sm relative overflow-hidden">
-                <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1.5 sm:mb-2 text-center">Top deals</h3>
-                {trendingProducts.length > 0 && (
-                  <div className="relative">
-                    {trendingProducts.slice(0, Math.min(5, trendingProducts.length)).map((product, idx) => (
-                      <div
-                        key={product.id}
-                        className={`flex flex-col items-center transition-opacity duration-500 ${
-                          idx === topDealIndex ? 'opacity-100' : 'opacity-0 absolute inset-0'
-                        }`}
-                      >
-                        <div className="w-full aspect-square bg-white rounded-md flex items-center justify-center mb-1.5 sm:mb-2 shadow-sm border border-gray-200 overflow-hidden">
-                          <img
-                            src={product.images?.[0]}
-                            alt={product.name}
-                            className="w-full h-full object-contain p-0.5 sm:p-1"
-                          />
-                        </div>
-                        <div className="w-full bg-gray-800 text-white text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-md text-center">
-                          ETB{formatPrice(product.price)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Festive Graphics Section */}
@@ -406,7 +309,7 @@ export default function Home() {
                         <span className="text-[10px] sm:text-xs">🎄</span>
                         <Sparkles className="absolute -top-1 -right-1 w-2 h-2 text-yellow-300 animate-pulse" />
                       </div>
-                      <div className="text-[7px] sm:text-[8px] font-bold text-white leading-tight drop-shadow-md">1ST EVERY MONTH</div>
+                      <div className="text-[8px] sm:text-[9px] font-bold text-white leading-tight drop-shadow-md">Flash Sale</div>
                     </div>
                     <div className="flex items-center gap-0.5">
                       <span className="text-[9px] sm:text-[10px] animate-bounce" style={{animationDelay: '0s'}}>🎮</span>
@@ -490,60 +393,35 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
               {/* Sale Timer Header - Single Line */}
               <div className="mb-2.5 flex items-center justify-between gap-2">
-                <span className="text-xs md:text-sm font-semibold text-gray-900 flex-shrink-0">Sale Ends: Nov 8, 10:59 (GMT+3)</span>
+                <span className="text-base md:text-lg font-bold text-gray-900 flex-shrink-0">Super Deal</span>
                 <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-2.5 md:px-3 py-1 rounded-full font-bold shadow-md flex-shrink-0">
                   <span className="text-xs md:text-sm">Up to 70% off</span>
                   <ChevronRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </div>
               </div>
 
-              {/* Horizontal Layout: Coupons | Product | Festive Graphic */}
-              <div className="flex gap-2.5 md:gap-3 lg:gap-4 items-start overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 md:mx-0 md:px-0" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-                {/* Discount Coupon Boxes */}
-                <div className="flex gap-2 md:gap-2.5 lg:gap-3 flex-shrink-0 md:flex-1">
-                  {discountCoupons.map((coupon, index) => (
+              {/* Horizontal Layout: Top Deal Products | Product | Festive Graphic */}
+              <div className="flex gap-3 md:gap-4 pb-2">
+                {/* Top Deal Product Boxes - Horizontal Row */}
+                <div className="flex gap-3 md:gap-4 w-full">
+                  {topDealProducts.map((product, index) => (
                     <div
-                      key={index}
-                      className="bg-gradient-to-br from-white to-pink-50 border-2 border-dashed border-pink-400 rounded-md p-2 md:p-2.5 min-w-[100px] md:min-w-[120px] lg:min-w-[140px] flex-shrink-0 md:flex-1 hover:shadow-lg transition-all cursor-pointer hover:scale-105 active:scale-95 touch-manipulation"
-                      onClick={() => copyCouponCode(coupon.code)}
+                      key={product.id || index}
+                      className="bg-gradient-to-br from-white to-pink-50 border-2 border-dashed border-pink-400 rounded-md p-3 md:p-4 flex-1 shadow-sm hover:shadow-lg transition-all cursor-pointer hover:scale-105 active:scale-95 touch-manipulation flex flex-col"
+                      onClick={() => navigate(`/product/${product.id}`)}
                     >
-                      <div className="text-center">
-                        <div className="text-xs md:text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-0.5">{coupon.discount}</div>
-                        <div className="text-[10px] md:text-xs text-gray-600 mb-1">orders {coupon.minOrder}</div>
-                        <div className="text-red-600 font-bold text-xs md:text-sm hover:text-red-700">
-                          Code: {coupon.code}
-                        </div>
+                      <div className="w-full aspect-square bg-white rounded-md flex items-center justify-center mb-2.5 shadow-sm border border-gray-200 overflow-hidden">
+                        <img
+                          src={product.images?.[0] || 'https://via.placeholder.com/150'}
+                          alt={product.name}
+                          className="w-full h-full object-contain p-2 md:p-2.5"
+                        />
+                      </div>
+                      <div className="w-full bg-gray-800 text-white text-xs md:text-sm font-bold px-3 md:px-4 py-2 md:py-2.5 rounded-md text-center">
+                        ETB{formatPrice(product.price || 0)}
                       </div>
                     </div>
                   ))}
-                </div>
-
-                {/* Product Listing Section - Carousel */}
-                <div className="bg-blue-50 rounded-md p-2.5 md:p-3 flex-shrink-0 w-[140px] md:w-[160px] lg:w-[180px] border border-blue-200 shadow-sm relative overflow-hidden">
-                  <h3 className="text-sm md:text-base font-semibold text-blue-900 mb-2 text-center">Top deals</h3>
-                  {trendingProducts.length > 0 && (
-                    <div className="relative">
-                      {trendingProducts.slice(0, Math.min(5, trendingProducts.length)).map((product, idx) => (
-                        <div
-                          key={product.id}
-                          className={`flex flex-col items-center transition-opacity duration-500 ${
-                            idx === topDealIndex ? 'opacity-100' : 'opacity-0 absolute inset-0'
-                          }`}
-                        >
-                          <div className="w-full aspect-square bg-white rounded-md flex items-center justify-center mb-2 shadow-sm border border-gray-200 overflow-hidden">
-                            <img
-                              src={product.images?.[0]}
-                              alt={product.name}
-                              className="w-full h-full object-contain p-1 md:p-1.5"
-                            />
-                          </div>
-                          <div className="w-full bg-gray-800 text-white text-xs md:text-sm font-bold px-2 md:px-3 py-1.5 md:py-2 rounded-md text-center">
-                            ETB{formatPrice(product.price)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {/* Festive Graphics Section */}
@@ -565,7 +443,7 @@ export default function Home() {
                           <span className="text-sm md:text-base">🎄</span>
                           <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-300 animate-pulse" />
                         </div>
-                        <div className="text-[10px] md:text-xs font-bold text-white drop-shadow-md">1ST EVERY MONTH</div>
+                        <div className="text-xs md:text-sm font-bold text-white drop-shadow-md">Flash Sale</div>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs md:text-sm animate-bounce" style={{animationDelay: '0s'}}>🎮</span>
@@ -617,17 +495,17 @@ export default function Home() {
           </div>
 
           {/* Categories Section */}
-          <div className="bg-white py-6 border-t border-gray-100">
+          <div className="bg-white py-4 border-t border-gray-100">
             <div className="max-w-7xl mx-auto px-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-5">Shop by Category</h2>
-              <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+              <h2 className="text-lg font-bold text-gray-900 mb-3">Shop by Category</h2>
+              <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
                 {categories.map((category, index) => (
                   <Link
                     key={index}
                     to="/shop"
-                    className="bg-gray-50 rounded-lg border border-gray-200 p-4 text-center hover:border-orange-500 hover:bg-orange-50 hover:shadow-md transition-all duration-200"
+                    className="bg-gray-50 rounded-lg border border-gray-200 p-3 text-center hover:border-orange-500 hover:bg-orange-50 hover:shadow-md transition-all duration-200"
                   >
-                    <div className="text-3xl mb-2">{category.icon || '📦'}</div>
+                    <div className="text-2xl mb-1.5">{category.icon || '📦'}</div>
                     <div className="text-xs text-gray-900 font-medium">{category.name}</div>
                   </Link>
                 ))}

@@ -448,16 +448,19 @@ export function CartProvider({ children }) {
         if (!deleteError) {
           await loadUserCartAndWishlist(user.id);
           pushToast({ type: 'success', title: 'Removed from wishlist', message: 'Item removed' });
+        } else {
+          pushToast({ type: 'error', title: 'Error', message: 'Failed to remove item from wishlist' });
         }
       } catch (err) {
         console.error('Error removing from wishlist:', err);
+        pushToast({ type: 'error', title: 'Error', message: 'Failed to remove item from wishlist' });
       }
     } else {
       // Guest user - remove from localStorage
       setWishlist(prev => prev.filter(item => item.id !== id));
       pushToast({ type: 'success', title: 'Removed from wishlist', message: 'Item removed' });
     }
-  }, [user, loadUserCartAndWishlist, getAuthToken, wishlistDbAvailable]);
+  }, [user, loadUserCartAndWishlist, pushToast, wishlistDbAvailable]);
 
   const isInWishlist = useCallback((id) => {
     return wishlist.some(item => item.id === id);
