@@ -29,10 +29,65 @@
         "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop",
         "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop",
         "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1606220838315-056192d5e927?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=500&h=500&fit=crop&q=85"
       ],
-      "colors": ["Black", "White", "Blue", "Red"],
-      "sizes": ["One Size"],
+      "colors": [
+        "Black",
+        "White",
+        "Blue",
+        "Red",
+        "Green",
+        "Yellow",
+        "Gray",
+        "Orange",
+        "Purple",
+        "Pink",
+        "Silver",
+        "Gold",
+        "Rose Gold",
+        "Navy",
+        "Coral"
+      ],
+      "sizes": [
+        "One Size",
+        "Small",
+        "Medium",
+        "Large",
+        "Extra Large"
+      ],
+      "materials": [
+        "Plastic",
+        "Silicone",
+        "Metal",
+        "Rubber"
+      ],
+      "styles": [
+        "Sport",
+        "Professional",
+        "Casual",
+        "Gaming",
+        "Travel"
+      ],
+      "features": [
+        "Noise Cancellation",
+        "Water Resistant",
+        "Wireless Charging",
+        "Voice Assistant",
+        "Quick Charge",
+        "Bluetooth 5.0",
+        "Long Battery Life"
+      ],
       "specifications": {
         "Battery Life": "30 hours",
         "Charging Time": "2 hours",
@@ -40,13 +95,6 @@
         "Water Resistance": "IPX7",
         "Weight": "45g"
       },
-      "features": [
-        "Active Noise Cancellation",
-        "30-hour Battery Life",
-        "Quick Charge",
-        "Water Resistant",
-        "Voice Assistant Ready"
-      ],
       "reviews": [
         {
           "id": 1,
@@ -69,7 +117,13 @@
           "helpful": 15
         }
       ],
-      "tags": ["wireless", "bluetooth", "noise-cancelling", "premium", "electronics"],
+      "tags": [
+        "wireless",
+        "bluetooth",
+        "noise-cancelling",
+        "premium",
+        "electronics"
+      ],
       "inStock": true,
       "stock": 150,
       "minOrder": 1,
@@ -103,10 +157,70 @@
       "images": [
         "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop",
         "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1579586337278-3f436f25d4d9?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1579586337278-3f436f25d4d9?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1579586337278-3f436f25d4d2?w=500&h=500&fit=crop&q=85"
       ],
-      "colors": ["Black", "Silver", "Rose Gold"],
-      "sizes": ["42mm", "46mm"],
+      "colors": [
+        "Black",
+        "Silver",
+        "Rose Gold",
+        "White",
+        "Blue",
+        "Red",
+        "Green",
+        "Yellow",
+        "Gray",
+        "Orange",
+        "Purple",
+        "Pink",
+        "Gold",
+        "Navy",
+        "Coral"
+      ],
+      "sizes": [
+        "38mm",
+        "40mm",
+        "42mm",
+        "44mm",
+        "46mm",
+        "48mm",
+        "50mm"
+      ],
+      "materials": [
+        "Aluminum",
+        "Stainless Steel",
+        "Titanium",
+        "Ceramic",
+        "Plastic"
+      ],
+      "styles": [
+        "Sport",
+        "Professional",
+        "Casual",
+        "Luxury",
+        "Fitness"
+      ],
+      "features": [
+        "Heart Rate Monitor",
+        "GPS",
+        "Sleep Tracking",
+        "Water Resistant",
+        "Bluetooth",
+        "WiFi",
+        "NFC",
+        "Voice Assistant"
+      ],
       "specifications": {
         "Display": "1.9\" AMOLED",
         "Battery": "7 days",
@@ -114,13 +228,6 @@
         "GPS": "Built-in",
         "Sensors": "Heart Rate, SpO2, Accelerometer"
       },
-      "features": [
-        "Heart Rate Monitoring",
-        "GPS Tracking",
-        "Sleep Analysis",
-        "Water Resistant",
-        "Smart Notifications"
-      ],
       "reviews": [
         {
           "id": 3,
@@ -133,7 +240,13 @@
           "helpful": 31
         }
       ],
-      "tags": ["smartwatch", "fitness", "health", "gps", "wearable"],
+      "tags": [
+        "smartwatch",
+        "fitness",
+        "health",
+        "gps",
+        "wearable"
+      ],
       "inStock": true,
       "stock": 75,
       "minOrder": 1,
@@ -167,10 +280,72 @@
       "images": [
         "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop",
         "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=500&h=500&fit=crop&q=75"
       ],
-      "colors": ["Brown", "Black", "Tan"],
-      "sizes": ["One Size"],
+      "colors": [
+        "Brown",
+        "Black",
+        "Tan",
+        "White",
+        "Blue",
+        "Red",
+        "Green",
+        "Yellow",
+        "Gray",
+        "Orange",
+        "Purple",
+        "Pink",
+        "Gold",
+        "Navy",
+        "Coral",
+        "Beige",
+        "Burgundy",
+        "Cream"
+      ],
+      "sizes": [
+        "Small",
+        "Medium",
+        "Large",
+        "Extra Large",
+        "One Size"
+      ],
+      "materials": [
+        "Genuine Leather",
+        "Faux Leather",
+        "Canvas",
+        "Nylon",
+        "Suede",
+        "Patent Leather"
+      ],
+      "styles": [
+        "Professional",
+        "Casual",
+        "Evening",
+        "Travel",
+        "Vintage",
+        "Modern"
+      ],
+      "features": [
+        "Multiple Compartments",
+        "Adjustable Strap",
+        "Zipper Closure",
+        "Water Resistant",
+        "Lightweight",
+        "Durable",
+        "Fashionable"
+      ],
       "specifications": {
         "Material": "Genuine Leather",
         "Dimensions": "30cm x 20cm x 10cm",
@@ -178,13 +353,6 @@
         "Closure": "Zipper",
         "Compartments": "3 main + 2 side"
       },
-      "features": [
-        "Genuine Leather",
-        "Multiple Compartments",
-        "Adjustable Strap",
-        "Zipper Closure",
-        "Handcrafted"
-      ],
       "reviews": [
         {
           "id": 4,
@@ -197,7 +365,13 @@
           "helpful": 18
         }
       ],
-      "tags": ["leather", "handbag", "premium", "fashion", "accessories"],
+      "tags": [
+        "leather",
+        "handbag",
+        "premium",
+        "fashion",
+        "accessories"
+      ],
       "inStock": true,
       "stock": 45,
       "minOrder": 1,
@@ -230,11 +404,60 @@
       },
       "images": [
         "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=70",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=95",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=78",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=87",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=93",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=82",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=89",
+        "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=500&h=500&fit=crop&q=91"
       ],
-      "colors": ["Black"],
-      "sizes": ["85mm"],
+      "colors": [
+        "Black",
+        "White",
+        "Silver",
+        "Gray",
+        "Gold",
+        "Titanium",
+        "Chrome"
+      ],
+      "sizes": [
+        "50mm",
+        "85mm",
+        "105mm",
+        "135mm",
+        "200mm",
+        "300mm"
+      ],
+      "materials": [
+        "Metal",
+        "Glass",
+        "Plastic",
+        "Rubber",
+        "Aluminum"
+      ],
+      "styles": [
+        "Professional",
+        "Portrait",
+        "Landscape",
+        "Macro",
+        "Telephoto"
+      ],
+      "features": [
+        "Auto Focus",
+        "Image Stabilization",
+        "Weather Sealed",
+        "Fast Aperture",
+        "Sharp Image Quality",
+        "Low Light Performance"
+      ],
       "specifications": {
         "Focal Length": "85mm",
         "Aperture": "f/1.4 - f/16",
@@ -242,13 +465,6 @@
         "Weight": "1025g",
         "Filter Size": "77mm"
       },
-      "features": [
-        "Ultra-wide Aperture",
-        "Professional Quality",
-        "Weather Sealed",
-        "Fast Autofocus",
-        "Sharp Image Quality"
-      ],
       "reviews": [
         {
           "id": 5,
@@ -261,7 +477,13 @@
           "helpful": 42
         }
       ],
-      "tags": ["camera", "lens", "photography", "professional", "portrait"],
+      "tags": [
+        "camera",
+        "lens",
+        "photography",
+        "professional",
+        "portrait"
+      ],
       "inStock": true,
       "stock": 12,
       "minOrder": 1,
@@ -295,17 +517,67 @@
       "images": [
         "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop",
         "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=500&fit=crop&q=75"
       ],
-      "colors": ["White", "Black", "Navy", "Gray", "Green"],
-      "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
-      "specifications": {
-        "Material": "100% Organic Cotton",
-        "Weight": "180gsm",
-        "Care": "Machine Wash Cold",
-        "Origin": "Made in USA",
-        "Certification": "GOTS Certified"
-      },
+      "colors": [
+        "White",
+        "Black",
+        "Navy",
+        "Gray",
+        "Green",
+        "Red",
+        "Blue",
+        "Yellow",
+        "Orange",
+        "Purple",
+        "Pink",
+        "Brown",
+        "Beige",
+        "Coral",
+        "Lavender",
+        "Mint",
+        "Cream"
+      ],
+      "sizes": [
+        "XXS",
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "XXXL",
+        "4XL",
+        "5XL"
+      ],
+      "materials": [
+        "100% Organic Cotton",
+        "Cotton Blend",
+        "Bamboo",
+        "Hemp",
+        "Linen"
+      ],
+      "styles": [
+        "Casual",
+        "Athletic",
+        "Oversized",
+        "Fitted",
+        "Relaxed",
+        "Vintage",
+        "Modern"
+      ],
       "features": [
         "100% Organic Cotton",
         "Sustainable Production",
@@ -313,6 +585,13 @@
         "Multiple Colors",
         "Eco-Friendly"
       ],
+      "specifications": {
+        "Material": "100% Organic Cotton",
+        "Weight": "180gsm",
+        "Care": "Machine Wash Cold",
+        "Origin": "Made in USA",
+        "Certification": "GOTS Certified"
+      },
       "reviews": [
         {
           "id": 6,
@@ -325,7 +604,13 @@
           "helpful": 27
         }
       ],
-      "tags": ["organic", "cotton", "sustainable", "comfortable", "fashion"],
+      "tags": [
+        "organic",
+        "cotton",
+        "sustainable",
+        "comfortable",
+        "fashion"
+      ],
       "inStock": true,
       "stock": 200,
       "minOrder": 1,
@@ -358,18 +643,52 @@
       },
       "images": [
         "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=70",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=95",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=78",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=87",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=93",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=82",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=89",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop&q=91"
       ],
-      "colors": ["White", "Black"],
-      "sizes": ["One Size"],
-      "specifications": {
-        "Resolution": "4K Ultra HD",
-        "Night Vision": "30ft range",
-        "Field of View": "130°",
-        "Storage": "Cloud + Local",
-        "Power": "Battery + Solar"
-      },
+      "colors": [
+        "White",
+        "Black",
+        "Gray",
+        "Silver",
+        "Brown",
+        "Beige",
+        "Navy",
+        "Green"
+      ],
+      "sizes": [
+        "Small",
+        "Medium",
+        "Large",
+        "One Size"
+      ],
+      "materials": [
+        "Plastic",
+        "Metal",
+        "Aluminum",
+        "Rubber",
+        "Glass"
+      ],
+      "styles": [
+        "Indoor",
+        "Outdoor",
+        "Wireless",
+        "Wired",
+        "Professional",
+        "Home"
+      ],
       "features": [
         "4K Video Recording",
         "Night Vision",
@@ -377,6 +696,13 @@
         "Cloud Storage",
         "Mobile App Control"
       ],
+      "specifications": {
+        "Resolution": "4K Ultra HD",
+        "Night Vision": "30ft range",
+        "Field of View": "130°",
+        "Storage": "Cloud + Local",
+        "Power": "Battery + Solar"
+      },
       "reviews": [
         {
           "id": 7,
@@ -389,7 +715,13 @@
           "helpful": 19
         }
       ],
-      "tags": ["security", "camera", "smart home", "wireless", "4k"],
+      "tags": [
+        "security",
+        "camera",
+        "smart home",
+        "wireless",
+        "4k"
+      ],
       "inStock": true,
       "stock": 85,
       "minOrder": 1,
@@ -397,30 +729,99 @@
     },
     {
       "id": 7,
-      "name": "Ultra-Thin 15.6" 4K Laptop",
+      "name": "Ultra-Thin 15.6\" 4K Laptop",
       "description": "Aluminum body, Intel i7, 16GB RAM, 1TB SSD, backlit keyboard, fingerprint unlock.",
       "category": "Electronics",
       "subcategory": "Computers",
       "brand": "TechBook",
-      "price": 1099.0,
-      "originalPrice": 1399.0,
+      "price": 1099,
+      "originalPrice": 1399,
       "discount": 21,
       "currency": "USD",
       "rating": 4.6,
       "reviewCount": 892,
       "sold": 5340,
-      "seller": { "name": "Global Tech Mall", "rating": 4.8, "followers": 210000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "3-7", "express": true },
+      "seller": {
+        "name": "Global Tech Mall",
+        "rating": 4.8,
+        "followers": 210000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "3-7",
+        "express": true
+      },
       "images": [
         "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Silver", "Space Gray"],
-      "sizes": ["15.6"],
-      "specifications": { "CPU": "Intel i7", "RAM": "16GB", "Storage": "1TB SSD", "Display": "4K" },
-      "features": ["Backlit Keyboard", "Fingerprint Unlock", "Thunderbolt 4"],
+      "colors": [
+        "Silver",
+        "Space Gray",
+        "Black",
+        "White",
+        "Gold",
+        "Rose Gold",
+        "Blue",
+        "Red",
+        "Green",
+        "Purple"
+      ],
+      "sizes": [
+        "13.3\"",
+        "14\"",
+        "15.6\"",
+        "17.3\"",
+        "11.6\"",
+        "12.5\"",
+        "16\""
+      ],
+      "materials": [
+        "Aluminum",
+        "Plastic",
+        "Carbon Fiber",
+        "Magnesium",
+        "Glass"
+      ],
+      "styles": [
+        "Ultrabook",
+        "Gaming",
+        "Business",
+        "Student",
+        "Professional",
+        "Creative"
+      ],
+      "features": [
+        "Backlit Keyboard",
+        "Fingerprint Unlock",
+        "Thunderbolt 4"
+      ],
+      "specifications": {
+        "CPU": "Intel i7",
+        "RAM": "16GB",
+        "Storage": "1TB SSD",
+        "Display": "4K"
+      },
       "reviews": [],
-      "tags": ["laptop", "ultrabook", "4k"],
+      "tags": [
+        "laptop",
+        "ultrabook",
+        "4k"
+      ],
       "inStock": true,
       "stock": 35,
       "minOrder": 1,
@@ -440,18 +841,82 @@
       "rating": 4.4,
       "reviewCount": 1450,
       "sold": 9800,
-      "seller": { "name": "Home Essentials Store", "rating": 4.6, "followers": 68000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "4-6", "express": false },
+      "seller": {
+        "name": "Home Essentials Store",
+        "rating": 4.6,
+        "followers": 68000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "4-6",
+        "express": false
+      },
       "images": [
         "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1604335399105-a0d7f1c17030?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Red", "Blue"],
-      "sizes": ["One Size"],
-      "specifications": { "Runtime": "60 min", "Filter": "HEPA", "Weight": "2.7kg" },
-      "features": ["Cordless", "Lightweight", "HEPA"],
+      "colors": [
+        "Red",
+        "Blue",
+        "Black",
+        "White",
+        "Gray",
+        "Silver",
+        "Green",
+        "Yellow",
+        "Orange",
+        "Purple"
+      ],
+      "sizes": [
+        "Compact",
+        "Standard",
+        "Large",
+        "One Size"
+      ],
+      "materials": [
+        "Plastic",
+        "Metal",
+        "Rubber",
+        "Aluminum",
+        "Carbon Fiber"
+      ],
+      "styles": [
+        "Cordless",
+        "Corded",
+        "Handheld",
+        "Stick",
+        "Robotic",
+        "Commercial"
+      ],
+      "features": [
+        "Cordless",
+        "Lightweight",
+        "HEPA"
+      ],
+      "specifications": {
+        "Runtime": "60 min",
+        "Filter": "HEPA",
+        "Weight": "2.7kg"
+      },
       "reviews": [],
-      "tags": ["vacuum", "home"],
+      "tags": [
+        "vacuum",
+        "home"
+      ],
       "inStock": true,
       "stock": 120,
       "minOrder": 1,
@@ -471,18 +936,99 @@
       "rating": 4.3,
       "reviewCount": 760,
       "sold": 12890,
-      "seller": { "name": "Sporty Outlet", "rating": 4.5, "followers": 52000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "5-8", "express": false },
+      "seller": {
+        "name": "Sporty Outlet",
+        "rating": 4.5,
+        "followers": 52000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "5-8",
+        "express": false
+      },
       "images": [
         "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Black", "White", "Blue"],
-      "sizes": ["40", "41", "42", "43", "44", "45"],
-      "specifications": { "Upper": "Mesh", "Sole": "Rubber" },
-      "features": ["Breathable", "Lightweight", "Cushioning"],
+      "colors": [
+        "Black",
+        "White",
+        "Blue",
+        "Red",
+        "Green",
+        "Yellow",
+        "Orange",
+        "Purple",
+        "Pink",
+        "Gray",
+        "Navy",
+        "Coral",
+        "Lime",
+        "Teal",
+        "Burgundy"
+      ],
+      "sizes": [
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50"
+      ],
+      "materials": [
+        "Mesh",
+        "Leather",
+        "Synthetic",
+        "Knit",
+        "Canvas",
+        "Rubber"
+      ],
+      "styles": [
+        "Running",
+        "Walking",
+        "Training",
+        "Casual",
+        "Athletic",
+        "Trail",
+        "Track"
+      ],
+      "features": [
+        "Breathable",
+        "Lightweight",
+        "Cushioning"
+      ],
+      "specifications": {
+        "Upper": "Mesh",
+        "Sole": "Rubber"
+      },
       "reviews": [],
-      "tags": ["running", "shoes"],
+      "tags": [
+        "running",
+        "shoes"
+      ],
       "inStock": true,
       "stock": 240,
       "minOrder": 1,
@@ -502,18 +1048,82 @@
       "rating": 4.5,
       "reviewCount": 980,
       "sold": 6200,
-      "seller": { "name": "Kitchen Bazaar", "rating": 4.7, "followers": 74000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "3-5", "express": true },
+      "seller": {
+        "name": "Kitchen Bazaar",
+        "rating": 4.7,
+        "followers": 74000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "3-5",
+        "express": true
+      },
       "images": [
         "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Silver"],
-      "sizes": ["10pcs"],
-      "specifications": { "Material": "Stainless Steel", "Compatibility": "Induction" },
-      "features": ["Non-reactive", "Durable", "Dishwasher Safe"],
+      "colors": [
+        "Silver",
+        "Black",
+        "White",
+        "Gold",
+        "Copper",
+        "Stainless Steel",
+        "Brushed Steel",
+        "Matte Black"
+      ],
+      "sizes": [
+        "8pcs",
+        "10pcs",
+        "12pcs",
+        "15pcs",
+        "20pcs",
+        "One Size"
+      ],
+      "materials": [
+        "Stainless Steel",
+        "Aluminum",
+        "Cast Iron",
+        "Ceramic",
+        "Non-Stick",
+        "Copper"
+      ],
+      "styles": [
+        "Professional",
+        "Home",
+        "Commercial",
+        "Vintage",
+        "Modern",
+        "Classic"
+      ],
+      "features": [
+        "Non-reactive",
+        "Durable",
+        "Dishwasher Safe"
+      ],
+      "specifications": {
+        "Material": "Stainless Steel",
+        "Compatibility": "Induction"
+      },
       "reviews": [],
-      "tags": ["cookware", "kitchen"],
+      "tags": [
+        "cookware",
+        "kitchen"
+      ],
       "inStock": true,
       "stock": 80,
       "minOrder": 1,
@@ -533,18 +1143,87 @@
       "rating": 4.2,
       "reviewCount": 1650,
       "sold": 15000,
-      "seller": { "name": "Gamer Hub", "rating": 4.6, "followers": 99000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "4-7", "express": false },
+      "seller": {
+        "name": "Gamer Hub",
+        "rating": 4.6,
+        "followers": 99000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "4-7",
+        "express": false
+      },
       "images": [
         "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1585386959984-a4155223167f?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1618835962148-cf10d54b5d39?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Black", "White"],
-      "sizes": ["One Size"],
-      "specifications": { "Sound": "7.1", "Mic": "Noise Cancel" },
-      "features": ["RGB", "Memory Foam", "Detachable Mic"],
+      "colors": [
+        "Black",
+        "White",
+        "Red",
+        "Blue",
+        "Green",
+        "Yellow",
+        "Orange",
+        "Purple",
+        "Pink",
+        "Gray",
+        "Silver",
+        "Gold",
+        "Navy",
+        "Coral",
+        "Lime"
+      ],
+      "sizes": [
+        "Small",
+        "Medium",
+        "Large",
+        "One Size"
+      ],
+      "materials": [
+        "Plastic",
+        "Metal",
+        "Leather",
+        "Fabric",
+        "Memory Foam",
+        "Rubber"
+      ],
+      "styles": [
+        "Gaming",
+        "Professional",
+        "Casual",
+        "Streaming",
+        "Esports",
+        "Wireless"
+      ],
+      "features": [
+        "RGB",
+        "Memory Foam",
+        "Detachable Mic"
+      ],
+      "specifications": {
+        "Sound": "7.1",
+        "Mic": "Noise Cancel"
+      },
       "reviews": [],
-      "tags": ["gaming", "headset"],
+      "tags": [
+        "gaming",
+        "headset"
+      ],
       "inStock": true,
       "stock": 300,
       "minOrder": 1,
@@ -557,25 +1236,88 @@
       "category": "Electronics",
       "subcategory": "Photography",
       "brand": "ViewMini",
-      "price": 129.0,
-      "originalPrice": 179.0,
+      "price": 129,
+      "originalPrice": 179,
       "discount": 28,
       "currency": "USD",
       "rating": 4.1,
       "reviewCount": 610,
       "sold": 4100,
-      "seller": { "name": "Projector Planet", "rating": 4.5, "followers": 42000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "6-10", "express": false },
+      "seller": {
+        "name": "Projector Planet",
+        "rating": 4.5,
+        "followers": 42000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "6-10",
+        "express": false
+      },
       "images": [
         "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["White"],
-      "sizes": ["One Size"],
-      "specifications": { "Resolution": "1080p", "WiFi": "2.4G/5G" },
-      "features": ["Portable", "Wi-Fi", "HDMI"],
+      "colors": [
+        "White",
+        "Black",
+        "Gray",
+        "Silver",
+        "Blue",
+        "Red",
+        "Green",
+        "Yellow",
+        "Orange",
+        "Purple"
+      ],
+      "sizes": [
+        "Compact",
+        "Standard",
+        "Large",
+        "One Size"
+      ],
+      "materials": [
+        "Plastic",
+        "Metal",
+        "Aluminum",
+        "Glass",
+        "Rubber"
+      ],
+      "styles": [
+        "Portable",
+        "Home Theater",
+        "Business",
+        "Gaming",
+        "Outdoor",
+        "Professional"
+      ],
+      "features": [
+        "Portable",
+        "Wi-Fi",
+        "HDMI"
+      ],
+      "specifications": {
+        "Resolution": "1080p",
+        "WiFi": "2.4G/5G"
+      },
       "reviews": [],
-      "tags": ["projector", "home theater"],
+      "tags": [
+        "projector",
+        "home theater"
+      ],
       "inStock": true,
       "stock": 95,
       "minOrder": 1,
@@ -595,18 +1337,83 @@
       "rating": 4.6,
       "reviewCount": 1220,
       "sold": 7200,
-      "seller": { "name": "Beauty Market", "rating": 4.7, "followers": 83000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "4-6", "express": false },
+      "seller": {
+        "name": "Beauty Market",
+        "rating": 4.7,
+        "followers": 83000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "4-6",
+        "express": false
+      },
       "images": [
         "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1585238342028-4bbc5a4503a4?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1611930022073-b7a4ba5ffc8f?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Standard"],
-      "sizes": ["2pcs"],
-      "specifications": { "Serum": "30ml", "Moisturizer": "50ml" },
-      "features": ["Vitamin C", "Hyaluronic Acid", "Paraben Free"],
+      "colors": [
+        "Standard",
+        "Light",
+        "Medium",
+        "Dark",
+        "Fair",
+        "Olive",
+        "Tan",
+        "Deep"
+      ],
+      "sizes": [
+        "1pcs",
+        "2pcs",
+        "3pcs",
+        "5pcs",
+        "10pcs",
+        "One Size"
+      ],
+      "materials": [
+        "Natural",
+        "Organic",
+        "Synthetic",
+        "Plant-based",
+        "Chemical-free",
+        "Vegan"
+      ],
+      "styles": [
+        "Anti-aging",
+        "Brightening",
+        "Hydrating",
+        "Acne Treatment",
+        "Sensitive Skin",
+        "Oily Skin",
+        "Dry Skin"
+      ],
+      "features": [
+        "Vitamin C",
+        "Hyaluronic Acid",
+        "Paraben Free"
+      ],
+      "specifications": {
+        "Serum": "30ml",
+        "Moisturizer": "50ml"
+      },
       "reviews": [],
-      "tags": ["skincare", "vitamin c"],
+      "tags": [
+        "skincare",
+        "vitamin c"
+      ],
       "inStock": true,
       "stock": 210,
       "minOrder": 1,
@@ -619,25 +1426,94 @@
       "category": "Sports & Outdoors",
       "subcategory": "Camping",
       "brand": "TrailPro",
-      "price": 139.0,
-      "originalPrice": 199.0,
+      "price": 139,
+      "originalPrice": 199,
       "discount": 30,
       "currency": "USD",
       "rating": 4.4,
       "reviewCount": 540,
       "sold": 3500,
-      "seller": { "name": "Outdoor King", "rating": 4.6, "followers": 56000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "5-8", "express": false },
+      "seller": {
+        "name": "Outdoor King",
+        "rating": 4.6,
+        "followers": 56000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "5-8",
+        "express": false
+      },
       "images": [
         "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1504280390368-3971f6607f3d?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Green", "Orange"],
-      "sizes": ["4-Person"],
-      "specifications": { "Waterproof": "3000mm", "Layers": "2" },
-      "features": ["Easy Setup", "UV Protection"],
+      "colors": [
+        "Green",
+        "Orange",
+        "Blue",
+        "Red",
+        "Yellow",
+        "Black",
+        "Gray",
+        "Camo",
+        "Navy",
+        "Brown",
+        "Tan",
+        "Purple"
+      ],
+      "sizes": [
+        "2-Person",
+        "3-Person",
+        "4-Person",
+        "6-Person",
+        "8-Person",
+        "10-Person",
+        "One Size"
+      ],
+      "materials": [
+        "Polyester",
+        "Nylon",
+        "Canvas",
+        "Ripstop",
+        "Silnylon",
+        "Cotton"
+      ],
+      "styles": [
+        "Dome",
+        "Tunnel",
+        "Cabin",
+        "Backpacking",
+        "Family",
+        "Ultralight",
+        "4-Season"
+      ],
+      "features": [
+        "Easy Setup",
+        "UV Protection"
+      ],
+      "specifications": {
+        "Waterproof": "3000mm",
+        "Layers": "2"
+      },
       "reviews": [],
-      "tags": ["camping", "tent"],
+      "tags": [
+        "camping",
+        "tent"
+      ],
       "inStock": true,
       "stock": 70,
       "minOrder": 1,
@@ -650,25 +1526,94 @@
       "category": "Home & Garden",
       "subcategory": "Furniture",
       "brand": "ErgoSeat",
-      "price": 219.0,
-      "originalPrice": 299.0,
+      "price": 219,
+      "originalPrice": 299,
       "discount": 27,
       "currency": "USD",
       "rating": 4.5,
       "reviewCount": 880,
       "sold": 4600,
-      "seller": { "name": "Office Direct", "rating": 4.7, "followers": 47000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "3-7", "express": true },
+      "seller": {
+        "name": "Office Direct",
+        "rating": 4.7,
+        "followers": 47000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "3-7",
+        "express": true
+      },
       "images": [
         "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1616628188460-31e33edc252c?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Black", "Gray"],
-      "sizes": ["One Size"],
-      "specifications": { "Material": "Mesh", "Base": "Aluminum" },
-      "features": ["Lumbar Support", "3D Armrests", "Headrest"],
+      "colors": [
+        "Black",
+        "Gray",
+        "White",
+        "Blue",
+        "Red",
+        "Green",
+        "Brown",
+        "Beige",
+        "Navy",
+        "Purple",
+        "Orange",
+        "Yellow"
+      ],
+      "sizes": [
+        "Small",
+        "Medium",
+        "Large",
+        "Extra Large",
+        "One Size"
+      ],
+      "materials": [
+        "Mesh",
+        "Leather",
+        "Fabric",
+        "Vinyl",
+        "Plastic",
+        "Metal",
+        "Wood"
+      ],
+      "styles": [
+        "Ergonomic",
+        "Executive",
+        "Gaming",
+        "Office",
+        "Home",
+        "Professional",
+        "Modern"
+      ],
+      "features": [
+        "Lumbar Support",
+        "3D Armrests",
+        "Headrest"
+      ],
+      "specifications": {
+        "Material": "Mesh",
+        "Base": "Aluminum"
+      },
       "reviews": [],
-      "tags": ["chair", "office"],
+      "tags": [
+        "chair",
+        "office"
+      ],
       "inStock": true,
       "stock": 65,
       "minOrder": 1,
@@ -681,25 +1626,93 @@
       "category": "Home & Garden",
       "subcategory": "Tools",
       "brand": "BabyWay",
-      "price": 169.0,
-      "originalPrice": 229.0,
+      "price": 169,
+      "originalPrice": 229,
       "discount": 26,
       "currency": "USD",
       "rating": 4.3,
       "reviewCount": 410,
       "sold": 2700,
-      "seller": { "name": "Family Store", "rating": 4.6, "followers": 35000, "verified": true },
-      "shipping": { "free": true, "estimatedDays": "6-10", "express": false },
+      "seller": {
+        "name": "Family Store",
+        "rating": 4.6,
+        "followers": 35000,
+        "verified": true
+      },
+      "shipping": {
+        "free": true,
+        "estimatedDays": "6-10",
+        "express": false
+      },
       "images": [
         "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop",
-        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop"
+        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop&q=90",
+        "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop&q=85",
+        "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop&q=75",
+        "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop&q=88",
+        "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1519682142270-3b8d1d0ae12b?w=500&h=500&fit=crop&q=92",
+        "https://images.unsplash.com/photo-1543660575-11ac2b64c67a?w=500&h=500&fit=crop&q=78"
       ],
-      "colors": ["Gray", "Navy"],
-      "sizes": ["One Size"],
-      "specifications": { "Weight": "6.5kg", "Fold": "One-hand" },
-      "features": ["Suspension", "Travel Friendly"],
+      "colors": [
+        "Gray",
+        "Navy",
+        "Black",
+        "White",
+        "Blue",
+        "Red",
+        "Green",
+        "Yellow",
+        "Orange",
+        "Purple",
+        "Pink",
+        "Brown",
+        "Beige",
+        "Coral"
+      ],
+      "sizes": [
+        "Compact",
+        "Standard",
+        "Large",
+        "One Size"
+      ],
+      "materials": [
+        "Aluminum",
+        "Steel",
+        "Plastic",
+        "Fabric",
+        "Leather",
+        "Canvas"
+      ],
+      "styles": [
+        "Travel",
+        "Jogging",
+        "All-Terrain",
+        "Lightweight",
+        "Compact",
+        "Luxury",
+        "Sport"
+      ],
+      "features": [
+        "Suspension",
+        "Travel Friendly"
+      ],
+      "specifications": {
+        "Weight": "6.5kg",
+        "Fold": "One-hand"
+      },
       "reviews": [],
-      "tags": ["baby", "stroller"],
+      "tags": [
+        "baby",
+        "stroller"
+      ],
       "inStock": true,
       "stock": 55,
       "minOrder": 1,
@@ -710,27 +1723,62 @@
     {
       "id": 1,
       "name": "Electronics",
-      "subcategories": ["Audio", "Wearables", "Photography", "Security", "Computers", "Mobile"]
+      "subcategories": [
+        "Audio",
+        "Wearables",
+        "Photography",
+        "Security",
+        "Computers",
+        "Mobile"
+      ]
     },
     {
       "id": 2,
       "name": "Fashion",
-      "subcategories": ["Clothing", "Bags", "Shoes", "Accessories", "Jewelry", "Watches"]
+      "subcategories": [
+        "Clothing",
+        "Bags",
+        "Shoes",
+        "Accessories",
+        "Jewelry",
+        "Watches"
+      ]
     },
     {
       "id": 3,
       "name": "Home & Garden",
-      "subcategories": ["Furniture", "Decor", "Kitchen", "Bathroom", "Garden", "Tools"]
+      "subcategories": [
+        "Furniture",
+        "Decor",
+        "Kitchen",
+        "Bathroom",
+        "Garden",
+        "Tools"
+      ]
     },
     {
       "id": 4,
       "name": "Sports & Outdoors",
-      "subcategories": ["Fitness", "Outdoor", "Sports", "Camping", "Hiking", "Water Sports"]
+      "subcategories": [
+        "Fitness",
+        "Outdoor",
+        "Sports",
+        "Camping",
+        "Hiking",
+        "Water Sports"
+      ]
     },
     {
       "id": 5,
       "name": "Health & Beauty",
-      "subcategories": ["Skincare", "Makeup", "Hair Care", "Health", "Supplements", "Personal Care"]
+      "subcategories": [
+        "Skincare",
+        "Makeup",
+        "Hair Care",
+        "Health",
+        "Supplements",
+        "Personal Care"
+      ]
     }
   ]
 }
