@@ -108,31 +108,6 @@ function NavbarContent() {
     <div className="bg-white shadow-sm border-b border-gray-200">
       {/* Desktop layout */}
       <div className="hidden lg:block">
-        <div className="bg-[#f5f5f5] border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-6 py-2 text-xs text-gray-600 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5" />
-                <span>Ship to</span>
-                <span className="font-medium text-gray-800">United States</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Globe className="w-3.5 h-3.5" />
-                <span>English</span>
-                <ChevronDown className="w-3 h-3" />
-              </div>
-              <span>Buyer Protection</span>
-              <span>Help Center</span>
-              <span>App</span>
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <Link to="/orders" className="hover:text-[#ff4747] transition-colors">My Orders</Link>
-              <Link to="/wishlist" className="hover:text-[#ff4747] transition-colors">Wishlist</Link>
-              <Link to="/seller-dashboard" className="hover:text-[#ff4747] transition-colors">Sell with Us</Link>
-            </div>
-          </div>
-        </div>
-
         <div className="bg-white">
           <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-8">
             {/* Logo */}
@@ -147,13 +122,13 @@ function NavbarContent() {
             </Link>
 
             {/* Search + quick tools */}
-            <div className="flex-1 flex flex-col items-center gap-2">
-              <form onSubmit={handleSearch} className="w-full max-w-3xl">
-                <div className="flex items-stretch border-2 border-[#ff4747] rounded-full overflow-hidden bg-white shadow-sm">
+            <div className="flex-1 flex flex-col justify-center items-center gap-1">
+              <form onSubmit={handleSearch} className="w-full max-w-xl">
+                <div className="flex items-stretch border border-[#ff4747] rounded-full overflow-hidden bg-white shadow-sm">
                   <select
                     value={searchCategory}
                     onChange={(e) => setSearchCategory(e.target.value)}
-                    className="hidden xl:block w-40 bg-gray-100 text-sm text-gray-600 px-4 focus:outline-none focus:ring-0 border-r border-gray-200"
+                    className="hidden xl:block w-28 bg-gray-100 text-sm text-gray-600 px-3 focus:outline-none focus:ring-0 border-r border-gray-200"
                   >
                     <option value="">All Categories</option>
                     {productsData.categories.map((c) => (
@@ -161,50 +136,31 @@ function NavbarContent() {
                     ))}
                   </select>
                   <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                       type="text"
                       placeholder="Search for great deals, products, and trends"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-12 pr-36 h-12 text-sm text-gray-700 focus:outline-none"
+                      className="w-full pl-10 pr-28 h-9 text-sm text-gray-700 focus:outline-none"
                     />
-                    <div className="absolute right-28 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400">
-                      <button type="button" className="p-2 hover:text-[#ff4747] transition-colors" title="Image search">
-                        <Camera className="w-4 h-4" />
+                    <div className="absolute right-24 top-1/2 -translate-y-1/2 flex items-center gap-1 text-gray-400">
+                      <button type="button" className="p-1 hover:text-[#ff4747] transition-colors" title="Image search">
+                        <Camera className="w-3.5 h-3.5" />
                       </button>
-                      <button type="button" className="p-2 hover:text-[#ff4747] transition-colors" title="Voice search">
-                        <Mic className="w-4 h-4" />
+                      <button type="button" className="p-1 hover:text-[#ff4747] transition-colors" title="Voice search">
+                        <Mic className="w-3.5 h-3.5" />
                       </button>
                     </div>
                     <button
                       type="submit"
-                      className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-[#ff4747] hover:bg-[#ff2e2e] transition-colors text-white font-semibold uppercase text-sm px-6 py-2 rounded-full"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 bg-[#ff4747] hover:bg-[#ff2e2e] transition-colors text-white font-semibold uppercase text-[11px] px-4 py-1.5 rounded-full"
                     >
                       Search
                     </button>
                   </div>
                 </div>
               </form>
-              <div className="w-full max-w-3xl flex items-center justify-between text-xs text-gray-500 px-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-gray-800 font-medium">Trending:</span>
-                  <button type="button" className="hover:text-[#ff4747]">Wireless earbuds</button>
-                  <button type="button" className="hover:text-[#ff4747]">Smart home</button>
-                  <button type="button" className="hover:text-[#ff4747]">Fashion deals</button>
-                </div>
-                <div className="hidden xl:flex items-center gap-4 text-gray-600">
-                  <Link to="/" className="flex items-center gap-1 hover:text-[#ff4747]">
-                    <QrCode className="w-4 h-4" />
-                    <span>Download App</span>
-                  </Link>
-                  <button type="button" className="flex items-center gap-1 hover:text-[#ff4747]">
-                    <Globe className="w-4 h-4" />
-                    <span>EN/ETB</span>
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Actions */}
@@ -305,34 +261,43 @@ function NavbarContent() {
           </div>
         </div>
 
-        <div className="bg-[#f85606]">
-          <div className="max-w-7xl mx-auto px-6 flex items-center text-white text-sm font-medium">
-            <button type="button" className="flex items-center gap-2 bg-[#d94a04] hover:bg-[#c44203] transition-colors px-4 py-3 rounded-t-md">
-              <Menu className="w-5 h-5" />
-              <span>All Categories</span>
-            </button>
-            <nav className="flex flex-1 items-stretch gap-3 px-6 py-3">
-              {topNavCategories.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className={`flex-1 flex items-center justify-center text-center rounded-full border transition-colors ${
-                    item.isActive
-                      ? "bg-white text-[#f85606] border-white font-semibold"
-                      : "bg-white/10 border-white/40 text-white/90 hover:bg-white/20 hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
+        <div className="bg-[#ffedd4]">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-[#ff4747] uppercase tracking-[0.3em]">Super Deal</h3>
+                <p className="mt-1 text-xl font-bold text-gray-900">Catch today’s flash bargains</p>
+              </div>
               <button
                 type="button"
-                className="flex-1 flex items-center justify-center gap-1 text-center rounded-full border border-white/40 bg-white/10 text-white/90 hover:bg-white/20 hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 rounded-full bg-[#ff4747] text-white text-sm font-semibold px-4 py-2 shadow hover:bg-[#ff2e2e] transition-colors"
               >
-                <span>More</span>
+                Up to 70% off
                 <ChevronRight className="w-4 h-4" />
               </button>
-            </nav>
+            </div>
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+              {topNavCategories.map((item, index) => (
+                <div
+                  key={`${item.label}-deal-${index}`}
+                  className="min-w-[120px] bg-white border-2 border-dashed border-[#ff90a6] rounded-2xl px-4 py-4 flex flex-col items-center gap-3 shadow-sm"
+                >
+                  <div className="w-16 h-16 rounded-xl bg-[#fff6f8] border border-[#ff90a6] flex items-center justify-center">
+                    <span className="text-2xl">{item.label.slice(0, 1)}</span>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-semibold text-gray-900">{item.label}</p>
+                    <p className="text-xs text-gray-500">ETB{(index + 1) * 12}.00</p>
+                  </div>
+                  <Link
+                    to={`/shop?category=${encodeURIComponent(item.label)}`}
+                    className="text-xs font-semibold text-[#ff4747] hover:text-[#ff2e2e]"
+                  >
+                    Shop now
+                  </Link>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -375,29 +375,29 @@ export default function Home() {
       <div className="hidden md:block">
         <div className="bg-gradient-to-b from-[#fff4ef] via-white to-white pb-16">
           <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-            <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_240px] xl:grid-cols-[220px_minmax(0,1fr)_260px]">
+            <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-[140px_minmax(0,1fr)_220px] xl:grid-cols-[150px_minmax(0,1fr)_240px]">
               {/* Category list */}
-              <aside className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-lg font-semibold text-gray-900">Top categories</h2>
-                  <p className="text-xs text-gray-500 mt-1">Explore popular picks from EcoExpress</p>
+              <aside className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-sm transform scale-[0.85] origin-top-left">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <h2 className="text-base font-semibold text-gray-900">Top categories</h2>
+                  <p className="text-[11px] text-gray-500 mt-1 leading-snug">Explore popular picks from EcoExpress</p>
                 </div>
                 <ul className="divide-y divide-gray-100">
                   {categories.slice(0, 12).map((category, index) => (
                     <li key={index}>
                       <Link
                         to={`/shop?category=${encodeURIComponent(category.name)}`}
-                        className="group flex items-center justify-between gap-3 px-5 py-2.5 hover:bg-[#fff5f0] transition-colors"
+                        className="group flex items-center justify-between gap-2.5 px-4 py-2 hover:bg-[#fff5f0] transition-colors"
                       >
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-lg">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">
                             {category.icon || '📦'}
                           </span>
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-[#ff4747] truncate max-w-[130px]">
+                          <span className="text-[13px] font-medium text-gray-700 group-hover:text-[#ff4747] truncate max-w-[110px]">
                             {category.name}
                           </span>
                         </div>
-                        <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#ff4747]" />
+                        <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-[#ff4747]" />
                       </Link>
                     </li>
                   ))}
@@ -405,7 +405,7 @@ export default function Home() {
                 {categories.length > 12 && (
                   <Link
                     to="/shop"
-                    className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-[#ff4747] bg-[#fff5f0] hover:bg-[#ffe2d2] transition-colors"
+                    className="flex items-center justify-center gap-2 px-4 py-2 text-[13px] font-semibold text-[#ff4747] bg-[#fff5f0] hover:bg-[#ffe2d2] transition-colors"
                   >
                     View all categories
                     <ChevronRight className="w-4 h-4" />
@@ -455,24 +455,7 @@ export default function Home() {
                         </button>
                       </div>
                     </div>
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-                      <button
-                        type="button"
-                        onClick={handleBannerPrev}
-                        className="w-10 h-10 rounded-full bg-white/80 hover:bg-white text-gray-700 flex items-center justify-center shadow"
-                      >
-                        <ChevronLeft className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-                      <button
-                        type="button"
-                        onClick={handleBannerNext}
-                        className="w-10 h-10 rounded-full bg-white/80 hover:bg-white text-gray-700 flex items-center justify-center shadow"
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                    </div>
+
                     <div className="absolute left-8 bottom-6 flex items-center gap-2">
                       {banners.map((_, index) => (
                         <button
@@ -488,6 +471,40 @@ export default function Home() {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="bg-gradient-to-r from-[#ffd7b1] via-[#ffc48f] to-[#ffb371] rounded-2xl border border-[#ffae6f] shadow-sm overflow-hidden">
+                    <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-[#7b2d00]">Super Deal</h3>
+                      </div>
+                      <div className="inline-flex items-center gap-1 rounded-full bg-[#ff4f3e] px-3 py-1 text-xs font-semibold text-white shadow-sm">
+                        <span>Up to 70% off</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+                    <div className="px-5 pb-5 flex gap-3 overflow-hidden">
+                      {topDealProducts.slice(0, 4).map((product, index) => (
+                        <Link
+                          key={product.id || index}
+                          to={`/product/${product.id}`}
+                          className="flex-1 bg-white rounded-xl border-2 border-dashed border-[#ff69b4] px-3 py-3 flex flex-col items-center gap-3 shadow-[0_4px_12px_-6px_rgba(255,99,71,0.4)] hover:-translate-y-1 transition-transform"
+                        >
+                          <div className="w-20 h-20 bg-white rounded-md border border-[#ffe0ed] flex items-center justify-center overflow-hidden">
+                            <img
+                              src={product.images?.[0] || 'https://via.placeholder.com/80'}
+                              alt={product.name}
+                              className="w-full h-full object-contain p-2"
+                            />
+                          </div>
+                          <div className="w-full text-center">
+                            <div className="bg-[#172042] text-white text-xs font-bold rounded-full py-1 px-2">
+                              ETB{formatPrice(product.price || 0)}
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
                   {superDeals.map((deal, index) => (
                     <Link
                       key={deal.id || index}
