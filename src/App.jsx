@@ -261,7 +261,7 @@ function NavbarContent() {
           </div>
         </div>
 
-        <div className="bg-[#ffedd4]">
+        {/* Removed super deal banner */}
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
