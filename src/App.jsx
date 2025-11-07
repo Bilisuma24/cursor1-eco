@@ -94,16 +94,6 @@ function NavbarContent() {
     };
   }, []);
 
-  const topNavCategories = [
-    { label: "Recommended", to: "/shop", isActive: true },
-    { label: "Electronics", to: "/shop" },
-    { label: "Shoes", to: "/shop" },
-    { label: "Computer & Office", to: "/shop" },
-    { label: "Men's Clothing", to: "/shop" },
-    { label: "Sports & Outdoors", to: "/shop" },
-    { label: "Jewelry & Accs", to: "/shop" }
-  ];
-
   return (
     <div className="bg-white shadow-sm border-b border-gray-200">
       {/* Desktop layout */}
@@ -257,46 +247,6 @@ function NavbarContent() {
                 )}
                 <span className="text-xs font-medium">Cart</span>
               </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Removed super deal banner */}
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-[#ff4747] uppercase tracking-[0.3em]">Super Deal</h3>
-                <p className="mt-1 text-xl font-bold text-gray-900">Catch today’s flash bargains</p>
-              </div>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full bg-[#ff4747] text-white text-sm font-semibold px-4 py-2 shadow hover:bg-[#ff2e2e] transition-colors"
-              >
-                Up to 70% off
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
-              {topNavCategories.map((item, index) => (
-                <div
-                  key={`${item.label}-deal-${index}`}
-                  className="min-w-[120px] bg-white border-2 border-dashed border-[#ff90a6] rounded-2xl px-4 py-4 flex flex-col items-center gap-3 shadow-sm"
-                >
-                  <div className="w-16 h-16 rounded-xl bg-[#fff6f8] border border-[#ff90a6] flex items-center justify-center">
-                    <span className="text-2xl">{item.label.slice(0, 1)}</span>
-                  </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-semibold text-gray-900">{item.label}</p>
-                    <p className="text-xs text-gray-500">ETB{(index + 1) * 12}.00</p>
-                  </div>
-                  <Link
-                    to={`/shop?category=${encodeURIComponent(item.label)}`}
-                    className="text-xs font-semibold text-[#ff4747] hover:text-[#ff2e2e]"
-                  >
-                    Shop now
-                  </Link>
-                </div>
-              ))}
             </div>
           </div>
         </div>

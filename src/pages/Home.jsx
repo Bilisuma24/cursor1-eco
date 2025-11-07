@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Star, Truck, Shield, ChevronRight, ChevronLeft, Heart, Timer, Menu, ChevronDown, Sparkles } from "lucide-react";
+import { Search, Star, ChevronRight, ChevronLeft, Timer, Menu, ChevronDown, Sparkles } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import ProductCard from "../components/ProductCard";
@@ -166,8 +166,135 @@ export default function Home() {
   // Get top 3 deal products for the boxes
   const topDealProducts = trendingProducts.slice(0, 4);
 
+  const defaultHeroDeals = [
+    {
+      id: 'fallback-1',
+      name: 'Compact Dish Rack Bundle',
+      price: 0.99,
+      discount: 88,
+      image: 'https://images.unsplash.com/photo-1626942386447-4d628739dc68?auto=format&fit=crop&w=400&q=80',
+      tag: 'Kitchen essentials'
+    },
+    {
+      id: 'fallback-2',
+      name: 'Smart Fitness Tracker',
+      price: 36.0,
+      discount: 62,
+      image: 'https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=400&q=80',
+      tag: 'Wearables'
+    },
+    {
+      id: 'fallback-3',
+      name: 'Minimalist Apparel Pack',
+      price: 48.0,
+      discount: 54,
+      image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80',
+      tag: 'Style picks'
+    }
+  ];
+
+  const heroSource = topDealProducts.length > 0 ? topDealProducts : defaultHeroDeals;
+  const heroDeals = heroSource.slice(0, 3).map((product, index) => {
+    const fallback = defaultHeroDeals[index] || defaultHeroDeals[0];
+    const priceValue = product.price || fallback.price || (index + 1) * 20;
+    return {
+      id: product.id || fallback.id || `hero-${index}`,
+      name: product.name || fallback.name,
+      image: product.images?.[0] || product.image || fallback.image,
+      priceLabel: `ETB${formatPrice(priceValue)}`,
+      discount: product.discount || fallback.discount || [88, 62, 54][index] || 40,
+      tag: index === 0 ? 'Welcome deal' : index === 1 ? 'Hot pick' : 'Limited stock'
+    };
+  });
+
+  const heroNavLinks = [
+    { label: 'Dollar Express', to: '/shop?tag=dollar-express' },
+    { label: 'Local shipping', to: '/shop?tag=local-shipping' },
+    { label: 'Home & Furniture', to: '/shop?category=Home%20%26%20Furniture' },
+    { label: 'Weekly deals', to: '/shop?tag=weekly-deals' },
+    { label: 'Top Brands', to: '/shop?tag=top-brands' },
+    { label: 'Choice', to: '/shop?tag=choice' },
+    { label: 'FunTime', to: '/shop?tag=funtime' },
+    { label: 'More', to: '/shop' }
+  ];
+
+  const HeroDealCard = ({
+    deal,
+    className = '',
+    compact = false,
+    ultraCompact = false,
+    micro = false
+  }) => {
+    if (!deal) return null;
+    const isUltra = micro || ultraCompact || compact;
+    return (
+      <div className={`relative flex flex-col items-center text-center bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white/30 ${className}`}>
+        <span
+          className={`absolute left-2 bg-black/80 text-white ${
+            micro ? 'text-[6.5px]' : ultraCompact ? 'text-[7.5px]' : isUltra ? 'text-[9px]' : 'text-[11px]'
+          } font-semibold px-1.5 py-[2px] rounded-full tracking-wide ${
+            micro ? 'top-1' : ultraCompact ? 'top-1.5' : isUltra ? 'top-2' : 'top-3'
+          }`}
+        >
+          {deal.priceLabel}
+        </span>
+        <span
+          className={`absolute right-2 bg-[#ff4747] text-white ${
+            micro ? 'text-[6.5px]' : ultraCompact ? 'text-[7.5px]' : isUltra ? 'text-[9px]' : 'text-[11px]'
+          } font-semibold px-1.5 py-[2px] rounded-full ${
+            micro ? 'top-1' : ultraCompact ? 'top-1.5' : isUltra ? 'top-2' : 'top-3'
+          }`}
+        >
+          -{deal.discount}%
+        </span>
+        <div className={`w-full ${micro ? 'mt-2' : ultraCompact ? 'mt-2.5' : compact ? 'mt-4' : 'mt-8'}`}>
+          <div
+            className={`mx-auto aspect-square ${
+              micro
+                ? 'w-[45%] max-w-[48px]'
+                : ultraCompact
+                ? 'w-[55%] max-w-[60px]'
+                : compact
+                ? 'w-[80%] max-w-[110px]'
+                : 'w-[90%] max-w-[130px]'
+            } rounded-xl bg-white shadow-inner flex items-center justify-center overflow-hidden`}
+          >
+            <img
+              src={deal.image || 'https://via.placeholder.com/180?text=Deal'}
+              alt={deal.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+        <p
+          className={`${
+            micro ? 'mt-1 text-[8px]' : ultraCompact ? 'mt-1.5 text-[9px]' : compact ? 'mt-3 text-[11px]' : 'mt-4 text-xs sm:text-sm'
+          } font-semibold text-gray-800 leading-tight line-clamp-2 px-2`}
+        >
+          {deal.name}
+        </p>
+        {deal.tag && (
+          <span
+            className={`${
+              micro
+                ? 'mt-0.5 mb-1 text-[6.5px]'
+                : ultraCompact
+                ? 'mt-1 mb-1.5 text-[7.5px]'
+                : compact
+                ? 'mt-1 mb-3 text-[9px]'
+                : 'mt-1 mb-4 text-[10px]'
+            } inline-flex items-center justify-center px-2 py-0.5 font-semibold uppercase tracking-wide text-[#ff4747] bg-[#ffe7db] rounded-full`}
+          >
+            {deal.tag}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   // Categories for desktop
   const categories = productsData.categories || [];
+  const heroCategories = categories.slice(0, 8);
 
   const handleBannerPrev = () => {
     setBannerIndex((i) => (i - 1 + banners.length) % banners.length);
@@ -257,6 +384,78 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Mobile Hero Banner */}
+          <section className="px-4 py-4">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-lg">
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
+              <div className="relative">
+                  <div className="flex items-center gap-2.5 px-4 pt-3 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[0.16em] overflow-x-auto">
+                    <button className="inline-flex items-center gap-1 bg-white/10 hover:bg-white/20 transition-colors px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                    <Menu className="w-4 h-4" />
+                    <span>All Categories</span>
+                  </button>
+                  {heroNavLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      to={link.to}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+
+                {heroCategories.length > 0 && (
+                  <div className="px-4 pb-2">
+                    <div className="flex items-center gap-2 overflow-x-auto">
+                      {heroCategories.map((category, index) => (
+                        <Link
+                          key={`hero-mobile-${category.id || index}`}
+                          to={`/shop?category=${encodeURIComponent(category.name)}`}
+                          className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+                        >
+                          <span className="text-lg">{category.icon || '📦'}</span>
+                          <span>{category.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                  <div className="px-4 pb-3 space-y-2.5">
+                    <div className="space-y-1">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/80">
+                      Welcome deal
+                    </span>
+                      <h2 className="text-lg font-bold leading-tight">New shopper special</h2>
+                      <p className="text-[10px] text-white/80 max-w-sm">
+                      Score limited-time offers crafted for first-time EcoExpress shoppers.
+                    </p>
+                    <button
+                      onClick={() => navigate('/shop?tag=welcome-deal')}
+                        className="inline-flex items-center gap-1.5 bg-white text-[#ff3b30] font-semibold px-3 py-1.5 rounded-full shadow hover:bg-white/90 transition-colors text-[11px]"
+                    >
+                      Shop now
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {heroDeals.map((deal, index) => (
+                      <HeroDealCard
+                        key={deal.id || index}
+                        deal={deal}
+                        ultraCompact
+                        micro
+                        className="min-w-[100px] p-1.5"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* More to love Section */}
           <div className="bg-white py-4">
             <div className="px-4 mb-3">
@@ -275,47 +474,95 @@ export default function Home() {
       {/* DESKTOP ONLY: AliExpress-inspired layout */}
       <div className="hidden md:block">
         <div className="bg-gradient-to-b from-[#fff4ef] via-white to-white pb-16">
-          <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-            <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-[140px_minmax(0,1fr)_220px] xl:grid-cols-[150px_minmax(0,1fr)_240px]">
-              {/* Category list */}
-              <aside className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-sm transform scale-[0.85] origin-top-left">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <h2 className="text-base font-semibold text-gray-900">Top categories</h2>
-                  <p className="text-[11px] text-gray-500 mt-1 leading-snug">Explore popular picks from EcoExpress</p>
-                </div>
-                <ul className="divide-y divide-gray-100">
-                  {categories.slice(0, 12).map((category, index) => (
-                    <li key={index}>
+          {/* Full-width hero banner */}
+          <section className="px-2 sm:px-4 lg:px-6 pt-2">
+            <div className="relative bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white rounded-3xl shadow-lg overflow-hidden border border-[#ff8a70]">
+                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.45),_transparent_60%)]" />
+                <div className="relative">
+                <div className="flex items-center gap-2 px-3 pt-2 pb-1 text-[9px] font-semibold uppercase tracking-[0.13em] overflow-x-auto">
+                  <button className="inline-flex items-center gap-1 bg-white/10 hover:bg-white/20 transition-colors px-2 py-0.5 rounded-full whitespace-nowrap">
+                      <Menu className="w-4 h-4" />
+                      <span>All Categories</span>
+                    </button>
+                    {heroNavLinks.map((link) => (
                       <Link
-                        to={`/shop?category=${encodeURIComponent(category.name)}`}
-                        className="group flex items-center justify-between gap-2.5 px-4 py-2 hover:bg-[#fff5f0] transition-colors"
+                        key={link.label}
+                        to={link.to}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-base">
-                            {category.icon || '📦'}
-                          </span>
-                          <span className="text-[13px] font-medium text-gray-700 group-hover:text-[#ff4747] truncate max-w-[110px]">
-                            {category.name}
-                          </span>
-                        </div>
-                        <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-[#ff4747]" />
+                        {link.label}
                       </Link>
-                    </li>
-                  ))}
-                </ul>
-                {categories.length > 12 && (
-                  <Link
-                    to="/shop"
-                    className="flex items-center justify-center gap-2 px-4 py-2 text-[13px] font-semibold text-[#ff4747] bg-[#fff5f0] hover:bg-[#ffe2d2] transition-colors"
-                  >
-                    View all categories
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
+                    ))}
+                  </div>
+
+                {heroCategories.length > 0 && (
+                  <div className="px-3 pb-1.5">
+                    <div className="flex items-center gap-2 overflow-x-auto">
+                      {heroCategories.map((category, index) => (
+                        <Link
+                          key={`hero-desktop-${category.id || index}`}
+                          to={`/shop?category=${encodeURIComponent(category.name)}`}
+                          className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+                        >
+                          <span className="text-xl">{category.icon || '📦'}</span>
+                          <span>{category.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </aside>
 
+                <div className="px-3 pb-2">
+                  <div className="grid gap-2 xl:grid-cols-[110px_minmax(0,1fr)_110px] items-stretch">
+                    {heroDeals[0] && (
+                      <HeroDealCard deal={heroDeals[0]} ultraCompact micro className="hidden lg:flex w-full h-full p-1.5" />
+                    )}
+
+                    <div className="flex flex-col justify-between space-y-2 text-left">
+                      <span className="inline-flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/80">
+                        Welcome deal
+                      </span>
+                      <h2 className="text-[18px] lg:text-[20px] font-bold leading-snug max-w-md">
+                        Catch limited-time savings for new shoppers
+                      </h2>
+                      <p className="text-[9.5px] text-white/80 max-w-lg">
+                        Enjoy fresh picks across electronics, lifestyle, and beyond—curated to deliver the biggest value on your first EcoExpress haul.
+                      </p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <button
+                          onClick={() => navigate('/shop?tag=welcome-deal')}
+                          className="inline-flex items-center gap-1 bg-white text-[#ff3b30] font-semibold px-2.5 py-1.5 rounded-full shadow-md hover:bg-white/90 transition-colors text-[10px]"
+                        >
+                          Shop now
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                        <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide">
+                          <span className="bg-white text-[#ff3b30] rounded-full px-2 py-0.5">
+                            -{heroDeals[0]?.discount || 80}%
+                          </span>
+                          <span>exclusive welcome deal</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-1.5">
+                      {heroDeals.slice(1).map((deal, index) => (
+                        <HeroDealCard
+                          key={deal.id || index}
+                          deal={deal}
+                          ultraCompact
+                          micro
+                          className="w-full h-full p-1.5"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                </div>
             </div>
+          </section>
 
+          <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
             {/* Flash deals section */}
             <section className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -387,27 +634,38 @@ export default function Home() {
               </div>
             </section>
 
-            {/* Popular categories */}
+            {/* Category list for footer placement */}
             <section className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Popular categories</h2>
-                <Link to="/shop" className="text-sm font-semibold text-[#ff4747] hover:text-[#ff2e2e] flex items-center gap-1">
-                  Shop all
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <h2 className="text-xl font-bold text-gray-900">Top categories</h2>
+              <p className="text-sm text-gray-500 mt-1">Explore popular picks from EcoExpress</p>
+              <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {categories.slice(0, 12).map((category, index) => (
                   <Link
                     key={index}
                     to={`/shop?category=${encodeURIComponent(category.name)}`}
-                    className="group bg-[#fff8f4] hover:bg-[#ffe7d8] border border-transparent hover:border-[#ffd0b3] rounded-2xl px-4 py-6 text-center transition-all"
+                    className="group flex items-center justify-between gap-3 rounded-xl border border-transparent hover:border-[#ffd0b3] bg-[#fff8f4] hover:bg-[#ffe7d8] transition-all px-4 py-3"
                   >
-                    <div className="text-3xl mb-3">{category.icon || '📦'}</div>
-                    <div className="text-sm font-semibold text-gray-700 group-hover:text-[#ff4747]">{category.name}</div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl md:text-2xl">
+                        {category.icon || '📦'}
+                      </span>
+                      <span className="text-sm font-semibold text-gray-700 group-hover:text-[#ff4747]">
+                        {category.name}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#ff4747]" />
                   </Link>
                 ))}
               </div>
+              {categories.length > 12 && (
+                <Link
+                  to="/shop"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#ff4747] hover:text-[#ff2e2e]"
+                >
+                  View all categories
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              )}
             </section>
 
             {/* Recommended products */}
