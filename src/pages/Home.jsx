@@ -375,7 +375,7 @@ export default function Home() {
       <div className="hidden md:block">
         <div className="bg-gradient-to-b from-[#fff4ef] via-white to-white pb-16">
           <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-            <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_260px] xl:grid-cols-[260px_minmax(0,1fr)_300px]">
+            <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_240px] xl:grid-cols-[220px_minmax(0,1fr)_260px]">
               {/* Category list */}
               <aside className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
@@ -387,17 +387,17 @@ export default function Home() {
                     <li key={index}>
                       <Link
                         to={`/shop?category=${encodeURIComponent(category.name)}`}
-                        className="group flex items-center justify-between gap-4 px-6 py-3 hover:bg-[#fff5f0] transition-colors"
+                        className="group flex items-center justify-between gap-3 px-5 py-2.5 hover:bg-[#fff5f0] transition-colors"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-lg">
                             {category.icon || '📦'}
                           </span>
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-[#ff4747]">
+                          <span className="text-sm font-medium text-gray-700 group-hover:text-[#ff4747] truncate max-w-[130px]">
                             {category.name}
                           </span>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#ff4747]" />
+                        <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#ff4747]" />
                       </Link>
                     </li>
                   ))}
@@ -405,7 +405,7 @@ export default function Home() {
                 {categories.length > 12 && (
                   <Link
                     to="/shop"
-                    className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-[#ff4747] bg-[#fff5f0] hover:bg-[#ffe2d2] transition-colors"
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-[#ff4747] bg-[#fff5f0] hover:bg-[#ffe2d2] transition-colors"
                   >
                     View all categories
                     <ChevronRight className="w-4 h-4" />

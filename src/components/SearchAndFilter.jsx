@@ -167,6 +167,25 @@ export default function SearchAndFilter({
                 className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent min-w-[120px]"
               />
             </div>
+            {categories.length > 0 && (
+              <div className="hidden lg:flex w-full items-center flex-wrap gap-2 pt-2 mt-1 border-t border-gray-200">
+                <span className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Top categories:</span>
+                {categories.slice(0, 8).map((category) => (
+                  <button
+                    key={category.id || category.name}
+                    type="button"
+                    onClick={() => handleFilterChange('category', category.name)}
+                    className={`px-3 py-1.5 text-xs rounded-full border transition-colors duration-200 ${
+                      localFilters.category === category.name
+                        ? 'bg-orange-500 border-orange-500 text-white shadow-sm'
+                        : 'border-gray-200 text-gray-700 hover:border-orange-300 hover:text-orange-600'
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sort and Clear - RESPONSIVE: Stack on mobile */}

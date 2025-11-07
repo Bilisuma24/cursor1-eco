@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu } from "lucide-react";
+import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu, Camera, Mic, QrCode } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
 
@@ -115,7 +115,7 @@ function NavbarContent() {
               <span>Help Center</span>
               <span>App</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 text-sm">
               <Link to="/orders" className="hover:text-[#ff4747] transition-colors">My Orders</Link>
               <Link to="/wishlist" className="hover:text-[#ff4747] transition-colors">Wishlist</Link>
               <Link to="/seller-dashboard" className="hover:text-[#ff4747] transition-colors">Sell with Us</Link>
@@ -124,21 +124,21 @@ function NavbarContent() {
         </div>
 
         <div className="bg-white">
-          <div className="max-w-7xl mx-auto px-6 py-5 flex items-center gap-8">
+          <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-8">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 min-w-[180px]">
               <div className="w-12 h-12 rounded-md bg-gradient-to-br from-[#ff6a3c] to-[#ff2e2e] flex items-center justify-center shadow-lg">
                 <span className="text-white font-extrabold text-2xl">E</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-2xl font-extrabold text-gray-900 leading-none">EcoExpress</span>
+                <span className="text-2xl text-gray-900 leading-none">EcoExpress</span>
                 <span className="text-xs uppercase tracking-[0.2em] text-[#ff6a3c] font-semibold">Global Shopping</span>
               </div>
             </Link>
 
-            {/* Search */}
-            <div className="flex-1">
-              <form onSubmit={handleSearch} className="w-full">
+            {/* Search + quick tools */}
+            <div className="flex-1 flex flex-col items-center gap-2">
+              <form onSubmit={handleSearch} className="w-full max-w-3xl">
                 <div className="flex items-stretch border-2 border-[#ff4747] rounded-full overflow-hidden bg-white shadow-sm">
                   <select
                     value={searchCategory}
@@ -157,8 +157,16 @@ function NavbarContent() {
                       placeholder="Search for great deals, products, and trends"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-12 pr-32 h-12 text-sm text-gray-700 focus:outline-none"
+                      className="w-full pl-12 pr-36 h-12 text-sm text-gray-700 focus:outline-none"
                     />
+                    <div className="absolute right-28 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400">
+                      <button type="button" className="p-2 hover:text-[#ff4747] transition-colors" title="Image search">
+                        <Camera className="w-4 h-4" />
+                      </button>
+                      <button type="button" className="p-2 hover:text-[#ff4747] transition-colors" title="Voice search">
+                        <Mic className="w-4 h-4" />
+                      </button>
+                    </div>
                     <button
                       type="submit"
                       className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-[#ff4747] hover:bg-[#ff2e2e] transition-colors text-white font-semibold uppercase text-sm px-6 py-2 rounded-full"
@@ -168,38 +176,29 @@ function NavbarContent() {
                   </div>
                 </div>
               </form>
-              <div className="flex items-center gap-4 text-xs text-gray-500 mt-2 pl-2">
-                <span className="text-gray-800 font-medium">Trending:</span>
-                <button type="button" className="hover:text-[#ff4747]">Wireless earbuds</button>
-                <button type="button" className="hover:text-[#ff4747]">Smart home</button>
-                <button type="button" className="hover:text-[#ff4747]">Fashion deals</button>
+              <div className="w-full max-w-3xl flex items-center justify-between text-xs text-gray-500 px-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-gray-800 font-medium">Trending:</span>
+                  <button type="button" className="hover:text-[#ff4747]">Wireless earbuds</button>
+                  <button type="button" className="hover:text-[#ff4747]">Smart home</button>
+                  <button type="button" className="hover:text-[#ff4747]">Fashion deals</button>
+                </div>
+                <div className="hidden xl:flex items-center gap-4 text-gray-600">
+                  <Link to="/" className="flex items-center gap-1 hover:text-[#ff4747]">
+                    <QrCode className="w-4 h-4" />
+                    <span>Download App</span>
+                  </Link>
+                  <button type="button" className="flex items-center gap-1 hover:text-[#ff4747]">
+                    <Globe className="w-4 h-4" />
+                    <span>EN/ETB</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Actions */}
             <div className="flex items-center gap-6 text-sm text-gray-700">
-              <Link to="/orders" className="flex flex-col items-center gap-1 hover:text-[#ff4747] transition-colors">
-                <User className="w-6 h-6" />
-                <span className="text-xs font-medium">Orders</span>
-              </Link>
-              <Link to="/wishlist" className="relative flex flex-col items-center gap-1 hover:text-[#ff4747] transition-colors">
-                <Heart className="w-6 h-6" />
-                {wishlist.length > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
-                    {wishlist.length}
-                  </span>
-                )}
-                <span className="text-xs font-medium">Wishlist</span>
-              </Link>
-              <Link to="/cart" className="relative flex flex-col items-center gap-1 hover:text-[#ff4747] transition-colors">
-                <ShoppingCart className="w-6 h-6" />
-                {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
-                    {cartItemsCount}
-                  </span>
-                )}
-                <span className="text-xs font-medium">Cart</span>
-              </Link>
               <div ref={dropdownRef} className="relative">
                 {user ? (
                   <button
@@ -221,8 +220,8 @@ function NavbarContent() {
                     <ChevronDown className="w-4 h-4 text-gray-500" />
                   </button>
                 ) : (
-                  <div className="flex flex-col text-xs text-gray-500">
-                    <span className="font-medium text-gray-700">Welcome to EcoExpress</span>
+                  <div className="flex flex-col text-xs text-gray-500 text-right">
+                    <span className="font-medium text-gray-700">Welcome</span>
                     <div className="flex items-center gap-2 mt-1 text-[#ff4747]">
                       <Link to="/login" className="font-semibold hover:underline">Sign in</Link>
                       <span className="text-gray-300">|</span>
@@ -283,6 +282,15 @@ function NavbarContent() {
                   </div>
                 )}
               </div>
+              <Link to="/cart" className="relative flex flex-col items-center gap-1 hover:text-[#ff4747] transition-colors">
+                <ShoppingCart className="w-6 h-6" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
+                    {cartItemsCount}
+                  </span>
+                )}
+                <span className="text-xs font-medium">Cart</span>
+              </Link>
             </div>
           </div>
         </div>
