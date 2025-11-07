@@ -634,40 +634,6 @@ export default function Home() {
               </div>
             </section>
 
-            {/* Category list for footer placement */}
-            <section className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-6">
-              <h2 className="text-xl font-bold text-gray-900">Top categories</h2>
-              <p className="text-sm text-gray-500 mt-1">Explore popular picks from EcoExpress</p>
-              <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {categories.slice(0, 12).map((category, index) => (
-                  <Link
-                    key={index}
-                    to={`/shop?category=${encodeURIComponent(category.name)}`}
-                    className="group flex items-center justify-between gap-3 rounded-xl border border-transparent hover:border-[#ffd0b3] bg-[#fff8f4] hover:bg-[#ffe7d8] transition-all px-4 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl md:text-2xl">
-                        {category.icon || '📦'}
-                      </span>
-                      <span className="text-sm font-semibold text-gray-700 group-hover:text-[#ff4747]">
-                        {category.name}
-                      </span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#ff4747]" />
-                  </Link>
-                ))}
-              </div>
-              {categories.length > 12 && (
-                <Link
-                  to="/shop"
-                  className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#ff4747] hover:text-[#ff2e2e]"
-                >
-                  View all categories
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              )}
-            </section>
-
             {/* Recommended products */}
             <section className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-6">
               <div className="flex items-center justify-between">

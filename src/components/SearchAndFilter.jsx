@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, Filter, X, ChevronDown } from "lucide-react";
 
 export default function SearchAndFilter({ 
@@ -10,6 +10,10 @@ export default function SearchAndFilter({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [localFilters, setLocalFilters] = useState(filters);
+
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -28,9 +32,13 @@ export default function SearchAndFilter({
     onFilterChange(clearedFilters);
   };
 
-  const hasActiveFilters = Object.values(localFilters).some(value => 
-    value && value !== '' && (Array.isArray(value) ? value.length > 0 : true)
-  );
+  const activeFilterEntries = Object.entries(localFilters).filter(([_, value]) => {
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'boolean') return value;
+    return value !== undefined && value !== null && value !== '';
+  });
+
+  const hasActiveFilters = activeFilterEntries.length > 0;
 
   return (
     <div className="bg-white border-b border-gray-200 sticky top-16 z-40 shadow-sm">
@@ -65,7 +73,7 @@ export default function SearchAndFilter({
           >
             <span className="flex items-center space-x-2">
               <Filter className="w-4 h-4" />
-              <span>Filters {hasActiveFilters && `(${Object.values(localFilters).filter(v => v && v !== '' && (Array.isArray(v) ? v.length > 0 : true)).length})`}</span>
+              <span>Filters {hasActiveFilters && `(${activeFilterEntries.length})`}</span>
             </span>
             <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -328,9 +336,7 @@ export default function SearchAndFilter({
         {/* Active Filters Display */}
         {hasActiveFilters && (
           <div className="mt-4 flex flex-wrap gap-2">
-            {Object.entries(localFilters).map(([key, value]) => {
-              if (!value || value === '' || (Array.isArray(value) && value.length === 0)) return null;
-              
+            {activeFilterEntries.map(([key, value]) => {
               let displayValue = value;
               if (key === 'priceRange') {
                 displayValue = value === '200+' ? '$200+' : `$${value}`;
