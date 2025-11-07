@@ -6,6 +6,7 @@ export default function AliExpressImageZoom({
     zoomRatio = 2.5,
     lensOpacity = 0.25,
     className = '',
+    aspectClass = 'aspect-[16/10]',
     onChange = () => {}
 }) {
     const [index, setIndex] = useState(initialIndex);
@@ -67,7 +68,7 @@ export default function AliExpressImageZoom({
 			<div className="relative w-full">
 				<div
 					ref={containerRef}
-					className="relative border border-gray-100 bg-white overflow-hidden w-full select-none rounded aspect-[16/10]"
+                    className={`relative border border-gray-100 bg-white overflow-hidden w-full select-none rounded ${aspectClass}`}
 					onMouseEnter={onMouseEnter}
 					onMouseLeave={onMouseLeave}
 					onMouseMove={onMouseMove}

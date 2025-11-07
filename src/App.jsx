@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp } from "lucide-react";
+import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
 
@@ -39,11 +39,12 @@ import { PublicRoute } from "./components/ProtectedRoute";
 function NavbarContent() {
   const { user, signOut, loading: authLoading } = useAuth();
   const { userRole, isSeller, isAdmin, loading: roleLoading } = useUserRole();
-  const { wishlist } = useCart();
+  const { wishlist, getCartItemsCount } = useCart();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
   const dropdownRef = useRef(null);
+  const cartItemsCount = typeof getCartItemsCount === "function" ? getCartItemsCount() : 0;
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -95,207 +96,272 @@ function NavbarContent() {
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200">
-      {/* RESPONSIVE FIX: Improved padding */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-        {/* Top Bar - RESPONSIVE: Hide or simplify on mobile */}
-        <div className="hidden sm:flex items-center justify-between py-2 text-xs text-gray-600">
-          <div className="flex items-center gap-3 lg:gap-4">
-            <div className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /><span>Ship to</span><span className="font-medium text-gray-800">United States</span></div>
-            <div className="hidden md:flex items-center gap-1"><Globe className="w-3.5 h-3.5" /><span>English</span><ChevronDown className="w-3 h-3" /></div>
-            <span className="hidden lg:inline">Trade Assurance</span>
-            <span className="hidden xl:inline">Secure payments</span>
-          </div>
-          <div className="flex items-center gap-3 lg:gap-4">
-            <span className="hidden md:inline">Help</span>
-            <span className="hidden lg:inline">Buyer Protection</span>
-            <span className="hidden xl:inline">App</span>
+      {/* Desktop layout */}
+      <div className="hidden lg:block">
+        <div className="bg-[#f5f5f5] border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-6 py-2 text-xs text-gray-600 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5" />
+                <span>Ship to</span>
+                <span className="font-medium text-gray-800">United States</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Globe className="w-3.5 h-3.5" />
+                <span>English</span>
+                <ChevronDown className="w-3 h-3" />
+              </div>
+              <span>Buyer Protection</span>
+              <span>Help Center</span>
+              <span>App</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link to="/orders" className="hover:text-[#ff4747] transition-colors">My Orders</Link>
+              <Link to="/wishlist" className="hover:text-[#ff4747] transition-colors">Wishlist</Link>
+              <Link to="/seller-dashboard" className="hover:text-[#ff4747] transition-colors">Sell with Us</Link>
+            </div>
           </div>
         </div>
 
-        {/* Main Navigation - RESPONSIVE: Improved spacing */}
-        <div className="flex items-center justify-between py-3 sm:py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+        <div className="bg-white">
+          <div className="max-w-7xl mx-auto px-6 py-5 flex items-center gap-8">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 min-w-[180px]">
+              <div className="w-12 h-12 rounded-md bg-gradient-to-br from-[#ff6a3c] to-[#ff2e2e] flex items-center justify-center shadow-lg">
+                <span className="text-white font-extrabold text-2xl">E</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-2xl font-extrabold text-gray-900 leading-none">EcoExpress</span>
+                <span className="text-xs uppercase tracking-[0.2em] text-[#ff6a3c] font-semibold">Global Shopping</span>
+              </div>
+            </Link>
+
+            {/* Search */}
+            <div className="flex-1">
+              <form onSubmit={handleSearch} className="w-full">
+                <div className="flex items-stretch border-2 border-[#ff4747] rounded-full overflow-hidden bg-white shadow-sm">
+                  <select
+                    value={searchCategory}
+                    onChange={(e) => setSearchCategory(e.target.value)}
+                    className="hidden xl:block w-40 bg-gray-100 text-sm text-gray-600 px-4 focus:outline-none focus:ring-0 border-r border-gray-200"
+                  >
+                    <option value="">All Categories</option>
+                    {productsData.categories.map((c) => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      placeholder="Search for great deals, products, and trends"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-12 pr-32 h-12 text-sm text-gray-700 focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-[#ff4747] hover:bg-[#ff2e2e] transition-colors text-white font-semibold uppercase text-sm px-6 py-2 rounded-full"
+                    >
+                      Search
+                    </button>
+                  </div>
+                </div>
+              </form>
+              <div className="flex items-center gap-4 text-xs text-gray-500 mt-2 pl-2">
+                <span className="text-gray-800 font-medium">Trending:</span>
+                <button type="button" className="hover:text-[#ff4747]">Wireless earbuds</button>
+                <button type="button" className="hover:text-[#ff4747]">Smart home</button>
+                <button type="button" className="hover:text-[#ff4747]">Fashion deals</button>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-6 text-sm text-gray-700">
+              <Link to="/orders" className="flex flex-col items-center gap-1 hover:text-[#ff4747] transition-colors">
+                <User className="w-6 h-6" />
+                <span className="text-xs font-medium">Orders</span>
+              </Link>
+              <Link to="/wishlist" className="relative flex flex-col items-center gap-1 hover:text-[#ff4747] transition-colors">
+                <Heart className="w-6 h-6" />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
+                    {wishlist.length}
+                  </span>
+                )}
+                <span className="text-xs font-medium">Wishlist</span>
+              </Link>
+              <Link to="/cart" className="relative flex flex-col items-center gap-1 hover:text-[#ff4747] transition-colors">
+                <ShoppingCart className="w-6 h-6" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
+                    {cartItemsCount}
+                  </span>
+                )}
+                <span className="text-xs font-medium">Cart</span>
+              </Link>
+              <div ref={dropdownRef} className="relative">
+                {user ? (
+                  <button
+                    type="button"
+                    onClick={toggleUserDropdown}
+                    className="flex items-center gap-2 hover:text-[#ff4747] transition-colors"
+                  >
+                    {getAvatarUrl() ? (
+                      <img src={getAvatarUrl()} alt="Avatar" className="w-9 h-9 rounded-full object-cover border border-gray-200" />
+                    ) : (
+                      <div className="w-9 h-9 bg-[#ff4747] text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                        {getUserInitials()}
+                      </div>
+                    )}
+                    <div className="flex flex-col items-start">
+                      <span className="text-[11px] text-gray-500 leading-none">Hi,</span>
+                      <span className="text-sm font-semibold leading-tight">{getUserDisplayName()}</span>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                  </button>
+                ) : (
+                  <div className="flex flex-col text-xs text-gray-500">
+                    <span className="font-medium text-gray-700">Welcome to EcoExpress</span>
+                    <div className="flex items-center gap-2 mt-1 text-[#ff4747]">
+                      <Link to="/login" className="font-semibold hover:underline">Sign in</Link>
+                      <span className="text-gray-300">|</span>
+                      <Link to="/signup" className="font-semibold hover:underline">Register</Link>
+                    </div>
+                  </div>
+                )}
+                {user && userDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-3 w-60 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">{getUserDisplayName()}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        to="/profile"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <User className="w-4 h-4" />
+                        <span>Profile</span>
+                      </Link>
+                      <Link
+                        to="/orders"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <span>Orders</span>
+                      </Link>
+                      {isSeller && (
+                        <Link
+                          to="/seller-dashboard"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <span>Seller Dashboard</span>
+                        </Link>
+                      )}
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <span>Admin Dashboard</span>
+                        </Link>
+                      )}
+                    </div>
+                    <div className="border-t border-gray-100">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-[#ff4747] font-semibold hover:bg-[#fff1ed]"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#f85606]">
+          <div className="max-w-7xl mx-auto px-6 flex items-center text-white text-sm font-medium">
+            <button type="button" className="flex items-center gap-2 bg-[#d94a04] hover:bg-[#c44203] transition-colors px-4 py-3 rounded-t-md">
+              <Menu className="w-5 h-5" />
+              <span>All Categories</span>
+            </button>
+            <nav className="flex items-center gap-6 px-6 py-3">
+              <Link to="/shop" className="hover:text-white/80">Flash Deals</Link>
+              <Link to="/shop" className="hover:text-white/80">Top Ranking</Link>
+              <Link to="/shop" className="hover:text-white/80">New User Zone</Link>
+              <Link to="/shop" className="hover:text-white/80">Global Shopping</Link>
+              <Link to="/shop" className="hover:text-white/80">Brand Mall</Link>
+              <Link to="/shop" className="hover:text-white/80">Home &amp; Garden</Link>
+              <Link to="/shop" className="hover:text-white/80">Tech Discovery</Link>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile layout */}
+      <div className="lg:hidden">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-[#ff4747] rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">E</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">Eco Store</span>
+            <span className="text-xl font-bold text-gray-900">EcoExpress</span>
           </Link>
-
-          {/* Search Bar - RESPONSIVE: Improved mobile layout */}
-          <div className="hidden sm:flex flex-1 max-w-3xl mx-3 lg:mx-6">
-            <form onSubmit={handleSearch} className="flex w-full">
-              <div className="hidden lg:block">
-                <select
-                  value={searchCategory}
-                  onChange={(e) => setSearchCategory(e.target.value)}
-                  className="h-[42px] sm:h-[44px] border border-r-0 border-gray-300 rounded-l-lg px-3 text-xs sm:text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value="">All Categories</option>
-                  {productsData.categories.map((c) => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="relative flex-1 min-w-0">
-                <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                <input
-                  type="text"
-                  placeholder="Search for products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 sm:pl-10 pr-20 sm:pr-28 h-[40px] sm:h-[44px] border border-gray-300 lg:border-l-0 rounded-l-lg lg:rounded-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium"
-                >
-                  Search
-                </button>
-              </div>
-            </form>
-            <div className="hidden lg:flex gap-3 text-xs text-gray-500 mt-2">
-              <span className="hover:text-gray-700 cursor-pointer">Top deals</span>
-              <span className="hover:text-gray-700 cursor-pointer">New arrivals</span>
-              <span className="hover:text-gray-700 cursor-pointer">Free shipping</span>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <div className="hidden lg:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-orange-600 font-medium">
-              Home
-            </Link>
-            <Link to="/shop" className="text-gray-700 hover:text-orange-600 font-medium">
-              Shop
-            </Link>
-            <Link to="/about" className="text-gray-700 hover:text-orange-600 font-medium">
-              About
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-orange-600 font-medium">
-              Contact
-            </Link>
-          </div>
-
-          {/* User Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Wishlist */}
-            <Link to="/wishlist" className="relative p-2 text-gray-700 hover:text-red-600 transition-colors duration-200">
+          <div className="flex items-center gap-3">
+            <Link to="/wishlist" className="relative text-gray-700 hover:text-[#ff4747]">
               <Heart className="w-6 h-6" />
               {wishlist.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
                   {wishlist.length}
                 </span>
               )}
             </Link>
-
-            {/* User Menu */}
-            {!user ? (
-              <div className="flex items-center space-x-2">
-                <Link
-                  to="/login"
-                  className="text-gray-700 hover:text-orange-600 font-medium"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200 font-medium"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            ) : (
-              <div className="relative flex items-center gap-2" ref={dropdownRef}>
-                {/* Mobile: Profile icon directly links to profile */}
-                <Link
-                  to="/profile"
-                  className="lg:hidden flex items-center text-gray-700 dark:text-gray-300 hover:text-orange-600 transition-colors"
-                  title="Profile"
-                >
-                  {getAvatarUrl() ? (
-                    <img src={getAvatarUrl()} alt="Avatar" className="w-8 h-8 rounded-full object-cover border" />
-                  ) : (
-                    <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                      {getUserInitials()}
-                    </div>
-                  )}
-                </Link>
-                
-                {/* Desktop: Profile with dropdown */}
-                <div className="hidden lg:flex items-center space-x-2">
-                  <Link
-                    to="/profile"
-                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-orange-600 transition-colors"
-                    title="Profile"
-                  >
-                    {getAvatarUrl() ? (
-                      <img src={getAvatarUrl()} alt="Avatar" className="w-8 h-8 rounded-full object-cover border" />
-                    ) : (
-                      <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                        {getUserInitials()}
-                      </div>
-                    )}
-                    <span className="font-medium">{getUserDisplayName()}</span>
-                  </Link>
-                  <button
-                    onClick={toggleUserDropdown}
-                    aria-label="Open menu"
-                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                  >
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                </div>
-                
-                {/* User Dropdown (Desktop only) */}
-                {userDropdownOpen && (
-                  <div className="hidden lg:block absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
-                    <Link
-                      to="/profile"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    >
-                      <User className="w-4 h-4" />
-                      <span>Profile</span>
-                    </Link>
-                    <Link
-                      to="/orders"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    >
-                      <span>Orders</span>
-                    </Link>
-                    {isSeller && (
-                      <Link
-                        to="/seller-dashboard"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      >
-                        <span>Seller Dashboard</span>
-                      </Link>
-                    )}
-                    {isAdmin && (
-                      <Link
-                        to="/admin"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      >
-                        <span>Admin Dashboard</span>
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center space-x-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
+            <Link to="/cart" className="relative text-gray-700 hover:text-[#ff4747]">
+              <ShoppingCart className="w-6 h-6" />
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
+                  {cartItemsCount}
+                </span>
+              )}
+            </Link>
           </div>
+        </div>
+        <div className="px-4 pb-3">
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search for products"
+              className="w-full bg-gray-100 rounded-full pl-12 pr-4 py-2.5 text-sm focus:outline-none"
+            />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          </form>
+        </div>
+        <div className="px-4 pb-4 text-sm text-gray-600 flex items-center justify-between">
+          {user ? (
+            <>
+              <span className="truncate">Hi, <span className="font-semibold text-gray-800">{getUserDisplayName()}</span></span>
+              <Link to="/profile" className="text-[#ff4747] font-semibold">Profile</Link>
+            </>
+          ) : (
+            <>
+              <span>Welcome to EcoExpress</span>
+              <div className="flex items-center gap-3 text-[#ff4747] font-semibold">
+                <Link to="/login">Sign in</Link>
+                <span className="text-gray-300">|</span>
+                <Link to="/signup">Join</Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

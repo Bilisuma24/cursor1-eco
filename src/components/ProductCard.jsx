@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Heart, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Heart, Star, Truck } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 
 export default function ProductCard({ product, onAddToCart, viewMode = 'grid' }) {
@@ -43,8 +43,8 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-3 h-3 ${
-          i < Math.floor(rating) ? 'text-orange-500 fill-current' : 'text-gray-300'
+        className={`w-3.5 h-3.5 ${
+          i < Math.floor(rating) ? 'text-[#ffb266] fill-current' : 'text-gray-300'
         }`}
       />
     ));
@@ -95,23 +95,30 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
     );
   }
 
+  const isChoiceDeal = (product.rating || 0) >= 4.6;
+
   return (
     <div 
-      className="bg-white rounded border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full"
+      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all flex flex-col h-full hover:border-[#ffd0b3] hover:shadow-lg"
       onClick={() => navigate(`/product/${product.id}`)}
     >
       {/* Image */}
-      <div className="relative aspect-square bg-gray-50 border border-gray-100 bg-white rounded overflow-hidden">
+      <div className="relative aspect-square bg-[#fff7f2] border-b border-gray-100 overflow-hidden">
+        {isChoiceDeal && (
+          <span className="absolute top-3 left-3 bg-[#ff4747] text-white text-[10px] font-semibold uppercase tracking-wide px-3 py-1 rounded-full shadow-sm">
+            Choice
+          </span>
+        )}
         <img
           src={product.images?.[selectedImage] || 'https://via.placeholder.com/300'}
           alt={product.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-300"
         />
         
         {/* Discount badge */}
-        {product.discount && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded">
-            -{product.discount}%
+        {product.originalPrice && product.originalPrice > product.price && (
+          <div className="absolute top-3 right-3 bg-white text-[#ff4747] text-xs font-semibold px-2.5 py-1 rounded-full border border-[#ffd0b3] shadow-sm">
+            -{Math.round(100 - (product.price / product.originalPrice) * 100)}%
           </div>
         )}
 
@@ -121,10 +128,10 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
             e.stopPropagation();
             handleWishlistToggle(e);
           }}
-          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+          className={`absolute bottom-3 right-3 w-9 h-9 rounded-full flex items-center justify-center border border-white/70 backdrop-blur bg-white/80 transition-colors ${
             isInWishlist(product.id)
-              ? 'bg-orange-500 text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100'
+              ? 'text-[#ff4747]'
+              : 'text-gray-600 hover:text-[#ff4747]'
           }`}
         >
           <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
@@ -132,29 +139,21 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
         {/* Image counter */}
         {product.images && product.images.length > 1 && (
-          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
+          <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
             {selectedImage + 1}/{product.images.length}
           </div>
         )}
       </div>
 
       {/* Product Info */}
-      <div className="p-3 flex flex-col flex-grow">
-        <h3 className="text-sm font-normal text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem]">
+      <div className="px-4 py-4 flex flex-col gap-3 flex-1">
+        <h3 className="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.75rem] group-hover:text-[#ff4747] transition-colors">
           {product.name || 'Untitled Product'}
         </h3>
 
-        {/* Rating */}
-        {product.rating && (
-          <div className="flex items-center gap-1 mb-2">
-            {renderStars(product.rating)}
-            <span className="text-xs text-gray-500">({product.reviewCount || 0})</span>
-          </div>
-        )}
-
         {/* Price */}
-        <div className="mt-auto">
-          <div className="text-lg font-bold text-red-600 mb-1">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <div className="text-xl font-bold text-[#ff4747]">
             {getCurrencySymbol()}{formatPrice(product.price || 0)}
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
@@ -162,6 +161,26 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
               {getCurrencySymbol()}{formatPrice(product.originalPrice)}
             </div>
           )}
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-[#ff4747] bg-[#ffe8dc] px-2 py-0.5 rounded-full">
+            Deal
+          </span>
+        </div>
+
+        {/* Rating */}
+        {product.rating && (
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            {renderStars(product.rating)}
+            <span className="font-medium text-gray-600">{product.rating?.toFixed(1)}</span>
+            <span className="text-gray-400">({product.reviewCount || 0})</span>
+          </div>
+        )}
+
+        <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
+          <span className="flex items-center gap-1 text-[#2dae6f] font-semibold">
+            <Truck className="w-4 h-4" />
+            Free shipping
+          </span>
+          <span>{product.sold ? `${product.sold}+ sold` : 'Popular'}</span>
         </div>
       </div>
     </div>
