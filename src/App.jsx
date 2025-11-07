@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu, Camera, Mic, QrCode } from "lucide-react";
+import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu, Camera, Mic, QrCode, ChevronRight } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
 
@@ -93,6 +93,16 @@ function NavbarContent() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const topNavCategories = [
+    { label: "Recommended", to: "/shop", isActive: true },
+    { label: "Electronics", to: "/shop" },
+    { label: "Shoes", to: "/shop" },
+    { label: "Computer & Office", to: "/shop" },
+    { label: "Men's Clothing", to: "/shop" },
+    { label: "Sports & Outdoors", to: "/shop" },
+    { label: "Jewelry & Accs", to: "/shop" }
+  ];
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200">
@@ -301,14 +311,27 @@ function NavbarContent() {
               <Menu className="w-5 h-5" />
               <span>All Categories</span>
             </button>
-            <nav className="flex items-center gap-6 px-6 py-3">
-              <Link to="/shop" className="hover:text-white/80">Flash Deals</Link>
-              <Link to="/shop" className="hover:text-white/80">Top Ranking</Link>
-              <Link to="/shop" className="hover:text-white/80">New User Zone</Link>
-              <Link to="/shop" className="hover:text-white/80">Global Shopping</Link>
-              <Link to="/shop" className="hover:text-white/80">Brand Mall</Link>
-              <Link to="/shop" className="hover:text-white/80">Home &amp; Garden</Link>
-              <Link to="/shop" className="hover:text-white/80">Tech Discovery</Link>
+            <nav className="flex flex-1 items-stretch gap-3 px-6 py-3">
+              {topNavCategories.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className={`flex-1 flex items-center justify-center text-center rounded-full border transition-colors ${
+                    item.isActive
+                      ? "bg-white text-[#f85606] border-white font-semibold"
+                      : "bg-white/10 border-white/40 text-white/90 hover:bg-white/20 hover:text-white"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <button
+                type="button"
+                className="flex-1 flex items-center justify-center gap-1 text-center rounded-full border border-white/40 bg-white/10 text-white/90 hover:bg-white/20 hover:text-white transition-colors"
+              >
+                <span>More</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </nav>
           </div>
         </div>
