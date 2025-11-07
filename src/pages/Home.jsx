@@ -414,97 +414,47 @@ export default function Home() {
               </aside>
 
               {/* Hero content */}
-              <section className="space-y-4">
-                <div className="relative bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="relative h-80 bg-gradient-to-br from-[#ff6a3c] to-[#ff2e2e]">
-                    {currentBanner?.image && (
-                      <img
-                        src={currentBanner.image}
-                        alt={currentBanner.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
-                    <div className="relative h-full flex flex-col justify-between p-8 text-white">
-                      <div>
-                        <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1 rounded-full text-xs uppercase tracking-[0.2em] mb-4">Mega sale</span>
-                        <h2 className="text-3xl font-bold leading-snug max-w-xl">
-                          {currentBanner?.title || 'Discover global deals every day'}
-                        </h2>
-                        <p className="mt-3 text-base text-white/80 max-w-lg">
-                          {currentBanner?.subtitle || 'Shop millions of items with fast shipping and exclusive EcoExpress offers.'}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        {currentBanner?.cta && (
-                          <Link
-                            to={currentBanner.cta.to}
-                            className="inline-flex items-center gap-2 bg-white text-[#ff4747] font-semibold px-6 py-3 rounded-full shadow-lg hover:bg-[#ffe2d2] transition-colors"
-                          >
-                            {currentBanner.cta.label}
-                            <ChevronRight className="w-4 h-4" />
-                          </Link>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => navigate('/shop')}
-                          className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm"
-                        >
-                          Explore all deals
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
+              <section className="space-y-4 lg:col-span-2 lg:justify-self-end">
+                <div className="bg-gradient-to-r from-[#ffe4d1] via-[#ffd4c4] to-[#ffc2b5] rounded-2xl border border-[#ffb78c] shadow-md overflow-hidden">
+                  <div className="px-6 pt-4 pb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[#c75c1b]">Super Deal</span>
+                      <span className="text-sm text-gray-700">Fresh picks every hour</span>
                     </div>
-
-                    <div className="absolute left-8 bottom-6 flex items-center gap-2">
-                      {banners.map((_, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => setBannerIndex(index)}
-                          className={`h-2 rounded-full transition-all ${bannerIndex === index ? 'w-8 bg-white' : 'w-2 bg-white/60 hover:bg-white/80'}`}
-                          aria-label={`View banner ${index + 1}`}
-                        />
-                      ))}
-                    </div>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-2 rounded-full bg-[#ff4747] text-white text-sm font-semibold px-4 py-1.5 shadow hover:bg-[#ff2e2e] transition-colors"
+                    >
+                      Up to 70% off
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="px-6 pb-5 flex items-stretch gap-4 overflow-hidden">
+                    {topDealProducts.map((product, index) => (
+                      <Link
+                        key={product.id || index}
+                        to={`/product/${product.id}`}
+                        className="flex-1 bg-white rounded-2xl border-2 border-dashed border-[#ff69b4] px-3 py-4 flex flex-col items-center gap-3 shadow-[0_6px_14px_-8px_rgba(255,71,71,0.45)] hover:-translate-y-1 transition-transform"
+                      >
+                        <div className="w-24 h-24 bg-white rounded-xl border border-[#ffe0ed] flex items-center justify-center overflow-hidden">
+                          <img
+                            src={product.images?.[0] || 'https://via.placeholder.com/96'}
+                            alt={product.name}
+                            className="w-full h-full object-contain p-2"
+                          />
+                        </div>
+                        <div className="text-center space-y-1">
+                          <p className="text-sm font-semibold text-gray-900 line-clamp-2 min-h-[3rem]">{product.name}</p>
+                          <div className="bg-[#172042] text-white text-xs font-bold rounded-full py-1 px-3 inline-block">
+                            ETB{formatPrice(product.price || 0)}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  <div className="bg-gradient-to-r from-[#ffd7b1] via-[#ffc48f] to-[#ffb371] rounded-2xl border border-[#ffae6f] shadow-sm overflow-hidden">
-                    <div className="px-5 pt-4 pb-3 flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold uppercase tracking-wide text-[#7b2d00]">Super Deal</h3>
-                      </div>
-                      <div className="inline-flex items-center gap-1 rounded-full bg-[#ff4f3e] px-3 py-1 text-xs font-semibold text-white shadow-sm">
-                        <span>Up to 70% off</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </div>
-                    </div>
-                    <div className="px-5 pb-5 flex gap-3 overflow-hidden">
-                      {topDealProducts.slice(0, 4).map((product, index) => (
-                        <Link
-                          key={product.id || index}
-                          to={`/product/${product.id}`}
-                          className="flex-1 bg-white rounded-xl border-2 border-dashed border-[#ff69b4] px-3 py-3 flex flex-col items-center gap-3 shadow-[0_4px_12px_-6px_rgba(255,99,71,0.4)] hover:-translate-y-1 transition-transform"
-                        >
-                          <div className="w-20 h-20 bg-white rounded-md border border-[#ffe0ed] flex items-center justify-center overflow-hidden">
-                            <img
-                              src={product.images?.[0] || 'https://via.placeholder.com/80'}
-                              alt={product.name}
-                              className="w-full h-full object-contain p-2"
-                            />
-                          </div>
-                          <div className="w-full text-center">
-                            <div className="bg-[#172042] text-white text-xs font-bold rounded-full py-1 px-2">
-                              ETB{formatPrice(product.price || 0)}
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-
                   {superDeals.map((deal, index) => (
                     <Link
                       key={deal.id || index}
@@ -539,88 +489,42 @@ export default function Home() {
                       </div>
                     </Link>
                   ))}
+
+                  <div className="bg-gradient-to-r from-[#ffd7b1] via-[#ffc48f] to-[#ffb371] rounded-2xl border border-[#ffae6f] shadow-sm overflow-hidden">
+                    <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-[#7b2d00]">Super Deal</h3>
+                      </div>
+                      <div className="inline-flex items-center gap-1 rounded-full bg-[#ff4f3e] px-3 py-1 text-xs font-semibold text-white shadow-sm">
+                        <span>Up to 70% off</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+                    <div className="px-5 pb-5 flex gap-3 overflow-hidden">
+                      {topDealProducts.slice(0, 4).map((product, index) => (
+                        <Link
+                          key={product.id || index}
+                          to={`/product/${product.id}`}
+                          className="flex-1 bg-white rounded-xl border-2 border-dashed border-[#ff69b4] px-3 py-3 flex flex-col items-center gap-3 shadow-[0_4px_12px_-6px_rgba(255,99,71,0.4)] hover:-translate-y-1 transition-transform"
+                        >
+                          <div className="w-20 h-20 bg-white rounded-md border border-[#ffe0ed] flex items-center justify-center overflow-hidden">
+                            <img
+                              src={product.images?.[0] || 'https://via.placeholder.com/80'}
+                              alt={product.name}
+                              className="w-full h-full object-contain p-2"
+                            />
+                          </div>
+                          <div className="w-full text-center">
+                            <div className="bg-[#172042] text-white text-xs font-bold rounded-full py-1 px-2">
+                              ETB{formatPrice(product.price || 0)}
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </section>
-
-              {/* Right column */}
-              <aside className="space-y-4">
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                  {user ? (
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">My EcoExpress</p>
-                        <h3 className="text-lg font-semibold text-gray-900 mt-2">Welcome back, {user.user_metadata?.name || user.email?.split('@')[0]}</h3>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <Link to="/orders" className="bg-gray-50 rounded-xl px-4 py-3 hover:bg-[#fff5f0] transition-colors">Orders</Link>
-                        <Link to="/wishlist" className="bg-gray-50 rounded-xl px-4 py-3 hover:bg-[#fff5f0] transition-colors">Wishlist</Link>
-                        <Link to="/cart" className="bg-gray-50 rounded-xl px-4 py-3 hover:bg-[#fff5f0] transition-colors">Cart</Link>
-                        <Link to="/profile" className="bg-gray-50 rounded-xl px-4 py-3 hover:bg-[#fff5f0] transition-colors">Account</Link>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">New to EcoExpress?</p>
-                        <h3 className="text-lg font-semibold text-gray-900 mt-2">Sign in to unlock exclusive deals</h3>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Link
-                          to="/login"
-                          className="inline-flex items-center justify-center gap-2 bg-[#ff4747] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#ff2e2e] transition-colors"
-                        >
-                          Sign in
-                        </Link>
-                        <Link
-                          to="/signup"
-                          className="inline-flex items-center justify-center gap-2 border border-[#ff4747] text-[#ff4747] font-semibold px-6 py-3 rounded-full hover:bg-[#fff5f0] transition-colors"
-                        >
-                          Create account
-                        </Link>
-                      </div>
-                      <ul className="space-y-2 text-xs text-gray-500">
-                        <li>• Fast checkout and order tracking</li>
-                        <li>• Personalized recommendations</li>
-                        <li>• Exclusive coupons and flash deals</li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                <div className="relative overflow-hidden rounded-2xl border border-[#ffd8c2] bg-[#fff3ec] p-6 shadow-inner">
-                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#ffb498]/50 rounded-full blur-2xl" />
-                  <h3 className="text-lg font-semibold text-gray-900">Collect coupons daily</h3>
-                  <p className="text-sm text-gray-600 mt-2">Claim extra savings on top of already low prices.</p>
-                  <button type="button" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#ff4747] hover:text-[#ff2e2e]">
-                    Get coupons
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Shield className="w-6 h-6 text-[#ff4747]" />
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900">Buyer Protection</h4>
-                      <p className="text-xs text-gray-500 mt-1">Get full refunds if your order doesn’t arrive or isn’t as described.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Truck className="w-6 h-6 text-[#ff4747]" />
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900">Fast delivery</h4>
-                      <p className="text-xs text-gray-500 mt-1">Enjoy reliable shipping options on thousands of items.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Heart className="w-6 h-6 text-[#ff4747]" />
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900">Choice guarantee</h4>
-                      <p className="text-xs text-gray-500 mt-1">Exclusive deals curated for you every day.</p>
-                    </div>
-                  </div>
-                </div>
-              </aside>
             </div>
 
             {/* Flash deals section */}
