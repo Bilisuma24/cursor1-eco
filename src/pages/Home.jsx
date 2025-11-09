@@ -311,45 +311,31 @@ export default function Home() {
       {/* MOBILE ONLY: AliExpress-style Layout */}
       <div className="md:hidden">
         <div className="bg-white pb-20">
-          {/* Search Bar */}
-          <div className="bg-white px-4 py-3 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full bg-gray-50 border border-gray-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500"
-                />
-              </div>
-              <button className="bg-gray-900 text-white rounded-full p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center">
-                <Search className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
           {/* Categories Section - Mobile */}
-          <div className="bg-white px-4 py-3 border-b border-gray-200">
-            <div className="mb-2">
-              <h2 className="text-xs font-semibold text-gray-900">Categories</h2>
+          <div className="bg-white px-3 py-2 border-b border-gray-200">
+            <div className="mb-1.5">
+              <h2 className="text-[11px] font-semibold text-gray-900">Categories</h2>
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               {categories.slice(0, 8).map((category, index) => (
                 <Link
                   key={index}
                   to={`/shop?category=${encodeURIComponent(category.name)}`}
-                  className="flex flex-col items-center"
+                  className="flex flex-col items-center gap-0.5"
                 >
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mb-0.5">
-                    <span className="text-xl">{category.icon || '📦'}</span>
+                  <div className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center">
+                    <span className="text-lg">{category.icon || '📦'}</span>
                   </div>
-                  <span className="text-[10px] text-gray-700 text-center line-clamp-2">{category.name}</span>
+                  <span className="text-[9px] text-gray-600 text-center leading-tight line-clamp-2">
+                    {category.name}
+                  </span>
                 </Link>
               ))}
             </div>
             {categories.length > 8 && (
               <Link
                 to="/shop"
-                className="block text-center mt-3 text-sm text-orange-500 font-medium"
+                className="block text-center mt-2 text-xs text-orange-500 font-medium"
               >
                 View All Categories →
               </Link>
@@ -385,20 +371,20 @@ export default function Home() {
           </div>
 
           {/* Mobile Hero Banner */}
-          <section className="px-4 py-4">
+          <section className="px-1.5 py-1.25">
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-lg">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
               <div className="relative">
-                  <div className="flex items-center gap-2.5 px-4 pt-3 pb-1.5 text-[9.5px] font-semibold uppercase tracking-[0.16em] overflow-x-auto">
-                    <button className="inline-flex items-center gap-1 bg-white/10 hover:bg-white/20 transition-colors px-2.5 py-0.5 rounded-full whitespace-nowrap">
-                    <Menu className="w-4 h-4" />
+                  <div className="flex items-center gap-0.4 px-1.25 pt-0.6 pb-0.2 text-[5.8px] font-semibold uppercase tracking-[0.09em] overflow-x-auto">
+                    <button className="inline-flex items-center gap-0.35 bg-white/10 hover:bg-white/20 transition-colors px-0.9 py-0.3 rounded-full whitespace-nowrap">
+                    <Menu className="w-2.25 h-2.25" />
                     <span>All Categories</span>
                   </button>
                   {heroNavLinks.map((link) => (
                     <Link
                       key={link.label}
                       to={link.to}
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
+                        className="inline-flex items-center gap-0.3 px-0.75 py-0.3 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
                     >
                       {link.label}
                     </Link>
@@ -406,15 +392,15 @@ export default function Home() {
                 </div>
 
                 {heroCategories.length > 0 && (
-                  <div className="px-4 pb-2">
-                    <div className="flex items-center gap-2 overflow-x-auto">
+                  <div className="px-1.2 pb-0.2">
+                    <div className="flex items-center gap-0.35 overflow-x-auto">
                       {heroCategories.map((category, index) => (
                         <Link
                           key={`hero-mobile-${category.id || index}`}
                           to={`/shop?category=${encodeURIComponent(category.name)}`}
-                          className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+                          className="inline-flex items-center gap-0.3 bg-white/10 hover:bg-white/20 transition-colors px-1 py-0.3 rounded-full text-[5.8px] font-medium whitespace-nowrap"
                         >
-                          <span className="text-lg">{category.icon || '📦'}</span>
+                          <span className="text-[10px]">{category.icon || '📦'}</span>
                           <span>{category.name}</span>
                         </Link>
                       ))}
@@ -422,32 +408,32 @@ export default function Home() {
                   </div>
                 )}
 
-                  <div className="px-4 pb-3 space-y-2.5">
-                    <div className="space-y-1">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/80">
+                  <div className="px-1.2 pb-0.75 space-y-0.4">
+                    <div className="space-y-0.15">
+                    <span className="inline-flex items-center gap-0.3 text-[5.5px] font-semibold uppercase tracking-[0.13em] text-white/70">
                       Welcome deal
                     </span>
-                      <h2 className="text-lg font-bold leading-tight">New shopper special</h2>
-                      <p className="text-[10px] text-white/80 max-w-sm">
+                      <h2 className="text-[10px] font-semibold leading-tight">New shopper special</h2>
+                      <p className="text-[6px] text-white/70 max-w-xs">
                       Score limited-time offers crafted for first-time EcoExpress shoppers.
                     </p>
                     <button
                       onClick={() => navigate('/shop?tag=welcome-deal')}
-                        className="inline-flex items-center gap-1.5 bg-white text-[#ff3b30] font-semibold px-3 py-1.5 rounded-full shadow hover:bg-white/90 transition-colors text-[11px]"
+                        className="inline-flex items-center gap-0.25 bg-white text-[#ff3b30] font-semibold px-1.1 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[7px]"
                     >
                       Shop now
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-2.5 h-2.5" />
                     </button>
                   </div>
 
-                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                  <div className="flex gap-[0.2rem] overflow-x-auto">
                     {heroDeals.map((deal, index) => (
                       <HeroDealCard
                         key={deal.id || index}
                         deal={deal}
                         ultraCompact
                         micro
-                        className="min-w-[100px] p-1.5"
+                        className="min-w-[46px] p-[0.35rem]"
                       />
                     ))}
                   </div>

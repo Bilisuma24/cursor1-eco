@@ -292,23 +292,6 @@ function NavbarContent() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           </form>
         </div>
-        <div className="px-4 pb-4 text-sm text-gray-600 flex items-center justify-between">
-          {user ? (
-            <>
-              <span className="truncate">Hi, <span className="font-semibold text-gray-800">{getUserDisplayName()}</span></span>
-              <Link to="/profile" className="text-[#ff4747] font-semibold">Profile</Link>
-            </>
-          ) : (
-            <>
-              <span>Welcome to EcoExpress</span>
-              <div className="flex items-center gap-3 text-[#ff4747] font-semibold">
-                <Link to="/login">Sign in</Link>
-                <span className="text-gray-300">|</span>
-                <Link to="/signup">Join</Link>
-              </div>
-            </>
-          )}
-        </div>
       </div>
     </div>
   );
