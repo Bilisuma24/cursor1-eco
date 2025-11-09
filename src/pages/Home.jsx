@@ -371,20 +371,20 @@ export default function Home() {
           </div>
 
           {/* Mobile Hero Banner */}
-          <section className="px-1.5 py-1.25">
+          <section className="px-1.25 py-1">
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-lg">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
               <div className="relative">
-                  <div className="flex items-center gap-0.4 px-1.25 pt-0.6 pb-0.2 text-[5.8px] font-semibold uppercase tracking-[0.09em] overflow-x-auto">
-                    <button className="inline-flex items-center gap-0.35 bg-white/10 hover:bg-white/20 transition-colors px-0.9 py-0.3 rounded-full whitespace-nowrap">
-                    <Menu className="w-2.25 h-2.25" />
+                  <div className="flex items-center gap-0.35 px-1 pt-0.5 pb-0.15 text-[5.5px] font-semibold uppercase tracking-[0.085em] overflow-x-auto">
+                    <button className="inline-flex items-center gap-0.3 bg-white/10 hover:bg-white/20 transition-colors px-0.75 py-0.25 rounded-full whitespace-nowrap">
+                    <Menu className="w-2 h-2" />
                     <span>All Categories</span>
                   </button>
                   {heroNavLinks.map((link) => (
                     <Link
                       key={link.label}
                       to={link.to}
-                        className="inline-flex items-center gap-0.3 px-0.75 py-0.3 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
+                        className="inline-flex items-center gap-0.25 px-0.6 py-0.25 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
                     >
                       {link.label}
                     </Link>
@@ -392,15 +392,15 @@ export default function Home() {
                 </div>
 
                 {heroCategories.length > 0 && (
-                  <div className="px-1.2 pb-0.2">
-                    <div className="flex items-center gap-0.35 overflow-x-auto">
+                  <div className="px-1 pb-0.15">
+                    <div className="flex items-center gap-0.25 overflow-x-auto">
                       {heroCategories.map((category, index) => (
                         <Link
                           key={`hero-mobile-${category.id || index}`}
                           to={`/shop?category=${encodeURIComponent(category.name)}`}
-                          className="inline-flex items-center gap-0.3 bg-white/10 hover:bg-white/20 transition-colors px-1 py-0.3 rounded-full text-[5.8px] font-medium whitespace-nowrap"
+                          className="inline-flex items-center gap-0.25 bg-white/10 hover:bg-white/20 transition-colors px-0.8 py-0.25 rounded-full text-[5.2px] font-medium whitespace-nowrap"
                         >
-                          <span className="text-[10px]">{category.icon || '📦'}</span>
+                          <span className="text-[9px]">{category.icon || '📦'}</span>
                           <span>{category.name}</span>
                         </Link>
                       ))}
@@ -408,32 +408,31 @@ export default function Home() {
                   </div>
                 )}
 
-                  <div className="px-1.2 pb-0.75 space-y-0.4">
-                    <div className="space-y-0.15">
-                    <span className="inline-flex items-center gap-0.3 text-[5.5px] font-semibold uppercase tracking-[0.13em] text-white/70">
+                  <div className="px-0.9 pb-0.6 space-y-0.3">
+                    <div className="space-y-[0.1rem]">
+                    <span className="inline-flex items-center gap-0.25 text-[5px] font-semibold uppercase tracking-[0.12em] text-white/70">
                       Welcome deal
                     </span>
-                      <h2 className="text-[10px] font-semibold leading-tight">New shopper special</h2>
-                      <p className="text-[6px] text-white/70 max-w-xs">
-                      Score limited-time offers crafted for first-time EcoExpress shoppers.
-                    </p>
+                      <h2 className="text-[9px] font-semibold leading-tight">New shopper special</h2>
+                      <p className="text-[5.4px] text-white/65 max-w-[12rem]">
+                       Limited-time offers crafted for first-time EcoExpress shoppers.
+                      </p>
                     <button
-                      onClick={() => navigate('/shop?tag=welcome-deal')}
-                        className="inline-flex items-center gap-0.25 bg-white text-[#ff3b30] font-semibold px-1.1 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[7px]"
+                        className="inline-flex items-center gap-0.2 bg-white text-[#ff3b30] font-semibold px-0.9 py-0.4 rounded-full shadow hover:bg-white/80 transition-colors text-[6.5px]"
                     >
                       Shop now
-                      <ChevronRight className="w-2.5 h-2.5" />
+                      <ChevronRight className="w-2.25 h-2.25" />
                     </button>
                   </div>
 
-                  <div className="flex gap-[0.2rem] overflow-x-auto">
+                  <div className="flex gap-[0.15rem] overflow-x-auto">
                     {heroDeals.map((deal, index) => (
                       <HeroDealCard
                         key={deal.id || index}
                         deal={deal}
                         ultraCompact
                         micro
-                        className="min-w-[46px] p-[0.35rem]"
+                        className="min-w-[40px] p-[0.28rem]"
                       />
                     ))}
                   </div>
