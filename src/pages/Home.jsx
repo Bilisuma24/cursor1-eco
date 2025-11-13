@@ -20,6 +20,7 @@ export default function Home() {
   const [categoriesMenuOpenNavBar, setCategoriesMenuOpenNavBar] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [expandedCategoryMobile, setExpandedCategoryMobile] = useState(null);
+  const [selectedCategoryMobile, setSelectedCategoryMobile] = useState(null);
   const bannerTimer = useRef(null);
   const topDealTimer = useRef(null);
   const categoriesMenuRefMobile = useRef(null);
@@ -375,53 +376,35 @@ export default function Home() {
 
 
           {/* Mobile Hero Banner */}
-          <section className="px-3 py-1.5">
-            <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-sm">
+          <section className="px-1.5 py-1">
+            <div className="relative overflow-hidden rounded-md bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
-              <div className="relative py-1.5">
-
-                {heroCategories.length > 0 && (
-                  <div className="px-2 pb-0.5">
-                    <div className="flex items-center gap-0.5 overflow-x-auto">
-                      {heroCategories.map((category, index) => (
-                        <Link
-                          key={`hero-mobile-${category.id || index}`}
-                          to={`/shop?category=${encodeURIComponent(category.name)}`}
-                          className="inline-flex items-center gap-0.5 bg-white/10 hover:bg-white/20 transition-colors px-1 py-0.5 rounded-full text-[7px] font-medium whitespace-nowrap"
-                        >
-                          <span className="text-[10px]">{category.icon || '📦'}</span>
-                          <span>{category.name}</span>
-                        </Link>
-                      ))}
+              <div className="relative py-1">
+                <div className="flex items-center gap-1.5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="text-[6px] font-semibold uppercase tracking-wide text-white/70 whitespace-nowrap">
+                        Welcome
+                      </span>
+                      <h2 className="text-[9px] font-semibold leading-tight truncate">New shopper special</h2>
                     </div>
-                  </div>
-                )}
-
-                  <div className="px-2 pb-1">
-                    <div className="space-y-0.5">
-                    <span className="inline-flex items-center gap-0.5 text-[6px] font-semibold uppercase tracking-wide text-white/70">
-                      Welcome deal
-                    </span>
-                      <h2 className="text-[10px] font-semibold leading-tight">New shopper special</h2>
-                      <p className="text-[7px] text-white/65 max-w-[9rem] line-clamp-1">
-                       Limited-time offers for first-time shoppers.
-                      </p>
                     <button
-                        className="inline-flex items-center gap-0.5 bg-white text-[#ff3b30] font-semibold px-1.5 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[8px] mt-0.5"
+                      onClick={() => navigate('/shop?tag=welcome-deal')}
+                      className="inline-flex items-center gap-0.5 bg-white text-[#ff3b30] font-semibold px-1.5 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[7px]"
                     >
-                      Shop now
-                      <ChevronRight className="w-2.5 h-2.5" />
+                      Shop
+                      <ChevronRight className="w-2 h-2" />
                     </button>
                   </div>
 
-                  <div className="flex gap-0.5 overflow-x-auto px-2 pb-1">
-                    {heroDeals.map((deal, index) => (
+                  <div className="flex gap-1 overflow-x-auto">
+                    {heroDeals.slice(0, 2).map((deal, index) => (
                       <HeroDealCard
                         key={deal.id || index}
                         deal={deal}
                         ultraCompact
                         micro
-                        className="min-w-[45px] p-0.5"
+                        className="min-w-[35px] flex-shrink-0"
                       />
                     ))}
                   </div>
