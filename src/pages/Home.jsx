@@ -15,8 +15,15 @@ export default function Home() {
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [bannerIndex, setBannerIndex] = useState(0);
   const [topDealIndex, setTopDealIndex] = useState(0);
+  const [categoriesMenuOpenMobile, setCategoriesMenuOpenMobile] = useState(false);
+  const [categoriesMenuOpenDesktop, setCategoriesMenuOpenDesktop] = useState(false);
+  const [categoriesMenuOpenNavBar, setCategoriesMenuOpenNavBar] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
   const bannerTimer = useRef(null);
   const topDealTimer = useRef(null);
+  const categoriesMenuRefMobile = useRef(null);
+  const categoriesMenuRefDesktop = useRef(null);
+  const categoriesMenuRefNavBar = useRef(null);
 
   // Fetch products from database and combine with static products
   useEffect(() => {
@@ -139,6 +146,20 @@ export default function Home() {
       return () => topDealTimer.current && clearInterval(topDealTimer.current);
     }
   }, [trendingProducts.length]);
+
+  // Note: Using onMouseEnter/onMouseLeave instead of click handlers for hover functionality
+
+  const handleCategoryClick = (categoryName, menuType = 'all') => {
+    if (categoryName) {
+      navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+    } else {
+      navigate('/shop');
+    }
+    // Close all menus
+    setCategoriesMenuOpenMobile(false);
+    setCategoriesMenuOpenDesktop(false);
+    setCategoriesMenuOpenNavBar(false);
+  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
@@ -295,6 +316,15 @@ export default function Home() {
   // Categories for desktop
   const categories = productsData.categories || [];
   const heroCategories = categories.slice(0, 8);
+  
+  // Debug: Log categories to verify they're loaded
+  useEffect(() => {
+    console.log('Categories loaded:', categories.length, 'categories');
+    console.log('Categories data:', categories);
+    if (categories.length === 0) {
+      console.warn('No categories found in productsData:', productsData);
+    }
+  }, []);
 
   const handleBannerPrev = () => {
     setBannerIndex((i) => (i - 1 + banners.length) % banners.length);
@@ -346,10 +376,105 @@ export default function Home() {
           <div className="bg-white border-b border-gray-200">
             <div className="px-4 py-2 overflow-x-auto">
               <div className="flex items-center gap-4 min-w-max">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded whitespace-nowrap">
-                  <Menu className="w-4 h-4" />
-                  <span>All Categories</span>
-                </button>
+                <div 
+                  className="relative" 
+                  ref={categoriesMenuRefNavBar}
+                  onMouseEnter={() => {
+                    console.log('Mouse entered nav bar');
+                    setCategoriesMenuOpenNavBar(true);
+                  }}
+                  onMouseLeave={() => {
+                    console.log('Mouse left nav bar');
+                    setCategoriesMenuOpenNavBar(false);
+                  }}
+                >
+                  <button 
+                    type="button"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded whitespace-nowrap transition-colors ${
+                      categoriesMenuOpenNavBar ? 'bg-orange-100 text-orange-700' : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Menu className="w-4 h-4" />
+                    <span>All Categories</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${categoriesMenuOpenNavBar ? 'rotate-180' : ''}`} />
+                    {categoriesMenuOpenNavBar && <span className="ml-1 text-xs">({categories.length})</span>}
+                  </button>
+                  {categoriesMenuOpenNavBar && (
+                    <>
+                      {/* Backdrop overlay */}
+                      <div 
+                        className="fixed inset-0 bg-black/50 z-[90]"
+                        onClick={() => setCategoriesMenuOpenNavBar(false)}
+                      />
+                      {/* Sidebar menu */}
+                      <div 
+                        className="fixed left-0 top-0 bottom-0 w-72 bg-white shadow-2xl z-[100] overflow-y-auto"
+                        onMouseEnter={(e) => {
+                          e.stopPropagation();
+                          setCategoriesMenuOpenNavBar(true);
+                        }}
+                        onMouseLeave={() => {
+                          setCategoriesMenuOpenNavBar(false);
+                        }}
+                      >
+                        <div className="px-4 py-4 border-b border-gray-200 bg-gray-50">
+                          <div className="flex items-center gap-3">
+                            <Menu className="w-5 h-5 text-gray-800" />
+                            <h2 className="text-base font-bold text-gray-900 uppercase tracking-wide">ALL CATEGORIES</h2>
+                          </div>
+                        </div>
+                        <div className="py-0 relative">
+                          {categories && categories.length > 0 ? (
+                            categories.map((category) => (
+                              <div
+                                key={category.id || category.name}
+                                className="relative"
+                                onMouseEnter={() => setHoveredCategory(category)}
+                                onMouseLeave={() => setHoveredCategory(null)}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => handleCategoryClick(category.name)}
+                                  className="w-full text-left px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3 border-b border-gray-200 last:border-b-0"
+                                  title={`Browse ${category.name} products`}
+                                >
+                                  <span className="text-xl flex-shrink-0">{category.icon || '📦'}</span>
+                                  <span className="flex-1 font-normal text-gray-700">{category.name}</span>
+                                </button>
+                                {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
+                                  <div className="fixed left-72 top-0 bottom-0 w-64 bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
+                                    <div className="p-4 border-b border-gray-200 bg-gray-50">
+                                      <h3 className="text-sm font-bold text-gray-900 uppercase">{category.name}</h3>
+                                    </div>
+                                    <div className="py-2">
+                                      {category.subcategories.map((subcategory, idx) => (
+                                        <button
+                                          key={idx}
+                                          type="button"
+                                          onClick={() => {
+                                            handleCategoryClick(category.name);
+                                            setHoveredCategory(null);
+                                          }}
+                                          className="w-full text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                                        >
+                                          {subcategory}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-6 py-4 text-sm text-gray-500">
+                              No categories available
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
                 <Link to="/shop" className="px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded whitespace-nowrap">
                   Choice
                 </Link>
@@ -428,21 +553,115 @@ export default function Home() {
 
           {/* Mobile Category Pills */}
           <div className="px-1.25 pb-1.5">
-            <div className="relative overflow-hidden rounded-full bg-white text-gray-700 border border-gray-200 shadow-sm">
-              <div className="relative flex items-center gap-0.35 px-0.75 py-0.35 text-[5.5px] font-semibold uppercase tracking-[0.085em] overflow-x-auto">
-                <button className="inline-flex items-center gap-0.3 bg-gray-100 hover:bg-gray-200 transition-colors px-0.75 py-0.25 rounded-full whitespace-nowrap">
-                  <Menu className="w-2 h-2" />
-                  <span>All Categories</span>
-                </button>
-                {heroNavLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className="inline-flex items-center gap-0.25 px-0.6 py-0.25 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors whitespace-nowrap"
+            <div className="relative overflow-visible">
+              <div className="relative overflow-hidden rounded-full bg-white text-gray-700 border border-gray-200 shadow-sm">
+                <div className="relative flex items-center gap-0.35 px-0.75 py-0.35 text-[5.5px] font-semibold uppercase tracking-[0.085em] overflow-x-auto">
+                  <div 
+                    className="relative" 
+                    ref={categoriesMenuRefMobile}
+                    onMouseEnter={() => {
+                      console.log('Mouse entered mobile');
+                      setCategoriesMenuOpenMobile(true);
+                    }}
+                    onMouseLeave={() => {
+                      console.log('Mouse left mobile');
+                      setCategoriesMenuOpenMobile(false);
+                    }}
                   >
-                    {link.label}
-                  </Link>
-                ))}
+                    <button 
+                      type="button"
+                      className="inline-flex items-center gap-0.3 bg-gray-100 hover:bg-gray-200 transition-colors px-0.75 py-0.25 rounded-full whitespace-nowrap"
+                    >
+                      <Menu className="w-2 h-2" />
+                      <span>All Categories</span>
+                      <ChevronDown className={`w-2 h-2 transition-transform ${categoriesMenuOpenMobile ? 'rotate-180' : ''}`} />
+                    </button>
+                    {categoriesMenuOpenMobile && (
+                      <>
+                        {/* Backdrop overlay */}
+                        <div 
+                          className="fixed inset-0 bg-black/50 z-[90]"
+                          onClick={() => setCategoriesMenuOpenMobile(false)}
+                        />
+                        {/* Sidebar menu */}
+                        <div 
+                          className="fixed left-0 top-0 bottom-0 w-72 bg-white shadow-2xl z-[100] overflow-y-auto"
+                          onMouseEnter={(e) => {
+                            e.stopPropagation();
+                            setCategoriesMenuOpenMobile(true);
+                          }}
+                          onMouseLeave={() => {
+                            setCategoriesMenuOpenMobile(false);
+                          }}
+                        >
+                          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                            <div className="flex items-center gap-2">
+                              <Menu className="w-4 h-4 text-gray-800" />
+                              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide">ALL CATEGORIES</h2>
+                            </div>
+                          </div>
+                          <div className="py-0 relative">
+                            {categories && categories.length > 0 ? (
+                              categories.map((category) => (
+                                <div
+                                  key={category.id || category.name}
+                                  className="relative"
+                                  onMouseEnter={() => setHoveredCategory(category)}
+                                  onMouseLeave={() => setHoveredCategory(null)}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCategoryClick(category.name)}
+                                    className="w-full text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3 border-b border-gray-200 last:border-b-0"
+                                    title={`Browse ${category.name} products`}
+                                  >
+                                    <span className="text-lg flex-shrink-0">{category.icon || '📦'}</span>
+                                    <span className="flex-1 text-gray-700">{category.name}</span>
+                                  </button>
+                                  {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
+                                    <div className="fixed left-72 top-0 bottom-0 w-64 bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
+                                      <div className="p-3 border-b border-gray-200 bg-gray-50">
+                                        <h3 className="text-xs font-bold text-gray-900 uppercase">{category.name}</h3>
+                                      </div>
+                                      <div className="py-1">
+                                        {category.subcategories.map((subcategory, idx) => (
+                                          <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => {
+                                              handleCategoryClick(category.name);
+                                              setHoveredCategory(null);
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                                          >
+                                            {subcategory}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-3 text-sm text-gray-500">
+                                No categories available
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {heroNavLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      to={link.to}
+                      className="inline-flex items-center gap-0.25 px-0.6 py-0.25 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors whitespace-nowrap"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -540,21 +759,115 @@ export default function Home() {
           {/* Desktop Category Pills */}
           <div className="px-2 sm:px-4 lg:px-6 pt-4">
             <div className="max-w-7xl mx-auto">
-              <div className="relative overflow-hidden rounded-full bg-white text-gray-700 border border-gray-200 shadow-sm">
-                <div className="relative flex items-center gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] overflow-x-auto">
-                  <button className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 transition-colors px-3 py-1 rounded-full whitespace-nowrap">
-                    <Menu className="w-4 h-4" />
-                    <span>All Categories</span>
-                  </button>
-                  {heroNavLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      to={link.to}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors whitespace-nowrap"
+              <div className="relative overflow-visible">
+                <div className="relative overflow-hidden rounded-full bg-white text-gray-700 border border-gray-200 shadow-sm">
+                  <div className="relative flex items-center gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] overflow-x-auto">
+                    <div 
+                      className="relative" 
+                      ref={categoriesMenuRefDesktop}
+                      onMouseEnter={() => {
+                        console.log('Mouse entered desktop');
+                        setCategoriesMenuOpenDesktop(true);
+                      }}
+                      onMouseLeave={() => {
+                        console.log('Mouse left desktop');
+                        setCategoriesMenuOpenDesktop(false);
+                      }}
                     >
-                      {link.label}
-                    </Link>
-                  ))}
+                      <button 
+                        type="button"
+                        className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 transition-colors px-3 py-1 rounded-full whitespace-nowrap"
+                      >
+                        <Menu className="w-4 h-4" />
+                        <span>All Categories</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${categoriesMenuOpenDesktop ? 'rotate-180' : ''}`} />
+                      </button>
+                      {categoriesMenuOpenDesktop && (
+                        <>
+                          {/* Backdrop overlay */}
+                          <div 
+                            className="fixed inset-0 bg-black/50 z-[90]"
+                            onClick={() => setCategoriesMenuOpenDesktop(false)}
+                          />
+                          {/* Sidebar menu */}
+                          <div 
+                            className="fixed left-0 top-0 bottom-0 w-72 bg-white shadow-2xl z-[100] overflow-y-auto"
+                            onMouseEnter={(e) => {
+                              e.stopPropagation();
+                              setCategoriesMenuOpenDesktop(true);
+                            }}
+                            onMouseLeave={() => {
+                              setCategoriesMenuOpenDesktop(false);
+                            }}
+                          >
+                            <div className="px-4 py-4 border-b border-gray-200 bg-gray-50">
+                              <div className="flex items-center gap-3">
+                                <Menu className="w-5 h-5 text-gray-800" />
+                                <h2 className="text-base font-bold text-gray-900 uppercase tracking-wide">ALL CATEGORIES</h2>
+                              </div>
+                            </div>
+                            <div className="py-0 relative">
+                              {categories && categories.length > 0 ? (
+                                categories.map((category) => (
+                                  <div
+                                    key={category.id || category.name}
+                                    className="relative"
+                                    onMouseEnter={() => setHoveredCategory(category)}
+                                    onMouseLeave={() => setHoveredCategory(null)}
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCategoryClick(category.name)}
+                                      className="w-full text-left px-4 py-3 text-sm font-normal text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3 border-b border-gray-200 last:border-b-0"
+                                      title={`Browse ${category.name} products`}
+                                    >
+                                      <span className="text-xl flex-shrink-0">{category.icon || '📦'}</span>
+                                      <span className="flex-1 text-gray-700">{category.name}</span>
+                                    </button>
+                                    {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
+                                      <div className="fixed left-72 top-0 bottom-0 w-64 bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
+                                        <div className="p-4 border-b border-gray-200 bg-gray-50">
+                                          <h3 className="text-sm font-bold text-gray-900 uppercase">{category.name}</h3>
+                                        </div>
+                                        <div className="py-2">
+                                          {category.subcategories.map((subcategory, idx) => (
+                                            <button
+                                              key={idx}
+                                              type="button"
+                                              onClick={() => {
+                                                handleCategoryClick(category.name);
+                                                setHoveredCategory(null);
+                                              }}
+                                              className="w-full text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                                            >
+                                              {subcategory}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="px-6 py-4 text-sm text-gray-500">
+                                  No categories available
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    {heroNavLinks.map((link) => (
+                      <Link
+                        key={link.label}
+                        to={link.to}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors whitespace-nowrap"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
