@@ -442,11 +442,11 @@ export default function Home() {
                                   <span className="flex-1 font-normal text-gray-700">{category.name}</span>
                                 </button>
                                 {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
-                                  <div className="fixed left-72 top-0 bottom-0 w-64 bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
+                                  <div className="fixed left-72 top-0 bottom-0 w-auto min-w-[400px] max-w-[600px] bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
                                     <div className="p-4 border-b border-gray-200 bg-gray-50">
                                       <h3 className="text-sm font-bold text-gray-900 uppercase">{category.name}</h3>
                                     </div>
-                                    <div className="py-2">
+                                    <div className="p-4 grid grid-cols-2 gap-2">
                                       {category.subcategories.map((subcategory, idx) => (
                                         <button
                                           key={idx}
@@ -455,7 +455,7 @@ export default function Home() {
                                             handleCategoryClick(category.name);
                                             setHoveredCategory(null);
                                           }}
-                                          className="w-full text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                                          className="text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded border border-gray-200 hover:border-gray-300"
                                         >
                                           {subcategory}
                                         </button>
@@ -496,21 +496,21 @@ export default function Home() {
           </div>
 
           {/* Mobile Hero Banner */}
-          <section className="px-1.25 py-1">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-lg">
+          <section className="px-3 py-1.5">
+            <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-sm">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
-              <div className="relative">
+              <div className="relative py-1.5">
 
                 {heroCategories.length > 0 && (
-                  <div className="px-1 pb-0.15">
-                    <div className="flex items-center gap-0.25 overflow-x-auto">
+                  <div className="px-2 pb-0.5">
+                    <div className="flex items-center gap-0.5 overflow-x-auto">
                       {heroCategories.map((category, index) => (
                         <Link
                           key={`hero-mobile-${category.id || index}`}
                           to={`/shop?category=${encodeURIComponent(category.name)}`}
-                          className="inline-flex items-center gap-0.25 bg-white/10 hover:bg-white/20 transition-colors px-0.8 py-0.25 rounded-full text-[5.2px] font-medium whitespace-nowrap"
+                          className="inline-flex items-center gap-0.5 bg-white/10 hover:bg-white/20 transition-colors px-1 py-0.5 rounded-full text-[7px] font-medium whitespace-nowrap"
                         >
-                          <span className="text-[9px]">{category.icon || '📦'}</span>
+                          <span className="text-[10px]">{category.icon || '📦'}</span>
                           <span>{category.name}</span>
                         </Link>
                       ))}
@@ -518,31 +518,31 @@ export default function Home() {
                   </div>
                 )}
 
-                  <div className="px-0.9 pb-0.6 space-y-0.3">
-                    <div className="space-y-[0.1rem]">
-                    <span className="inline-flex items-center gap-0.25 text-[5px] font-semibold uppercase tracking-[0.12em] text-white/70">
+                  <div className="px-2 pb-1">
+                    <div className="space-y-0.5">
+                    <span className="inline-flex items-center gap-0.5 text-[6px] font-semibold uppercase tracking-wide text-white/70">
                       Welcome deal
                     </span>
-                      <h2 className="text-[9px] font-semibold leading-tight">New shopper special</h2>
-                      <p className="text-[5.4px] text-white/65 max-w-[12rem]">
-                       Limited-time offers crafted for first-time EcoExpress shoppers.
+                      <h2 className="text-[10px] font-semibold leading-tight">New shopper special</h2>
+                      <p className="text-[7px] text-white/65 max-w-[9rem] line-clamp-1">
+                       Limited-time offers for first-time shoppers.
                       </p>
                     <button
-                        className="inline-flex items-center gap-0.2 bg-white text-[#ff3b30] font-semibold px-0.9 py-0.4 rounded-full shadow hover:bg-white/80 transition-colors text-[6.5px]"
+                        className="inline-flex items-center gap-0.5 bg-white text-[#ff3b30] font-semibold px-1.5 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[8px] mt-0.5"
                     >
                       Shop now
-                      <ChevronRight className="w-2.25 h-2.25" />
+                      <ChevronRight className="w-2.5 h-2.5" />
                     </button>
                   </div>
 
-                  <div className="flex gap-[0.15rem] overflow-x-auto">
+                  <div className="flex gap-0.5 overflow-x-auto px-2 pb-1">
                     {heroDeals.map((deal, index) => (
                       <HeroDealCard
                         key={deal.id || index}
                         deal={deal}
                         ultraCompact
                         micro
-                        className="min-w-[40px] p-[0.28rem]"
+                        className="min-w-[45px] p-0.5"
                       />
                     ))}
                   </div>
@@ -619,11 +619,11 @@ export default function Home() {
                                     <span className="flex-1 text-gray-700">{category.name}</span>
                                   </button>
                                   {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
-                                    <div className="fixed left-72 top-0 bottom-0 w-64 bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
+                                    <div className="fixed left-72 top-0 bottom-0 w-auto min-w-[350px] max-w-[500px] bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
                                       <div className="p-3 border-b border-gray-200 bg-gray-50">
                                         <h3 className="text-xs font-bold text-gray-900 uppercase">{category.name}</h3>
                                       </div>
-                                      <div className="py-1">
+                                      <div className="p-3 grid grid-cols-2 gap-2">
                                         {category.subcategories.map((subcategory, idx) => (
                                           <button
                                             key={idx}
@@ -632,7 +632,7 @@ export default function Home() {
                                               handleCategoryClick(category.name);
                                               setHoveredCategory(null);
                                             }}
-                                            className="w-full text-left px-4 py-2 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                                            className="text-left px-3 py-2 text-xs font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded border border-gray-200 hover:border-gray-300"
                                           >
                                             {subcategory}
                                           </button>
@@ -825,11 +825,11 @@ export default function Home() {
                                       <span className="flex-1 text-gray-700">{category.name}</span>
                                     </button>
                                     {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
-                                      <div className="fixed left-72 top-0 bottom-0 w-64 bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
+                                      <div className="fixed left-72 top-0 bottom-0 w-auto min-w-[400px] max-w-[600px] bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
                                         <div className="p-4 border-b border-gray-200 bg-gray-50">
                                           <h3 className="text-sm font-bold text-gray-900 uppercase">{category.name}</h3>
                                         </div>
-                                        <div className="py-2">
+                                        <div className="p-4 grid grid-cols-2 gap-2">
                                           {category.subcategories.map((subcategory, idx) => (
                                             <button
                                               key={idx}
@@ -838,7 +838,7 @@ export default function Home() {
                                                 handleCategoryClick(category.name);
                                                 setHoveredCategory(null);
                                               }}
-                                              className="w-full text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                                              className="text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded border border-gray-200 hover:border-gray-300"
                                             >
                                               {subcategory}
                                             </button>
