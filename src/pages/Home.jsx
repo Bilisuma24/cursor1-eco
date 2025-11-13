@@ -375,21 +375,6 @@ export default function Home() {
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-lg">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
               <div className="relative">
-                  <div className="flex items-center gap-0.35 px-1 pt-0.5 pb-0.15 text-[5.5px] font-semibold uppercase tracking-[0.085em] overflow-x-auto">
-                    <button className="inline-flex items-center gap-0.3 bg-white/10 hover:bg-white/20 transition-colors px-0.75 py-0.25 rounded-full whitespace-nowrap">
-                    <Menu className="w-2 h-2" />
-                    <span>All Categories</span>
-                  </button>
-                  {heroNavLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      to={link.to}
-                        className="inline-flex items-center gap-0.25 px-0.6 py-0.25 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
 
                 {heroCategories.length > 0 && (
                   <div className="px-1 pb-0.15">
@@ -441,6 +426,28 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Mobile Category Pills */}
+          <div className="px-1.25 pb-1.5">
+            <div className="relative overflow-hidden rounded-full bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-md">
+              <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.45),_transparent_55%)]" />
+              <div className="relative flex items-center gap-0.35 px-0.75 py-0.35 text-[5.5px] font-semibold uppercase tracking-[0.085em] overflow-x-auto">
+                <button className="inline-flex items-center gap-0.3 bg-white/10 hover:bg-white/20 transition-colors px-0.75 py-0.25 rounded-full whitespace-nowrap">
+                  <Menu className="w-2 h-2" />
+                  <span>All Categories</span>
+                </button>
+                {heroNavLinks.map((link) => (
+                  <Link
+                    key={link.label}
+                    to={link.to}
+                    className="inline-flex items-center gap-0.25 px-0.6 py-0.25 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* More to love Section */}
           <div className="bg-white py-4">
             <div className="px-4 mb-3">
@@ -460,26 +467,10 @@ export default function Home() {
       <div className="hidden md:block">
         <div className="bg-gradient-to-b from-[#fff4ef] via-white to-white pb-16">
           {/* Full-width hero banner */}
-          <section className="px-2 sm:px-4 lg:px-6 pt-2">
+          <section className="px-2 sm:px-4 lg:px-6 pt-3">
             <div className="relative bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white rounded-3xl shadow-lg overflow-hidden border border-[#ff8a70]">
                 <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.45),_transparent_60%)]" />
                 <div className="relative">
-                <div className="flex items-center gap-2 px-3 pt-2 pb-1 text-[9px] font-semibold uppercase tracking-[0.13em] overflow-x-auto">
-                  <button className="inline-flex items-center gap-1 bg-white/10 hover:bg-white/20 transition-colors px-2 py-0.5 rounded-full whitespace-nowrap">
-                      <Menu className="w-4 h-4" />
-                      <span>All Categories</span>
-                    </button>
-                    {heroNavLinks.map((link) => (
-                      <Link
-                        key={link.label}
-                        to={link.to}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                  </div>
-
                 {heroCategories.length > 0 && (
                   <div className="px-3 pb-1.5">
                     <div className="flex items-center gap-2 overflow-x-auto">
@@ -546,6 +537,30 @@ export default function Home() {
                 </div>
             </div>
           </section>
+
+          {/* Desktop Category Pills */}
+          <div className="px-2 sm:px-4 lg:px-6 pt-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="relative overflow-hidden rounded-full bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white shadow-lg">
+                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.45),_transparent_60%)]" />
+                <div className="relative flex items-center gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] overflow-x-auto">
+                  <button className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 transition-colors px-3 py-1 rounded-full whitespace-nowrap">
+                    <Menu className="w-4 h-4" />
+                    <span>All Categories</span>
+                  </button>
+                  {heroNavLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      to={link.to}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors whitespace-nowrap"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
             {/* Flash deals section */}
