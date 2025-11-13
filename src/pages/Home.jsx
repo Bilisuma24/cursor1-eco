@@ -432,146 +432,22 @@ export default function Home() {
 
           {/* Mobile Recommendations / Category Pills */}
           <div className="px-3 py-3 bg-gray-50">
-            <div className="mb-2 px-1">
-              <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Recommended for You</h3>
-            </div>
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {/* All Categories Button */}
-              <div 
-                className="relative flex-shrink-0" 
-                ref={categoriesMenuRefMobile}
-                onMouseEnter={() => {
-                  setCategoriesMenuOpenMobile(true);
-                }}
-                onMouseLeave={() => {
-                  setCategoriesMenuOpenMobile(false);
-                }}
+            <div className="mb-2 px-1 flex items-center justify-between">
+              <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Recommendations</h3>
+              <Link 
+                to="/shop" 
+                className="text-xs font-medium text-orange-600 hover:text-orange-700 transition-colors"
               >
-                <button 
-                  type="button"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 border-2 border-gray-300 rounded-full font-semibold text-xs uppercase tracking-wide shadow-sm hover:border-gray-400 active:bg-gray-50 transition-all whitespace-nowrap"
-                >
-                  <Menu className="w-4 h-4" />
-                  <span>All Categories</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform ${categoriesMenuOpenMobile ? 'rotate-180' : ''}`} />
-                </button>
-                {categoriesMenuOpenMobile && (
-                  <>
-                    {/* Backdrop overlay */}
-                    <div 
-                      className="fixed inset-0 bg-black/50 z-[90]"
-                      onClick={() => setCategoriesMenuOpenMobile(false)}
-                    />
-                    {/* Sidebar menu */}
-                    <div 
-                      className="fixed left-0 top-0 bottom-0 w-72 bg-white shadow-2xl z-[100] overflow-y-auto"
-                      onMouseEnter={(e) => {
-                        e.stopPropagation();
-                        setCategoriesMenuOpenMobile(true);
-                      }}
-                      onMouseLeave={() => {
-                        setCategoriesMenuOpenMobile(false);
-                      }}
-                    >
-                      <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-                        <div className="flex items-center gap-2">
-                          <Menu className="w-4 h-4 text-gray-800" />
-                          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide">ALL CATEGORIES</h2>
-                        </div>
-                      </div>
-                      <div className="py-0 relative">
-                        {categories && categories.length > 0 ? (
-                          categories.map((category) => (
-                            <div
-                              key={category.id || category.name}
-                              className="relative"
-                              onMouseEnter={() => setHoveredCategory(category)}
-                              onMouseLeave={() => setHoveredCategory(null)}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (category.subcategories && category.subcategories.length > 0) {
-                                    setExpandedCategoryMobile(
-                                      expandedCategoryMobile?.id === category.id ? null : category
-                                    );
-                                  } else {
-                                    handleCategoryClick(category.name);
-                                  }
-                                }}
-                                className="w-full text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3 border-b border-gray-200 last:border-b-0"
-                                title={`Browse ${category.name} products`}
-                              >
-                                <span className="text-lg flex-shrink-0">{category.icon || '📦'}</span>
-                                <span className="flex-1 text-gray-700">{category.name}</span>
-                                {category.subcategories && category.subcategories.length > 0 && (
-                                  <ChevronRight className={`w-4 h-4 transition-transform ${expandedCategoryMobile?.id === category.id ? 'rotate-90' : ''}`} />
-                                )}
-                              </button>
-                              {/* Desktop: Hover to show */}
-                              {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
-                                <div className="hidden md:block fixed left-72 top-0 bottom-0 w-auto min-w-[350px] max-w-[500px] bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
-                                  <div className="p-3 border-b border-gray-200 bg-gray-50">
-                                    <h3 className="text-xs font-bold text-gray-900 uppercase">{category.name}</h3>
-                                  </div>
-                                  <div className="p-3 grid grid-cols-2 gap-2">
-                                    {category.subcategories.map((subcategory, idx) => (
-                                      <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={() => {
-                                          handleCategoryClick(category.name);
-                                          setHoveredCategory(null);
-                                        }}
-                                        className="text-left px-3 py-2 text-xs font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded border border-gray-200 hover:border-gray-300"
-                                      >
-                                        {subcategory}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {/* Mobile: Click to expand */}
-                              {expandedCategoryMobile?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
-                                <div className="md:hidden bg-gray-50 border-b border-gray-200">
-                                  <div className="p-3 border-b border-gray-200">
-                                    <h3 className="text-xs font-bold text-gray-900 uppercase">{category.name}</h3>
-                                  </div>
-                                  <div className="p-3 grid grid-cols-2 gap-2">
-                                    {category.subcategories.map((subcategory, idx) => (
-                                      <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={() => {
-                                          handleCategoryClick(category.name);
-                                          setExpandedCategoryMobile(null);
-                                        }}
-                                        className="text-left px-3 py-2 text-xs font-normal text-gray-700 active:bg-gray-100 transition-colors rounded border border-gray-200"
-                                      >
-                                        {subcategory}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="px-4 py-3 text-sm text-gray-500">
-                            No categories available
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
+                View All →
+              </Link>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
               {/* Recommendation Pills */}
               {heroNavLinks.map((link) => (
                 <Link
                   key={link.label}
                   to={link.to}
-                  className="flex-shrink-0 inline-flex items-center justify-center px-4 py-2.5 bg-white text-gray-700 border-2 border-gray-200 rounded-full font-semibold text-xs uppercase tracking-wide shadow-sm hover:border-gray-400 hover:bg-gray-50 active:bg-gray-100 transition-all whitespace-nowrap"
+                  className="flex-shrink-0 inline-flex items-center justify-center px-4 py-2.5 bg-white text-gray-700 border-2 border-gray-200 rounded-full font-semibold text-xs uppercase tracking-wide shadow-sm hover:border-gray-400 hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all whitespace-nowrap"
                 >
                   {link.label}
                 </Link>
