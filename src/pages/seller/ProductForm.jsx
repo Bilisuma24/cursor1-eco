@@ -22,6 +22,7 @@ const ProductForm = () => {
     price: '',
     stock: '',
     category: '',
+    subcategory: '',
     free_shipping: false,
     express_shipping: false,
     shipping_cost: '',
@@ -33,6 +34,7 @@ const ProductForm = () => {
   const [sizeInput, setSizeInput] = useState('');
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [availableSubcategories, setAvailableSubcategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
@@ -48,15 +50,32 @@ const ProductForm = () => {
     }
   }, [id, isEdit, user?.id]);
 
+  // Update subcategories when category changes in formData
+  useEffect(() => {
+    if (formData.category && categories.length > 0) {
+      const selectedCategoryObj = categories.find(cat => cat.name === formData.category);
+      if (selectedCategoryObj && selectedCategoryObj.subcategories) {
+        setAvailableSubcategories(selectedCategoryObj.subcategories);
+      } else {
+        setAvailableSubcategories([]);
+      }
+    } else {
+      setAvailableSubcategories([]);
+    }
+  }, [formData.category, categories]);
+
   const loadCategories = async () => {
     try {
-      // Use static category data instead of fetching from empty database
-      const staticCategories = productsData.categories.map(cat => cat.name);
-      setCategories(staticCategories);
+      // Use static category data with full category objects including subcategories
+      setCategories(productsData.categories || []);
     } catch (err) {
       console.error('Error loading categories:', err);
       // Fallback to basic categories if there's an error
-      setCategories(['Electronics', 'Fashion', 'Home & Garden', 'Sports & Outdoors', 'Health & Beauty']);
+      setCategories([
+        { name: 'Electronics', subcategories: ['Audio', 'Wearables', 'Photography'] },
+        { name: 'Fashion', subcategories: ['Clothing', 'Bags', 'Shoes'] },
+        { name: 'Home & Garden', subcategories: ['Furniture', 'Decor', 'Kitchen'] }
+      ]);
     }
   };
 
@@ -82,6 +101,7 @@ const ProductForm = () => {
         price: product.price || '',
         stock: product.stock || '',
         category: product.category || '',
+        subcategory: product.subcategory || '',
         free_shipping: product.free_shipping || false,
         express_shipping: product.express_shipping || false,
         shipping_cost: product.shipping_cost || '',
@@ -89,6 +109,14 @@ const ProductForm = () => {
         sizes: product.sizes || [],
         gender: product.gender || ''
       });
+
+      // Load subcategories for the selected category
+      if (product.category) {
+        const selectedCategoryObj = categories.find(cat => cat.name === product.category);
+        if (selectedCategoryObj && selectedCategoryObj.subcategories) {
+          setAvailableSubcategories(selectedCategoryObj.subcategories);
+        }
+      }
 
       // Convert existing images to the format expected by ImageUploader
       if (product.images && product.images.length > 0) {
@@ -110,10 +138,26 @@ const ProductForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    // When category changes, update available subcategories and reset subcategory selection
+    if (name === 'category') {
+      const selectedCategoryObj = categories.find(cat => cat.name === value);
+      if (selectedCategoryObj && selectedCategoryObj.subcategories) {
+        setAvailableSubcategories(selectedCategoryObj.subcategories);
+      } else {
+        setAvailableSubcategories([]);
+      }
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        subcategory: '' // Reset subcategory when category changes
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
   };
 
   // Category-specific requirements
@@ -358,6 +402,7 @@ const ProductForm = () => {
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         category: formData.category || 'General',
+        subcategory: formData.subcategory || null,
         seller_id: user.id,
         free_shipping: formData.free_shipping || false,
         express_shipping: formData.express_shipping || false,
@@ -562,15 +607,41 @@ const ProductForm = () => {
                 value={formData.category}
                 onChange={handleInputChange}
                 className="w-full form-select border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                required
               >
                 <option value="">Select a category</option>
                 {categories.map(category => (
-                  <option key={category} value={category}>
-                    {category}
+                  <option key={category.name || category} value={category.name || category}>
+                    {category.name || category}
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Subcategory */}
+            {formData.category && availableSubcategories.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Subcategory <span className="text-gray-500 text-xs">(Optional)</span>
+                </label>
+                <select
+                  name="subcategory"
+                  value={formData.subcategory}
+                  onChange={handleInputChange}
+                  className="w-full form-select border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="">Select a subcategory (optional)</option>
+                  {availableSubcategories.map(subcategory => (
+                    <option key={subcategory} value={subcategory}>
+                      {subcategory}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Help customers find your product by selecting a subcategory
+                </p>
+              </div>
+            )}
 
             {/* Product Options - Colors, Sizes, Gender */}
             <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">

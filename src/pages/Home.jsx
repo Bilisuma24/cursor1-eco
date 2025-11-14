@@ -341,80 +341,97 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* MOBILE ONLY: AliExpress-style Layout */}
-      <div className="md:hidden">
-        <div className="bg-white pb-20">
-          {/* Categories Section - Mobile */}
-          <div className="bg-white px-3 py-2 border-b border-gray-200">
-            <div className="mb-1.5">
-              <h2 className="text-[11px] font-semibold text-gray-900">Categories</h2>
-            </div>
-            <div className="grid grid-cols-4 gap-1.5">
-              {categories.slice(0, 8).map((category, index) => (
-                <Link
-                  key={index}
-                  to={`/shop?category=${encodeURIComponent(category.name)}`}
-                  className="flex flex-col items-center gap-0.5"
-                >
-                  <div className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center">
-                    <span className="text-lg">{category.icon || '📦'}</span>
+      <div className="md:hidden bg-white pb-20">
+        {/* Mobile Hero Banner - At Top */}
+        <section className="px-1.5 py-1 bg-white">
+          <div className="relative overflow-hidden rounded-md bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
+            <div className="relative py-1">
+              <div className="flex items-center gap-1.5">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1 mb-1">
+                    <span className="text-[6px] font-semibold uppercase tracking-wide text-white/70 whitespace-nowrap">
+                      Welcome
+                    </span>
+                    <h2 className="text-[9px] font-semibold leading-tight truncate">New shopper special</h2>
                   </div>
-                  <span className="text-[9px] text-gray-600 text-center leading-tight line-clamp-2">
-                    {category.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-            {categories.length > 8 && (
-              <Link
-                to="/shop"
-                className="block text-center mt-2 text-xs text-orange-500 font-medium"
-              >
-                View All Categories →
-              </Link>
-            )}
-          </div>
+                  <button
+                    onClick={() => navigate('/shop?tag=welcome-deal')}
+                    className="inline-flex items-center gap-0.5 bg-white text-[#ff3b30] font-semibold px-1.5 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[7px]"
+                  >
+                    Shop
+                    <ChevronRight className="w-2 h-2" />
+                  </button>
+                </div>
 
-
-          {/* Mobile Hero Banner */}
-          <section className="px-1.5 py-1">
-            <div className="relative overflow-hidden rounded-md bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white">
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
-              <div className="relative py-1">
-                <div className="flex items-center gap-1.5">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1 mb-1">
-                      <span className="text-[6px] font-semibold uppercase tracking-wide text-white/70 whitespace-nowrap">
-                        Welcome
-                      </span>
-                      <h2 className="text-[9px] font-semibold leading-tight truncate">New shopper special</h2>
-                    </div>
-                    <button
-                      onClick={() => navigate('/shop?tag=welcome-deal')}
-                      className="inline-flex items-center gap-0.5 bg-white text-[#ff3b30] font-semibold px-1.5 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[7px]"
-                    >
-                      Shop
-                      <ChevronRight className="w-2 h-2" />
-                    </button>
-                  </div>
-
-                  <div className="flex gap-1 overflow-x-auto">
-                    {heroDeals.slice(0, 2).map((deal, index) => (
-                      <HeroDealCard
-                        key={deal.id || index}
-                        deal={deal}
-                        ultraCompact
-                        micro
-                        className="min-w-[35px] flex-shrink-0"
-                      />
-                    ))}
-                  </div>
+                <div className="flex gap-1 overflow-x-auto">
+                  {heroDeals.slice(0, 2).map((deal, index) => (
+                    <HeroDealCard
+                      key={deal.id || index}
+                      deal={deal}
+                      ultraCompact
+                      micro
+                      className="min-w-[35px] flex-shrink-0"
+                    />
+                  ))}
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Mobile Recommendations / Category Pills */}
-          <div className="px-3 py-3 bg-gray-50">
+        {/* Recommended Products - Mobile */}
+        <div className="bg-white border-t border-gray-200">
+          <div className="px-3 py-3 border-b border-gray-100">
+            <h2 className="text-base font-bold text-gray-900">Recommended for you</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-2 p-3">
+            {featuredProducts && featuredProducts.length > 0 ? (
+              featuredProducts.slice(0, 20).map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/product/${product.id}`}
+                  className="flex flex-col bg-white rounded overflow-hidden active:scale-95 transition-transform border border-gray-100"
+                >
+                  <div className="relative aspect-square bg-gray-50 flex items-center justify-center">
+                    <img
+                      src={product.images?.[0] || 'https://via.placeholder.com/150?text=No+Image'}
+                      alt={product.name}
+                      className="w-full h-full object-contain p-2"
+                    />
+                    {product.discount && (
+                      <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                        -{product.discount}%
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <p className="text-xs text-gray-800 font-medium line-clamp-2 leading-tight mb-1 min-h-[2.5rem]">
+                      {product.name}
+                    </p>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-sm font-bold text-red-600">
+                        {product.currency || 'ETB'}{formatPrice(product.price || 0)}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-xs text-gray-400 line-through">
+                          {product.currency || 'ETB'}{formatPrice(product.originalPrice)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-2 p-4 text-center text-gray-500 text-sm">
+                No products available
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Recommendations / Category Pills */}
+        <div className="px-3 py-3 bg-gray-50 border-t border-gray-200">
             <div className="mb-2 px-1 flex items-center justify-between">
               <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Recommendations</h3>
               <Link 
@@ -438,18 +455,22 @@ export default function Home() {
             </div>
           </div>
 
-          {/* More to love Section */}
-          <div className="bg-white py-4">
-            <div className="px-4 mb-3">
-              <h2 className="text-gray-600 text-sm font-medium">More to love</h2>
-            </div>
-            <div className="grid grid-cols-2 gap-2 px-4">
-              {featuredProducts.slice(0, 10).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+        {/* More to love Section */}
+        <div className="bg-white py-4 border-t border-gray-200 pb-20">
+          <div className="px-4 mb-3">
+            <h2 className="text-gray-600 text-sm font-medium">More to love</h2>
           </div>
-
+          <div className="grid grid-cols-2 gap-2 px-4">
+            {featuredProducts && featuredProducts.length > 0 ? (
+              featuredProducts.slice(0, 10).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <div className="col-span-2 p-4 text-center text-gray-500 text-sm">
+                No products available
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -306,13 +306,14 @@ CREATE POLICY "public_read_products"
     const params = new URLSearchParams(location.search);
     const q = params.get('search') || '';
     const cat = params.get('category') || '';
+    const subcat = params.get('subcategory') || '';
     setSearchTerm(q);
     setSelectedCategory(cat || 'For you');
-    if (cat) {
-      setFilters((prev) => ({ ...prev, category: cat }));
-    } else {
-      setFilters((prev) => ({ ...prev, category: '' }));
-    }
+    setFilters((prev) => ({
+      ...prev,
+      category: cat || '',
+      subcategory: subcat || ''
+    }));
   }, [location.search]);
 
   useEffect(() => {
