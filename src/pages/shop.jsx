@@ -446,8 +446,8 @@ CREATE POLICY "public_read_products"
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Mobile Category Layout */}
       <div className="md:hidden">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200">
+        {/* Header (fixed on mobile to always stay visible) */}
+        <div className="fixed inset-x-0 top-0 z-40 bg-white border-b border-gray-200">
           <div className="px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <span className="text-xl font-bold text-gray-900">Eco</span>
@@ -461,6 +461,9 @@ CREATE POLICY "public_read_products"
             </button>
           </div>
         </div>
+
+        {/* Spacer to offset fixed header height */}
+        <div className="h-[56px]" />
 
         {/* Two-Panel Layout */}
         <div className="flex h-[calc(100vh-140px)] overflow-hidden">

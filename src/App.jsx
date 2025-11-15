@@ -254,16 +254,16 @@ function NavbarContent() {
 
       {/* Mobile layout */}
       <div className="lg:hidden">
-        <div className="px-4 py-3 flex items-center justify-between">
+        <div className="px-3 py-2 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-[#ff4747] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">E</span>
+            <div className="w-9 h-9 bg-[#ff4747] rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">E</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">EcoExpress</span>
+            <span className="text-lg font-bold text-gray-900">EcoExpress</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/wishlist" className="relative text-gray-700 hover:text-[#ff4747]">
-              <Heart className="w-6 h-6" />
+              <Heart className="w-5 h-5" />
               {wishlist.length > 0 && (
                 <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
                   {wishlist.length}
@@ -271,7 +271,7 @@ function NavbarContent() {
               )}
             </Link>
             <Link to="/cart" className="relative text-gray-700 hover:text-[#ff4747]">
-              <ShoppingCart className="w-6 h-6" />
+              <ShoppingCart className="w-5 h-5" />
               {cartItemsCount > 0 && (
                 <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
                   {cartItemsCount}
@@ -280,16 +280,16 @@ function NavbarContent() {
             </Link>
           </div>
         </div>
-        <div className="px-4 pb-3">
+        <div className="px-3 pb-2">
           <form onSubmit={handleSearch} className="relative">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search for products"
-              className="w-full bg-gray-100 rounded-full pl-12 pr-4 py-2.5 text-sm focus:outline-none"
+              className="w-full bg-gray-100 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none"
             />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4.5 h-4.5" />
           </form>
         </div>
       </div>
@@ -378,8 +378,8 @@ function AppContent() {
   return (
     <>
       <ScrollToTop />
-      {/* Header - Logo always visible, rest only on home page */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
+      {/* Header - fixed to remain visible while scrolling */}
+      <header className="bg-white shadow-md fixed inset-x-0 top-0 z-50">
         {isHomePage ? (
           <NavbarContent />
         ) : isProductDetailPage ? (
@@ -401,6 +401,9 @@ function AppContent() {
           </div>
         )}
       </header>
+
+      {/* Spacer below fixed header (reduced mobile height) */}
+      <div className="h-[56px] sm:h-[72px]" />
 
       {/* Page Routes */}
       <main>
