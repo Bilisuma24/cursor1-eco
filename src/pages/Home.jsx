@@ -342,11 +342,38 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       {/* MOBILE ONLY: AliExpress-style Layout */}
       <div className="md:hidden bg-white pb-20">
+        {/* Mobile Recommendations / Category Pills (moved above banner) */}
+        <div className="px-3 py-3 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+            <span className="flex-shrink-0 text-xs font-semibold uppercase tracking-wide text-gray-700">
+              Recommendations
+            </span>
+            {/* Real category pills (inline with heading) */}
+            {(productsData.categories || []).slice(0, 12).map((category, idx) => (
+              <Link
+                key={category.id || `${category.name}-${idx}`}
+                to={`/shop?category=${encodeURIComponent(category.name)}`}
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-gray-700 border-2 border-gray-200 rounded-full font-semibold text-xs uppercase tracking-wide shadow-sm hover:border-gray-400 hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all whitespace-nowrap"
+                title={`Browse ${category.name}`}
+              >
+                {category.icon ? <span className="text-sm">{category.icon}</span> : null}
+                <span>{category.name}</span>
+              </Link>
+            ))}
+            <Link 
+              to="/shop" 
+              className="flex-shrink-0 text-xs font-medium text-orange-600 hover:text-orange-700 transition-colors ml-auto pr-1"
+            >
+              View All →
+            </Link>
+          </div>
+        </div>
+
         {/* Mobile Hero Banner - At Top */}
-        <section className="px-1.5 py-1 bg-white">
-          <div className="relative overflow-hidden rounded-md bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white">
+        <section className="px-3 py-2.5 bg-white">
+          <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white min-h-[110px]">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
-            <div className="relative py-1">
+            <div className="relative py-3">
               <div className="flex items-center gap-1.5">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 mb-1">
@@ -364,14 +391,14 @@ export default function Home() {
                   </button>
                 </div>
 
-                <div className="flex gap-1 overflow-x-auto">
+                <div className="flex gap-1.5 overflow-x-auto">
                   {heroDeals.slice(0, 2).map((deal, index) => (
                     <HeroDealCard
                       key={deal.id || index}
                       deal={deal}
                       ultraCompact
                       micro
-                      className="min-w-[35px] flex-shrink-0"
+                      className="min-w-[40px] flex-shrink-0"
                     />
                   ))}
                 </div>
@@ -429,31 +456,6 @@ export default function Home() {
             )}
           </div>
         </div>
-
-        {/* Mobile Recommendations / Category Pills */}
-        <div className="px-3 py-3 bg-gray-50 border-t border-gray-200">
-            <div className="mb-2 px-1 flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Recommendations</h3>
-              <Link 
-                to="/shop" 
-                className="text-xs font-medium text-orange-600 hover:text-orange-700 transition-colors"
-              >
-                View All →
-              </Link>
-            </div>
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-              {/* Recommendation Pills */}
-              {heroNavLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  className="flex-shrink-0 inline-flex items-center justify-center px-4 py-2.5 bg-white text-gray-700 border-2 border-gray-200 rounded-full font-semibold text-xs uppercase tracking-wide shadow-sm hover:border-gray-400 hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all whitespace-nowrap"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
 
         {/* More to love Section */}
         <div className="bg-white py-4 border-t border-gray-200 pb-20">

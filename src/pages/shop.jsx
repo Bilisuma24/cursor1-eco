@@ -446,19 +446,6 @@ CREATE POLICY "public_read_products"
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Mobile Category Layout */}
       <div className="md:hidden">
-        {/* Top Browser Bar */}
-        <div className="bg-gray-800 text-white text-xs py-1 px-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-600 rounded"></div>
-            <span className="text-gray-300">ecostore.com</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-600 rounded"></div>
-            <div className="w-6 h-4 bg-gray-600 rounded text-xs flex items-center justify-center">15</div>
-            <div className="w-4 h-4 bg-gray-600 rounded"></div>
-          </div>
-        </div>
-
         {/* Header */}
         <div className="bg-white border-b border-gray-200">
           <div className="px-4 py-3 flex items-center justify-between">
