@@ -7,6 +7,7 @@ import SearchSuggestions from "./SearchSuggestions";
 import LevelBadge from "./achievements/LevelBadge";
 import { getUserLevel } from "../services/achievementService";
 import { useUserRole } from "../hooks/useUserRole";
+import Logo from "./Logo";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -137,9 +138,10 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-2.5 md:py-3 mobile-container">
         <Link
           to="/"
-          className="text-lg font-bold text-gray-900 whitespace-nowrap"
+          className="flex items-center gap-2 whitespace-nowrap"
         >
-          EcoStore
+          <Logo className="w-8 h-8" />
+          <span className="text-lg font-bold text-[#3b82f6]">Kush deals</span>
         </Link>
 
         {/* Desktop Search */}

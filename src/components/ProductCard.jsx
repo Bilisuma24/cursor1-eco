@@ -8,6 +8,24 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
 
+  // Generate a consistent, pleasant color per product to tint the shadow.
+  // Falls back gracefully when product fields are missing.
+  const getShadowColor = () => {
+    const key =
+      String(product?.color || product?.category || product?.name || product?.id || 'prod')
+        .toLowerCase();
+    // Simple string hash -> hue [0, 360)
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+    }
+    const hue = hash % 360;
+    const saturation = 82; // vibrant but soft
+    const lightness = 72; // keeps the shadow pastel-like
+    const alpha = 0.22;
+    return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+  };
+
   const handleWishlistToggle = async (e) => {
     e.stopPropagation();
     try {
@@ -53,7 +71,8 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   if (viewMode === 'list') {
     return (
       <div 
-        className="bg-white rounded border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+        className="bg-white rounded border border-gray-200 overflow-hidden cursor-pointer transition-shadow product-shadow"
+        style={{ ['--shadow-color']: getShadowColor() }}
         onClick={() => navigate(`/product/${product.id}`)}
       >
         <div className="flex">
@@ -99,7 +118,8 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
   return (
     <div 
-      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all flex flex-col h-full hover:border-[#ffd0b3] hover:shadow-lg"
+      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all flex flex-col h-full hover:border-[#ffd0b3] product-shadow"
+      style={{ ['--shadow-color']: getShadowColor() }}
       onClick={() => navigate(`/product/${product.id}`)}
     >
       {/* Image */}

@@ -370,10 +370,10 @@ export default function Home() {
         </div>
 
         {/* Mobile Hero Banner - At Top */}
-        <section className="px-3 py-2.5 bg-white">
-          <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white min-h-[110px]">
+        <section className="pt-1 pb-2 bg-white">
+          <div className="relative overflow-hidden bg-[#3b82f6] text-white min-h-[90px] shadow-xl">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
-            <div className="relative py-3">
+            <div className="relative py-2 px-3">
               <div className="flex items-center gap-1.5">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 mb-1">
@@ -384,7 +384,7 @@ export default function Home() {
                   </div>
                   <button
                     onClick={() => navigate('/shop?tag=welcome-deal')}
-                    className="inline-flex items-center gap-0.5 bg-white text-[#ff3b30] font-semibold px-1.5 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[7px]"
+                    className="inline-flex items-center gap-0.5 bg-white text-[#3b82f6] font-semibold px-1.5 py-0.5 rounded-full shadow hover:bg-white/80 transition-colors text-[7px]"
                   >
                     Shop
                     <ChevronRight className="w-2 h-2" />
@@ -478,14 +478,14 @@ export default function Home() {
 
       {/* DESKTOP ONLY: AliExpress-inspired layout */}
       <div className="hidden md:block">
-        <div className="bg-gradient-to-b from-[#fff4ef] via-white to-white pb-16">
+        <div className="bg-gradient-to-b from-blue-50 via-white to-white pb-16">
           {/* Full-width hero banner */}
-          <section className="px-2 sm:px-4 lg:px-6 pt-3">
-            <div className="relative bg-gradient-to-r from-[#ff3b30] via-[#ff4d3d] to-[#ff6e48] text-white rounded-3xl shadow-lg overflow-hidden border border-[#ff8a70]">
+          <section className="pt-1">
+            <div className="relative bg-[#3b82f6] text-white shadow-2xl overflow-hidden border-y border-blue-400">
                 <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.45),_transparent_60%)]" />
                 <div className="relative">
                 {heroCategories.length > 0 && (
-                  <div className="px-3 pb-1.5">
+                  <div className="px-3 pb-1">
                     <div className="flex items-center gap-2 overflow-x-auto">
                       {heroCategories.map((category, index) => (
                         <Link
@@ -501,32 +501,32 @@ export default function Home() {
                   </div>
                 )}
 
-                <div className="px-3 pb-2">
+                <div className="px-3 pb-2 pt-1">
                   <div className="grid gap-2 xl:grid-cols-[110px_minmax(0,1fr)_110px] items-stretch">
                     {heroDeals[0] && (
                       <HeroDealCard deal={heroDeals[0]} ultraCompact micro className="hidden lg:flex w-full h-full p-1.5" />
                     )}
 
-                    <div className="flex flex-col justify-between space-y-2 text-left">
+                    <div className="flex flex-col justify-between space-y-1.5 text-left">
                       <span className="inline-flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/80">
                         Welcome deal
                       </span>
-                      <h2 className="text-[18px] lg:text-[20px] font-bold leading-snug max-w-md">
+                      <h2 className="text-[16px] lg:text-[18px] font-bold leading-snug max-w-md">
                         Catch limited-time savings for new shoppers
                       </h2>
-                      <p className="text-[9.5px] text-white/80 max-w-lg">
-                        Enjoy fresh picks across electronics, lifestyle, and beyond—curated to deliver the biggest value on your first EcoExpress haul.
+                      <p className="text-[9px] text-white/80 max-w-lg">
+                        Enjoy fresh picks across electronics, lifestyle, and beyond—curated to deliver the biggest value on your first Kush deals haul.
                       </p>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <button
                           onClick={() => navigate('/shop?tag=welcome-deal')}
-                          className="inline-flex items-center gap-1 bg-white text-[#ff3b30] font-semibold px-2.5 py-1.5 rounded-full shadow-md hover:bg-white/90 transition-colors text-[10px]"
+                          className="inline-flex items-center gap-1 bg-white text-[#3b82f6] font-semibold px-2.5 py-1.5 rounded-full shadow-md hover:bg-white/90 transition-colors text-[10px]"
                         >
                           Shop now
                           <ChevronRight className="w-4 h-4" />
                         </button>
                         <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide">
-                          <span className="bg-white text-[#ff3b30] rounded-full px-2 py-0.5">
+                          <span className="bg-white text-[#3b82f6] rounded-full px-2 py-0.5">
                             -{heroDeals[0]?.discount || 80}%
                           </span>
                           <span>exclusive welcome deal</span>

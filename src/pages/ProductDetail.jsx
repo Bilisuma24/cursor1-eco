@@ -35,6 +35,18 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState('description');
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   
+  // Soft, product-based shadow color for a more attractive feel
+  const getShadowColor = () => {
+    if (!product) return 'rgba(0,0,0,0.08)';
+    const key = String(product.color || product.category || product.name || product.id || 'p')
+      .toLowerCase();
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+    }
+    const hue = hash % 360;
+    return `hsla(${hue}, 80%, 72%, 0.22)`;
+  };
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -819,11 +831,13 @@ export default function ProductDetail() {
 
       <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 lg:py-8 space-y-8">
         <div className="lg:hidden space-y-4">
-          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden product-shadow"
+               style={{ ['--shadow-color']: getShadowColor() }}>
             <AliExpressImageZoom images={product.images} aspectClass="aspect-square" />
           </div>
 
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 space-y-4">
+          <div className="bg-white border border-gray-200 rounded-2xl product-shadow p-4 space-y-4"
+               style={{ ['--shadow-color']: getShadowColor() }}>
             <div>
               <h1 className="text-xl font-bold text-gray-900 leading-tight">
                 {product.name}
@@ -860,22 +874,27 @@ export default function ProductDetail() {
             {renderServiceHighlights('mt-4')}
           </div>
 
-          {renderStoreCard()}
+          <div style={{ ['--shadow-color']: getShadowColor() }} className="product-shadow rounded-2xl">
+            {renderStoreCard()}
+          </div>
         </div>
 
         <div className="hidden lg:block">
           <div className="grid grid-cols-[520px_minmax(0,1fr)] gap-10 items-start">
             <div className="space-y-4">
-              <div className="bg-white border border-gray-200 rounded-3xl shadow-sm p-5">
+              <div className="bg-white border border-gray-200 rounded-3xl product-shadow p-5"
+                   style={{ ['--shadow-color']: getShadowColor() }}>
                 <AliExpressImageZoom images={product.images} aspectClass="aspect-square" />
               </div>
-              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm px-4 py-3">
+              <div className="bg-white border border-gray-200 rounded-2xl product-shadow px-4 py-3"
+                   style={{ ['--shadow-color']: getShadowColor() }}>
                 <span className="text-sm text-gray-500">Hover to zoom • {product.images.length} product photos</span>
               </div>
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white border border-gray-200 rounded-3xl shadow-sm p-7 space-y-6">
+              <div className="bg-white border border-gray-200 rounded-3xl product-shadow p-7 space-y-6"
+                   style={{ ['--shadow-color']: getShadowColor() }}>
                 <div className="space-y-3">
                   {discountPercentage && (
                     <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[#ff6a3c] bg-[#fff1ea] px-3 py-1 rounded-full">
@@ -945,12 +964,16 @@ export default function ProductDetail() {
                 {renderServiceHighlights('mt-4')}
               </div>
 
-              {renderStoreCard()}
+              <div style={{ ['--shadow-color']: getShadowColor() }} className="product-shadow rounded-2xl">
+                {renderStoreCard()}
+              </div>
             </div>
           </div>
         </div>
 
-        {detailsTabs}
+        <div style={{ ['--shadow-color']: getShadowColor() }} className="product-shadow rounded-2xl">
+          {detailsTabs}
+        </div>
         {suggestedSection}
       </div>
     </div>

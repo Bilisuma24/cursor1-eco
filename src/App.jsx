@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react
 import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu, Camera, Mic, QrCode, ChevronRight } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
+import Logo from "./components/Logo";
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -102,12 +103,10 @@ function NavbarContent() {
           <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-8">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 min-w-[180px]">
-              <div className="w-12 h-12 rounded-md bg-gradient-to-br from-[#ff6a3c] to-[#ff2e2e] flex items-center justify-center shadow-lg">
-                <span className="text-white font-extrabold text-2xl">E</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl text-gray-900 leading-none">EcoExpress</span>
-                <span className="text-xs uppercase tracking-[0.2em] text-[#ff6a3c] font-semibold">Global Shopping</span>
+              <Logo className="w-12 h-12" />
+              <div className="flex flex-col items-start">
+                <span className="text-2xl text-[#3b82f6] leading-none font-bold">Kush deals</span>
+                <span className="text-xs uppercase tracking-[0.2em] text-[#ff6a3c] font-semibold">MARKETSPACE</span>
               </div>
             </Link>
 
@@ -256,10 +255,8 @@ function NavbarContent() {
       <div className="lg:hidden">
         <div className="px-3 py-2 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-[#ff4747] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">E</span>
-            </div>
-            <span className="text-lg font-bold text-gray-900">EcoExpress</span>
+            <Logo className="w-9 h-9" />
+            <span className="text-lg font-bold text-[#3b82f6]">Kush deals</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/wishlist" className="relative text-gray-700 hover:text-[#ff4747]">
@@ -339,8 +336,8 @@ function FooterContent() {
           <div>
             <h3 className="text-[7px] font-medium text-white mb-0">Contact</h3>
             <ul className="space-y-0 leading-tight">
-              <li><a href="mailto:support@ecoshop.com" className="text-[7px] text-gray-400 hover:text-white transition-colors">support@ecoshop.com</a></li>
-              <li><a href="tel:+1800ECOSHOP" className="text-[7px] text-gray-400 hover:text-white transition-colors">1-800-ECO-SHOP</a></li>
+              <li><a href="mailto:support@kushdeals.com" className="text-[7px] text-gray-400 hover:text-white transition-colors">support@kushdeals.com</a></li>
+              <li><a href="tel:+1800KUSHDEALS" className="text-[7px] text-gray-400 hover:text-white transition-colors">1-800-KUSH-DEALS</a></li>
             </ul>
           </div>
         </div>
@@ -348,7 +345,7 @@ function FooterContent() {
         {/* Footer Bottom */}
         <div className="border-t border-gray-800 pt-1">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-1.5">
-            <p className="text-[8px] text-gray-400">© {new Date().getFullYear()} EcoShop. All rights reserved.</p>
+            <p className="text-[8px] text-gray-400">© {new Date().getFullYear()} Kush deals. All rights reserved.</p>
             <div className="flex gap-1.5">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
                 <span className="sr-only">Facebook</span>
@@ -391,10 +388,8 @@ function AppContent() {
               <div className="flex items-center justify-between py-3 sm:py-4">
                 {/* Logo - Always visible */}
                 <Link to="/" className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-xl">E</span>
-                  </div>
-                  <span className="text-2xl font-bold text-gray-900">Eco Store</span>
+                  <Logo className="w-10 h-10" />
+                  <span className="text-2xl font-bold text-[#3b82f6]">Kush deals</span>
                 </Link>
               </div>
             </div>
