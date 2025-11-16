@@ -468,13 +468,13 @@ CREATE POLICY "public_read_products"
         {/* Two-Panel Layout */}
         <div className="flex h-[calc(100vh-140px)] overflow-hidden">
           {/* Left Panel - Categories List */}
-          <div className="w-32 bg-white border-r border-gray-200 overflow-y-auto">
-            <div className="py-2">
+          <div className="w-24 bg-white border-r border-gray-200 overflow-y-auto">
+            <div className="py-1.5">
               {allCategories.map((category, index) => (
                 <button
                   key={index}
                   onClick={() => handleCategorySelect(category)}
-                  className={`w-full text-left px-3 py-2.5 text-xs transition-colors relative ${
+                  className={`w-full text-left px-2 py-1.5 text-[11px] leading-tight transition-colors relative ${
                     selectedCategory === category
                       ? 'text-red-500 font-semibold'
                       : 'text-gray-900'

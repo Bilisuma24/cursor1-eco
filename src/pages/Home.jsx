@@ -586,19 +586,19 @@ export default function Home() {
                           />
                           {/* Sidebar menu */}
                           <div 
-                            className="fixed left-0 top-0 bottom-0 w-72 bg-white shadow-2xl z-[100] overflow-y-auto"
+                            className="fixed left-0 top-0 bottom-0 w-48 bg-white shadow-2xl z-[100] overflow-y-auto"
                             onMouseEnter={(e) => {
                               e.stopPropagation();
                               setCategoriesMenuOpenDesktop(true);
                             }}
                             onMouseLeave={() => {
-                              setCategoriesMenuOpenDesktop(false);
+setCategoriesMenuOpenDesktop(false);
                             }}
                           >
-                            <div className="px-4 py-4 border-b border-gray-200 bg-gray-50">
-                              <div className="flex items-center gap-3">
-                                <Menu className="w-5 h-5 text-gray-800" />
-                                <h2 className="text-base font-bold text-gray-900 uppercase tracking-wide">ALL CATEGORIES</h2>
+                            <div className="px-3 py-2 border-b border-gray-200 bg-gray-50">
+                              <div className="flex items-center gap-2">
+                                <Menu className="w-4 h-4 text-gray-800" />
+                                <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wide">ALL CATEGORIES</h2>
                               </div>
                             </div>
                             <div className="py-0 relative">
@@ -613,18 +613,18 @@ export default function Home() {
                                     <button
                                       type="button"
                                       onClick={() => handleCategoryClick(category.name)}
-                                      className="w-full text-left px-4 py-3 text-sm font-normal text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3 border-b border-gray-200 last:border-b-0"
+                                      className="w-full text-left px-3 py-2 text-xs font-normal text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
                                       title={`Browse ${category.name} products`}
                                     >
-                                      <span className="text-xl flex-shrink-0">{category.icon || '📦'}</span>
-                                      <span className="flex-1 text-gray-700">{category.name}</span>
+                                      <span className="text-base flex-shrink-0">{category.icon || '📦'}</span>
+                                      <span className="flex-1 text-gray-700 truncate">{category.name}</span>
                                     </button>
                                     {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
-                                      <div className="fixed left-72 top-0 bottom-0 w-auto min-w-[400px] max-w-[600px] bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
-                                        <div className="p-4 border-b border-gray-200 bg-gray-50">
-                                          <h3 className="text-sm font-bold text-gray-900 uppercase">{category.name}</h3>
+                                      <div className="fixed left-48 top-0 bottom-0 w-auto min-w-[240px] max-w-[360px] bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
+                                        <div className="p-2 border-b border-gray-200 bg-gray-50">
+                                          <h3 className="text-xs font-bold text-gray-900 uppercase">{category.name}</h3>
                                         </div>
-                                        <div className="p-4 grid grid-cols-2 gap-2">
+                                        <div className="p-2 grid grid-cols-2 gap-1.5">
                                           {category.subcategories.map((subcategory, idx) => (
                                             <button
                                               key={idx}
@@ -633,7 +633,7 @@ export default function Home() {
                                                 handleCategoryClick(category.name);
                                                 setHoveredCategory(null);
                                               }}
-                                              className="text-left px-4 py-2.5 text-sm font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded border border-gray-200 hover:border-gray-300"
+                                              className="text-left px-2 py-1.5 text-xs font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded border border-gray-200 hover:border-gray-300"
                                             >
                                               {subcategory}
                                             </button>
@@ -644,7 +644,7 @@ export default function Home() {
                                   </div>
                                 ))
                               ) : (
-                                <div className="px-6 py-4 text-sm text-gray-500">
+                                <div className="px-3 py-3 text-xs text-gray-500">
                                   No categories available
                                 </div>
                               )}
