@@ -112,12 +112,12 @@ function NavbarContent() {
 
             {/* Search + quick tools */}
             <div className="flex-1 flex flex-col justify-center items-center gap-1">
-              <form onSubmit={handleSearch} className="w-full max-w-xl">
+              <form onSubmit={handleSearch} className="w-full max-w-lg">
                 <div className="flex items-stretch border border-[#ff4747] rounded-full overflow-hidden bg-white shadow-sm">
                   <select
                     value={searchCategory}
                     onChange={(e) => setSearchCategory(e.target.value)}
-                    className="hidden xl:block w-28 bg-gray-100 text-sm text-gray-600 px-3 focus:outline-none focus:ring-0 border-r border-gray-200"
+                    className="hidden xl:block w-24 bg-gray-100 text-xs text-gray-600 px-2.5 focus:outline-none focus:ring-0 border-r border-gray-200"
                   >
                     <option value="">All Categories</option>
                     {productsData.categories.map((c) => (
@@ -125,25 +125,25 @@ function NavbarContent() {
                     ))}
                   </select>
                   <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
                     <input
                       type="text"
                       placeholder="Search for great deals, products, and trends"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-28 h-9 text-sm text-gray-700 focus:outline-none"
+                      className="w-full pl-9 pr-24 h-8 text-xs text-gray-700 focus:outline-none"
                     />
-                    <div className="absolute right-24 top-1/2 -translate-y-1/2 flex items-center gap-1 text-gray-400">
-                      <button type="button" className="p-1 hover:text-[#ff4747] transition-colors" title="Image search">
-                        <Camera className="w-3.5 h-3.5" />
+                    <div className="absolute right-20 top-1/2 -translate-y-1/2 flex items-center gap-1 text-gray-400">
+                      <button type="button" className="p-0.5 hover:text-[#ff4747] transition-colors" title="Image search">
+                        <Camera className="w-3 h-3" />
                       </button>
-                      <button type="button" className="p-1 hover:text-[#ff4747] transition-colors" title="Voice search">
-                        <Mic className="w-3.5 h-3.5" />
+                      <button type="button" className="p-0.5 hover:text-[#ff4747] transition-colors" title="Voice search">
+                        <Mic className="w-3 h-3" />
                       </button>
                     </div>
                     <button
                       type="submit"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 bg-[#ff4747] hover:bg-[#ff2e2e] transition-colors text-white font-semibold uppercase text-[11px] px-4 py-1.5 rounded-full"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 bg-[#ff4747] hover:bg-[#ff2e2e] transition-colors text-white font-semibold uppercase text-[10px] px-3 py-1 rounded-full"
                     >
                       Search
                     </button>
@@ -256,7 +256,10 @@ function NavbarContent() {
         <div className="px-3 py-2 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Logo className="w-9 h-9" />
-            <span className="text-lg font-bold text-[#3b82f6]">Kush deals</span>
+            <div className="flex flex-col items-start">
+              <span className="text-lg text-[#3b82f6] leading-none font-bold">Kush deals</span>
+              <span className="text-[9px] uppercase tracking-[0.15em] text-[#ff6a3c] font-semibold">MARKETSPACE</span>
+            </div>
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/wishlist" className="relative text-gray-700 hover:text-[#ff4747]">

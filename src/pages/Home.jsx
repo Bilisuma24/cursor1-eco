@@ -230,14 +230,13 @@ export default function Home() {
     };
   });
 
+  // Generate hero nav links from real categories
   const heroNavLinks = [
-    { label: 'Dollar Express', to: '/shop?tag=dollar-express' },
-    { label: 'Local shipping', to: '/shop?tag=local-shipping' },
-    { label: 'Home & Furniture', to: '/shop?category=Home%20%26%20Furniture' },
-    { label: 'Weekly deals', to: '/shop?tag=weekly-deals' },
-    { label: 'Top Brands', to: '/shop?tag=top-brands' },
-    { label: 'Choice', to: '/shop?tag=choice' },
-    { label: 'FunTime', to: '/shop?tag=funtime' },
+    { label: 'All Categories', to: '/shop' },
+    ...productsData.categories.slice(0, 7).map(category => ({
+      label: category.name,
+      to: `/shop?category=${encodeURIComponent(category.name)}`
+    })),
     { label: 'More', to: '/shop' }
   ];
 
@@ -557,109 +556,17 @@ export default function Home() {
               <div className="relative overflow-visible">
                 <div className="relative overflow-hidden rounded-full bg-white text-gray-700 border border-gray-200 shadow-sm">
                   <div className="relative flex items-center gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] overflow-x-auto">
-                    <div 
-                      className="relative" 
-                      ref={categoriesMenuRefDesktop}
-                      onMouseEnter={() => {
-                        console.log('Mouse entered desktop');
-                        setCategoriesMenuOpenDesktop(true);
-                      }}
-                      onMouseLeave={() => {
-                        console.log('Mouse left desktop');
-                        setCategoriesMenuOpenDesktop(false);
-                      }}
-                    >
-                      <button 
-                        type="button"
-                        className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 transition-colors px-3 py-1 rounded-full whitespace-nowrap"
-                      >
-                        <Menu className="w-4 h-4" />
-                        <span>All Categories</span>
-                        <ChevronDown className={`w-4 h-4 transition-transform ${categoriesMenuOpenDesktop ? 'rotate-180' : ''}`} />
-                      </button>
-                      {categoriesMenuOpenDesktop && (
-                        <>
-                          {/* Backdrop overlay */}
-                          <div 
-                            className="fixed inset-0 bg-black/50 z-[90]"
-                            onClick={() => setCategoriesMenuOpenDesktop(false)}
-                          />
-                          {/* Sidebar menu */}
-                          <div 
-                            className="fixed left-0 top-0 bottom-0 w-48 bg-white shadow-2xl z-[100] overflow-y-auto"
-                            onMouseEnter={(e) => {
-                              e.stopPropagation();
-                              setCategoriesMenuOpenDesktop(true);
-                            }}
-                            onMouseLeave={() => {
-setCategoriesMenuOpenDesktop(false);
-                            }}
-                          >
-                            <div className="px-3 py-2 border-b border-gray-200 bg-gray-50">
-                              <div className="flex items-center gap-2">
-                                <Menu className="w-4 h-4 text-gray-800" />
-                                <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wide">ALL CATEGORIES</h2>
-                              </div>
-                            </div>
-                            <div className="py-0 relative">
-                              {categories && categories.length > 0 ? (
-                                categories.map((category) => (
-                                  <div
-                                    key={category.id || category.name}
-                                    className="relative"
-                                    onMouseEnter={() => setHoveredCategory(category)}
-                                    onMouseLeave={() => setHoveredCategory(null)}
-                                  >
-                                    <button
-                                      type="button"
-                                      onClick={() => handleCategoryClick(category.name)}
-                                      className="w-full text-left px-3 py-2 text-xs font-normal text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
-                                      title={`Browse ${category.name} products`}
-                                    >
-                                      <span className="text-base flex-shrink-0">{category.icon || '📦'}</span>
-                                      <span className="flex-1 text-gray-700 truncate">{category.name}</span>
-                                    </button>
-                                    {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
-                                      <div className="fixed left-48 top-0 bottom-0 w-auto min-w-[240px] max-w-[360px] bg-white shadow-xl z-[110] overflow-y-auto border-l border-gray-200">
-                                        <div className="p-2 border-b border-gray-200 bg-gray-50">
-                                          <h3 className="text-xs font-bold text-gray-900 uppercase">{category.name}</h3>
-                                        </div>
-                                        <div className="p-2 grid grid-cols-2 gap-1.5">
-                                          {category.subcategories.map((subcategory, idx) => (
-                                            <button
-                                              key={idx}
-                                              type="button"
-                                              onClick={() => {
-                                                handleCategoryClick(category.name);
-                                                setHoveredCategory(null);
-                                              }}
-                                              className="text-left px-2 py-1.5 text-xs font-normal text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded border border-gray-200 hover:border-gray-300"
-                                            >
-                                              {subcategory}
-                                            </button>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))
-                              ) : (
-                                <div className="px-3 py-3 text-xs text-gray-500">
-                                  No categories available
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    {heroNavLinks.map((link) => (
+                    {heroNavLinks.map((link, index) => (
                       <Link
                         key={link.label}
                         to={link.to}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors whitespace-nowrap"
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors whitespace-nowrap ${
+                          index === 0 ? 'font-semibold' : ''
+                        }`}
                       >
+                        {index === 0 && <Menu className="w-3.5 h-3.5" />}
                         {link.label}
+                        {index === 0 && <ChevronDown className="w-3.5 h-3.5" />}
                       </Link>
                     ))}
                   </div>
