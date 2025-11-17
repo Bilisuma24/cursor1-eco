@@ -8,7 +8,6 @@ import { getUserLevel, getUserAchievements } from "../services/achievementServic
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import { useUserRole } from "../hooks/useUserRole";
 import { supabase } from "../lib/supabaseClient";
-import { ProtectedRoute } from "../components/ProtectedRoute";
 
 export default function Profile() {
   const { user, signOut, loading: authLoading, updatePassword, updateUserMetadata } = useAuth();
@@ -473,17 +472,64 @@ export default function Profile() {
     setTimeout(() => setSuccess(""), 2500);
   };
 
-  return (
-    <ProtectedRoute>
-      {/* Show loading state only if still actively loading profile data */}
-      {loadingProfile ? (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading profile...</p>
+  // Show loading state only if still actively loading profile data
+  if (loadingProfile || authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show AliExpress-style sign-in section when user is not logged in
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-md mx-auto px-4 py-6">
+          {/* Profile Section - AliExpress Style */}
+          <div className="bg-white mb-4 p-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                <User className="w-8 h-8 text-gray-500" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Sign In / Register</h1>
+              </div>
+            </div>
+          </div>
+
+          {/* Sign In Form */}
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <p className="mb-4 text-center text-sm text-gray-600">
+              Please sign in to access your account
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/login"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-3 px-4 rounded-lg text-center transition-colors"
+              >
+                Register
+              </Link>
+            </div>
           </div>
         </div>
-      ) : user ? (
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Show loading state only if still actively loading profile data */}
+      {user ? (
         <div className="min-h-screen bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -1428,6 +1474,6 @@ export default function Profile() {
           </div>
         </div>
       )}
-    </ProtectedRoute>
+    </div>
   );
 }
