@@ -81,10 +81,10 @@ export default function ForgotPassword() {
               Check your inbox at <strong>{email}</strong> for instructions on resetting your password.
             </p>
             <Link
-              to="/login"
+              to="/signup"
               className="block w-full text-center bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Back to Login
+              Back to Sign Up
             </Link>
           </div>
         ) : (
@@ -165,10 +165,10 @@ export default function ForgotPassword() {
 
             <div className="text-center">
               <Link
-                to="/login"
+                to="/signup"
                 className="text-sm text-blue-600 hover:text-blue-500"
               >
-                Back to Login
+                Back to Sign Up
               </Link>
             </div>
           </form>

@@ -192,9 +192,9 @@ export default function SignUp() {
         // Email confirmation required
         setLoading(false);
         alert(
-          "Account created successfully! Please check your email to confirm your account before logging in."
+          "Account created successfully! Please check your email to confirm your account. You can sign up again once confirmed."
         );
-        navigate("/login", { replace: true });
+        navigate("/signup", { replace: true });
       }
     } catch (err) {
       console.error("Sign up error:", err);
@@ -213,18 +213,12 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-8 overflow-x-hidden mobile-container">
-      <div className="max-w-md w-full space-y-4 sm:space-y-6 bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl">
-        <div>
-          <h2 className="text-center text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-8 overflow-x-hidden mobile-container">
+      <div className="max-w-md w-full space-y-4 sm:space-y-6 bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-2xl border-4 border-white">
+        <div className="text-center">
+          <h2 className="text-center text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Create Account
           </h2>
-          <p className="mt-1.5 sm:mt-2 text-center text-xs sm:text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign in
-            </Link>
-          </p>
         </div>
 
         <form className="space-y-3 sm:space-y-4 lg:space-y-6" onSubmit={handleSubmit}>
@@ -250,7 +244,7 @@ export default function SignUp() {
                 className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.name
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
                 } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
                 placeholder="Enter your full name"
               />
@@ -275,7 +269,7 @@ export default function SignUp() {
                 className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.email
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
                 } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
                 placeholder="Enter your email"
               />
@@ -300,7 +294,7 @@ export default function SignUp() {
                 className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.password
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
                 } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
                 placeholder="Min. 6 characters"
               />
@@ -328,7 +322,7 @@ export default function SignUp() {
                 className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${
                   validationErrors.confirmPassword
                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
                 } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}
                 placeholder="Confirm password"
               />
@@ -350,7 +344,7 @@ export default function SignUp() {
                     value="buyer"
                     checked={formData.userType === "buyer"}
                     onChange={handleChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 flex-shrink-0"
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <span className="text-sm sm:text-base text-gray-900 font-medium">👤 Buyer</span>
@@ -364,7 +358,7 @@ export default function SignUp() {
                     value="seller"
                     checked={formData.userType === "seller"}
                     onChange={handleChange}
-                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 flex-shrink-0"
+                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <span className="text-sm sm:text-base text-gray-900 font-medium">🏪 Seller</span>
@@ -385,8 +379,8 @@ export default function SignUp() {
               className={`group relative w-full flex justify-center min-h-[44px] py-2.5 sm:py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white touch-manipulation ${
                 loading
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              } transition-colors`}
+                  : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-lg"
+              } transition-all`}
             >
               {loading ? (
                 <>

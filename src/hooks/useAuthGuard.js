@@ -6,7 +6,7 @@ export const useAuthGuard = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  const requireAuth = useCallback((action, redirectTo = '/login') => {
+  const requireAuth = useCallback((action, redirectTo = '/signup') => {
     return (callback) => {
       return async (...args) => {
         if (loading) {
@@ -50,6 +50,9 @@ export const useAuthGuard = () => {
     isLoading: loading
   };
 };
+
+
+
 
 
 

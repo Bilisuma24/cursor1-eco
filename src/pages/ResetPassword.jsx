@@ -16,7 +16,7 @@ export default function ResetPassword() {
   // Redirect if not logged in
   useEffect(() => {
     if (!user) {
-      navigate("/login", { replace: true });
+      navigate("/signup", { replace: true });
     }
   }, [user, navigate]);
 
@@ -53,7 +53,7 @@ export default function ResetPassword() {
     try {
       await updatePassword(formData.password);
       alert("Password updated successfully! Please sign in with your new password.");
-      navigate("/login", { replace: true });
+      navigate("/signup", { replace: true });
     } catch (err) {
       console.error("Update password error:", err);
       setError(err.message || "Failed to update password. Please try again.");

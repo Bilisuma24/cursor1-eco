@@ -17,7 +17,7 @@ export default function PriceAlerts() {
     if (user) {
       loadAlerts();
     } else {
-      navigate('/login');
+      navigate('/signup');
     }
   }, [user]);
 
@@ -303,6 +303,9 @@ export default function PriceAlerts() {
     </div>
   );
 }
+
+
+
 
 
 

@@ -57,7 +57,7 @@ export default function Cart() {
     if (!user) {
       setError('Please log in to checkout');
       // Redirect to login or show login modal
-      navigate('/login');
+      navigate('/signup');
       return;
     }
 

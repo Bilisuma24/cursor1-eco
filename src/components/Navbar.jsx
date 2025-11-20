@@ -270,15 +270,9 @@ const Navbar = () => {
             <div className="flex items-center space-x-4">
               <Link
                 to="/signup"
-                className="text-gray-700 font-medium hover:text-gradient transition-all duration-300 hover-scale-sm"
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/login"
                 className="btn-modern ripple"
               >
-                Login
+                Sign Up
               </Link>
             </div>
           )}
@@ -424,16 +418,9 @@ const Navbar = () => {
               <Link
                 to="/signup"
                 onClick={() => setMenuOpen(false)}
-                className="block min-h-[44px] px-4 py-3 text-center text-base text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800 rounded-lg mx-4"
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
                 className="block min-h-[44px] px-4 py-3 text-center text-base font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-300 touch-manipulation active:scale-95 mx-4 shadow-lg"
               >
-                Login
+                Sign Up
               </Link>
             </div>
           )}

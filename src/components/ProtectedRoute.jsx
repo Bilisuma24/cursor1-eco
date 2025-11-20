@@ -41,7 +41,7 @@ export function ProtectedRoute({ children }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/signup" replace />;
   }
 
   return children;
@@ -67,7 +67,7 @@ export function BuyerRoute({ children }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/signup" replace />;
   }
 
   if (!isBuyer) {
@@ -123,7 +123,7 @@ export function SellerRoute({ children }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/signup" replace />;
   }
 
   if (!isSeller) {
@@ -179,7 +179,7 @@ export function AdminRoute({ children }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/signup" replace />;
   }
 
   if (!isAdmin) {

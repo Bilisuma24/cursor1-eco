@@ -1,0 +1,91 @@
+warning: in the working copy of 'src/pages/Signup.jsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/pages/Signup.jsx b/src/pages/Signup.jsx[m
+[1mindex 1f780ce..b5df907 100644[m
+[1m--- a/src/pages/Signup.jsx[m
+[1m+++ b/src/pages/Signup.jsx[m
+[36m@@ -213,15 +213,15 @@[m [mexport default function SignUp() {[m
+   };[m
+ [m
+   return ([m
+[31m-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-8 overflow-x-hidden mobile-container">[m
+[31m-      <div className="max-w-md w-full space-y-4 sm:space-y-6 bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl">[m
+[31m-        <div>[m
+[31m-          <h2 className="text-center text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">[m
+[32m+[m[32m    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-8 overflow-x-hidden mobile-container">[m
+[32m+[m[32m      <div className="max-w-md w-full space-y-4 sm:space-y-6 bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-2xl border-4 border-white">[m
+[32m+[m[32m        <div className="text-center">[m
+[32m+[m[32m          <h2 className="text-center text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">[m
+             Create Account[m
+           </h2>[m
+           <p className="mt-1.5 sm:mt-2 text-center text-xs sm:text-sm text-gray-600">[m
+             Already have an account?{" "}[m
+[31m-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">[m
+[32m+[m[32m            <Link to="/login" className="font-medium text-purple-600 hover:text-purple-700">[m
+               Sign in[m
+             </Link>[m
+           </p>[m
+[36m@@ -250,7 +250,7 @@[m [mexport default function SignUp() {[m
+                 className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${[m
+                   validationErrors.name[m
+                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"[m
+[31m-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"[m
+[32m+[m[32m                    : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"[m
+                 } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}[m
+                 placeholder="Enter your full name"[m
+               />[m
+[36m@@ -275,7 +275,7 @@[m [mexport default function SignUp() {[m
+                 className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${[m
+                   validationErrors.email[m
+                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"[m
+[31m-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"[m
+[32m+[m[32m                    : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"[m
+                 } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}[m
+                 placeholder="Enter your email"[m
+               />[m
+[36m@@ -300,7 +300,7 @@[m [mexport default function SignUp() {[m
+                 className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${[m
+                   validationErrors.password[m
+                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"[m
+[31m-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"[m
+[32m+[m[32m                    : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"[m
+                 } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}[m
+                 placeholder="Min. 6 characters"[m
+               />[m
+[36m@@ -328,7 +328,7 @@[m [mexport default function SignUp() {[m
+                 className={`appearance-none rounded-lg relative block w-full min-h-[44px] px-3 py-2 text-sm sm:text-base border ${[m
+                   validationErrors.confirmPassword[m
+                     ? "border-red-300 focus:ring-red-500 focus:border-red-500"[m
+[31m-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"[m
+[32m+[m[32m                    : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"[m
+                 } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:z-10`}[m
+                 placeholder="Confirm password"[m
+               />[m
+[36m@@ -350,7 +350,7 @@[m [mexport default function SignUp() {[m
+                     value="buyer"[m
+                     checked={formData.userType === "buyer"}[m
+                     onChange={handleChange}[m
+[31m-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 flex-shrink-0"[m
+[32m+[m[32m                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 flex-shrink-0"[m
+                   />[m
+                   <div className="flex-1 min-w-0">[m
+                     <span className="text-sm sm:text-base text-gray-900 font-medium">👤 Buyer</span>[m
+[36m@@ -364,7 +364,7 @@[m [mexport default function SignUp() {[m
+                     value="seller"[m
+                     checked={formData.userType === "seller"}[m
+                     onChange={handleChange}[m
+[31m-                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 flex-shrink-0"[m
+[32m+[m[32m                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 flex-shrink-0"[m
+                   />[m
+                   <div className="flex-1 min-w-0">[m
+                     <span className="text-sm sm:text-base text-gray-900 font-medium">🏪 Seller</span>[m
+[36m@@ -385,8 +385,8 @@[m [mexport default function SignUp() {[m
+               className={`group relative w-full flex justify-center min-h-[44px] py-2.5 sm:py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white touch-manipulation ${[m
+                 loading[m
+                   ? "bg-gray-400 cursor-not-allowed"[m
+[31m-                  : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"[m
+[31m-              } transition-colors`}[m
+[32m+[m[32m                  : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-lg"[m
+[32m+[m[32m              } transition-all`}[m
+             >[m
+               {loading ? ([m
+                 <>[m

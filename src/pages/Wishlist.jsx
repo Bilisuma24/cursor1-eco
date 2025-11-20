@@ -175,10 +175,10 @@ export default function Wishlist() {
                     </Link>
                     {!user && (
                       <Link
-                        to="/login"
+                        to="/signup"
                         className="bg-gray-900 hover:bg-gray-800 text-white px-10 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                       >
-                        Sign in
+                        Sign up
                       </Link>
                     )}
                   </div>

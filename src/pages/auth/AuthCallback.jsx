@@ -99,7 +99,7 @@ export default function AuthCallback() {
         alert('Failed to resend confirmation email: ' + error.message);
       } else {
         alert('Confirmation email sent! Please check your inbox.');
-        navigate('/login');
+        navigate('/signup');
       }
     } catch (err) {
       alert('Failed to resend confirmation email: ' + err.message);

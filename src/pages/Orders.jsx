@@ -99,10 +99,10 @@ export default function Orders() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h2>
           <p className="text-gray-600 mb-6">You need to be logged in to view your orders.</p>
           <Link
-            to="/login"
+            to="/signup"
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium inline-block"
           >
-            Go to Login
+            Sign Up
           </Link>
         </div>
       </div>

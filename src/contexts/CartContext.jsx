@@ -187,7 +187,7 @@ export function CartProvider({ children }) {
     // If not authenticated, redirect to login
     if (!user) {
       pushToast({ type: 'info', title: 'Login Required', message: 'Please log in to add items to your cart' });
-      window.location.href = '/login';
+      window.location.href = '/signup';
       return;
     }
 
@@ -389,7 +389,7 @@ export function CartProvider({ children }) {
     // If not authenticated, redirect to login
     if (!user) {
       pushToast({ type: 'info', title: 'Login Required', message: 'Please log in to add items to your wishlist' });
-      window.location.href = '/login';
+      window.location.href = '/signup';
       return;
     }
 

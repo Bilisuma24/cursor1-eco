@@ -65,7 +65,7 @@ export default function Checkout() {
     }
 
     if (!user) {
-      navigate('/login');
+      navigate('/signup');
       return;
     }
 

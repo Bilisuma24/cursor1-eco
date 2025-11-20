@@ -8,7 +8,6 @@ import { getUserLevel, getUserAchievements } from "../services/achievementServic
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import { useUserRole } from "../hooks/useUserRole";
 import { supabase } from "../lib/supabaseClient";
-import Login from "./Login";
 
 export default function Account() {
   const { user, signOut, loading: authLoading, updatePassword, updateUserMetadata } = useAuth();
@@ -427,9 +426,10 @@ export default function Account() {
     );
   }
 
-  // Show login if not authenticated (after loading is complete)
+  // Redirect to signup if not authenticated (after loading is complete)
   if (!user) {
-    return <Login />;
+    navigate('/signup', { replace: true });
+    return null;
   }
 
   return (

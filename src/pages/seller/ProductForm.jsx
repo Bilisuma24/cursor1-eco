@@ -463,12 +463,12 @@ const ProductForm = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">You must be logged in to access this page</p>
+          <p className="text-red-600 mb-4">You must be signed up to access this page</p>
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/signup')}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
-            Go to Login
+            Go to Sign Up
           </button>
         </div>
       </div>
