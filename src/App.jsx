@@ -9,6 +9,7 @@ import Shop from "./pages/Shop";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
 import Profile from "./pages/profile";
 import Account from "./pages/Account";
 import Cart from "./pages/Cart";
@@ -60,7 +61,7 @@ function NavbarContent() {
   const handleLogout = async () => {
     await signOut();
     setUserDropdownOpen(false);
-    window.location.href = "/signup";
+    window.location.href = "/login";
   };
 
   // Get user initials for avatar
@@ -176,8 +177,10 @@ function NavbarContent() {
                 ) : (
                   <div className="flex flex-col text-xs text-gray-500 text-right">
                     <span className="font-medium text-gray-700">Welcome</span>
-                    <div className="flex flex-col text-xs text-gray-500">
-                      <Link to="/signup" className="font-semibold text-[#ff4747] hover:underline">Sign up / Register</Link>
+                    <div className="flex items-center gap-2 mt-1 text-[#ff4747]">
+                      <Link to="/login" className="font-semibold hover:underline">Sign in</Link>
+                      <span className="text-gray-300">|</span>
+                      <Link to="/signup" className="font-semibold hover:underline">Register</Link>
                     </div>
                   </div>
                 )}
@@ -409,6 +412,7 @@ function AppContent() {
               
               {/* Auth Routes - Redirect if already logged in */}
               <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
+              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
               <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
