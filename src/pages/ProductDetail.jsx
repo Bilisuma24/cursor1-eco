@@ -706,7 +706,10 @@ export default function ProductDetail() {
       </div>
       <div className="flex items-center gap-2">
         <button
-          onClick={() => navigate('/shop')}
+          onClick={() => {
+            // Navigate to shop and clear any query parameters to show all products
+            navigate('/shop', { replace: true });
+          }}
           className="flex-1 min-h-[36px] rounded-lg border-2 border-[#ff6a3c] text-[#ff6a3c] font-semibold text-xs py-1.5 hover:bg-[#fff4ef] transition-colors"
         >
           Visit Store
