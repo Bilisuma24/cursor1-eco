@@ -4,21 +4,16 @@ import { User, ShoppingBag, Heart, BellRing, Settings, Home } from "lucide-react
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import { useUserRole } from "../hooks/useUserRole";
 import UserTypeModal from "../components/UserTypeModal";
+import LoginModal from "../components/LoginModal";
+import RegisterModal from "../components/RegisterModal";
 
 export default function Login() {
-  const { signIn, resendConfirmation, user } = useAuth();
+  const { user } = useAuth();
   const { userRole, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showResend, setShowResend] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({});
   const [showUserTypeModal, setShowUserTypeModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   // Check if user needs to select role and redirect if they have one
   useEffect(() => {
@@ -38,72 +33,6 @@ export default function Login() {
     }
   }, [user, userRole, roleLoading, navigate]);
 
-  // Load remembered email from localStorage
-  useEffect(() => {
-    const rememberedEmail = localStorage.getItem("remembered_email");
-    if (rememberedEmail) {
-      setFormData((prev) => ({ ...prev, email: rememberedEmail, rememberMe: true }));
-    }
-  }, []);
-
-  const validateForm = () => {
-    const errors = {};
-
-    if (!formData.email.trim()) {
-      errors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
-    }
-
-    if (!formData.password) {
-      errors.password = "Password is required";
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setValidationErrors({});
-    setShowResend(false);
-
-    if (!validateForm()) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      console.log("Attempting to sign in with:", formData.email);
-      await signIn(formData.email, formData.password);
-
-      // Handle remember me
-      if (formData.rememberMe) {
-        localStorage.setItem("remembered_email", formData.email);
-      } else {
-        localStorage.removeItem("remembered_email");
-      }
-
-      // Wait for user state and role to update
-      // The redirect/modal will happen in the useEffect above
-      console.log("Login successful, waiting for role determination...");
-      setLoading(false);
-    } catch (err) {
-      console.error("Sign in error:", err);
-      const errorMessage = err.message || "Login failed. Please check your credentials.";
-
-      setError(errorMessage);
-
-      // Show resend button if email not confirmed
-      if (errorMessage.toLowerCase().includes("not confirmed") || errorMessage.toLowerCase().includes("email")) {
-        setShowResend(true);
-      }
-
-      setLoading(false);
-    }
-  };
 
   const handleRoleSelected = (selectedRole) => {
     console.log('Role selected:', selectedRole);
@@ -116,34 +45,6 @@ export default function Login() {
         navigate("/profile", { replace: true });
       }
     }, 500);
-  };
-
-  const handleResend = async () => {
-    try {
-      await resendConfirmation(formData.email);
-      alert("Confirmation email sent! Please check your inbox.");
-      setShowResend(false);
-    } catch (err) {
-      alert("Failed to send confirmation email: " + err.message);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-
-    // Clear validation error when user starts typing
-    if (validationErrors[name]) {
-      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-
-    // Clear general error when user starts typing
-    if (error) {
-      setError("");
-    }
   };
 
   // Show user type modal if user is logged in but has no role
@@ -173,10 +74,28 @@ export default function Login() {
               <User className="w-10 h-10 text-gray-500" />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign In / Register</h1>
+              <div className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
+                >
+                  Login
+                </button>
+                <span className="text-gray-400">/</span>
+                <button
+                  onClick={() => setShowRegisterModal(true)}
+                  className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
+                >
+                  Register
+                </button>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Modals */}
+        <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+        <RegisterModal isOpen={showRegisterModal} onClose={() => setShowRegisterModal(false)} />
 
         {/* Profile Menu - Horizontal - Same as Account Page */}
         <div className="bg-white rounded-lg shadow-sm p-4">

@@ -77,7 +77,7 @@ export default function AliExpressImageZoom({
 					{src ? (
 						<>
 							{/* Base image */}
-							<img ref={imageRef} src={src} alt="Product" className="block w-full h-full object-contain object-center md:object-cover" style={{ objectPosition: 'center center' }} />
+							<img ref={imageRef} src={src} alt="Product" className="block w-full h-full object-contain object-center md:object-cover p-4 md:p-0" style={{ objectPosition: 'center center' }} />
 							
 							{/* Zoomed overlay image */}
 							<img 

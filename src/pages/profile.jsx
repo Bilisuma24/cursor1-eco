@@ -8,6 +8,8 @@ import { getUserLevel, getUserAchievements } from "../services/achievementServic
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import { useUserRole } from "../hooks/useUserRole";
 import { supabase } from "../lib/supabaseClient";
+import LoginModal from "../components/LoginModal";
+import RegisterModal from "../components/RegisterModal";
 
 export default function Profile() {
   const { user, signOut, loading: authLoading, updatePassword, updateUserMetadata } = useAuth();
@@ -484,6 +486,9 @@ export default function Profile() {
     );
   }
 
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+
   // Show AliExpress-style sign-in section when user is not logged in
   if (!user) {
     return (
@@ -496,32 +501,28 @@ export default function Profile() {
                 <User className="w-8 h-8 text-gray-500" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Sign In / Register</h1>
+                <div className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <button
+                    onClick={() => setShowLoginModal(true)}
+                    className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
+                  >
+                    Login
+                  </button>
+                  <span className="text-gray-400">/</span>
+                  <button
+                    onClick={() => setShowRegisterModal(true)}
+                    className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
+                  >
+                    Register
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Sign In Form */}
-          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-            <p className="mb-4 text-center text-sm text-gray-600">
-              Please sign in to access your account
-            </p>
-            <div className="flex flex-col gap-3">
-              <Link
-                to="/signup"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors"
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/signup"
-                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-3 px-4 rounded-lg text-center transition-colors"
-              >
-                Register
-              </Link>
-            </div>
-          </div>
         </div>
+        {/* Modals */}
+        <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+        <RegisterModal isOpen={showRegisterModal} onClose={() => setShowRegisterModal(false)} />
       </div>
     );
   }

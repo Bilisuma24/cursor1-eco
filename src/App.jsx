@@ -397,8 +397,8 @@ function AppContent() {
         )}
       </header>
 
-      {/* Spacer below fixed header (reduced mobile height) */}
-      <div className="h-[56px] sm:h-[72px]" />
+      {/* Spacer below fixed header (reduced mobile height) - hidden on product detail pages */}
+      {!isProductDetailPage && <div className="h-[56px] sm:h-[72px]" />}
 
       {/* Page Routes */}
       <main>
