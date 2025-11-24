@@ -811,9 +811,9 @@ export default function ProductDetail() {
 
   return (
     <div className="bg-[#f7f7f7] overflow-x-hidden pb-8 lg:pb-12">
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 pb-1.5 pt-0">
-          <div className="flex items-center gap-4">
+      <div className="bg-white border-b-0 lg:border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-0">
+          <div className="flex items-center gap-4 py-2 lg:py-0">
             <Link to="/" className="flex items-center gap-2 flex-shrink-0">
               <Logo className="w-8 h-8 sm:w-10 sm:h-10" />
               <span className="text-lg sm:text-xl font-bold text-[#3b82f6] hidden sm:inline">Kush deals</span>
@@ -827,11 +827,11 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-1.5 lg:py-2 space-y-2.5 lg:space-y-3">
-        <div className="lg:hidden space-y-2">
-          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden product-shadow"
+      <div className="max-w-6xl mx-auto px-0 lg:px-6">
+        <div className="lg:hidden -mt-8 md:-mt-0">
+          <div className="bg-white border-0 lg:border border-gray-200 rounded-none lg:rounded-lg overflow-hidden product-shadow"
                style={{ ['--shadow-color']: getShadowColor() }}>
-            <AliExpressImageZoom images={product.images} aspectClass="aspect-square" />
+            <AliExpressImageZoom images={product.images} aspectClass="aspect-video" />
           </div>
 
           <div className="bg-white border border-gray-200 rounded-2xl product-shadow p-2 space-y-2"

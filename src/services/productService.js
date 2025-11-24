@@ -500,12 +500,37 @@ export const productService = {
   // Delete a product image from storage
   async deleteProductImage(imagePath) {
     try {
-      // Extract file path from URL
-      const url = new URL(imagePath);
-      const pathParts = url.pathname.split('/');
-      const fileName = pathParts[pathParts.length - 1];
-      const productId = pathParts[pathParts.length - 2];
-      const fullPath = `${productId}/${fileName}`;
+      if (!imagePath || typeof imagePath !== 'string') {
+        throw new Error('Invalid image path provided');
+      }
+
+      let fullPath;
+      
+      // Check if imagePath is already a storage path (not a full URL)
+      if (!imagePath.startsWith('http://') && !imagePath.startsWith('https://')) {
+        // It's already a path, use it directly
+        const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+        fullPath = cleanPath;
+      } else {
+        // Extract file path from URL
+        try {
+          const url = new URL(imagePath);
+          const pathParts = url.pathname.split('/');
+          const fileName = pathParts[pathParts.length - 1];
+          const productId = pathParts[pathParts.length - 2];
+          fullPath = `${productId}/${fileName}`;
+        } catch (urlError) {
+          // If URL construction fails, try to extract path from the string
+          console.warn('Failed to parse URL, attempting to extract path:', imagePath);
+          // Try to extract path from common URL patterns
+          const pathMatch = imagePath.match(/\/product-images\/(.+)$/);
+          if (pathMatch && pathMatch[1]) {
+            fullPath = pathMatch[1];
+          } else {
+            throw new Error(`Invalid image URL format: ${imagePath}`);
+          }
+        }
+      }
 
       const { error } = await supabase.storage
         .from('product-images')

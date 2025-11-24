@@ -234,11 +234,11 @@ export default function Cart() {
                     {!user && (
                       <Link
                         to="/login"
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg inline-flex items-center justify-center space-x-2 w-44 whitespace-nowrap"
-                  >
-                    <User className="w-4 h-4" />
-                          <span>Sign in</span>
-                    <ArrowRight className="w-4 h-4" />
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg inline-flex items-center justify-center space-x-2 w-44 whitespace-nowrap cursor-pointer"
+                      >
+                        <User className="w-4 h-4" />
+                        <span>Login</span>
+                        <ArrowRight className="w-4 h-4" />
                       </Link>
                     )}
                     <Link

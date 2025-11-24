@@ -272,7 +272,7 @@ export default function Home() {
         </span>
         <div className={`w-full ${micro ? 'mt-2' : ultraCompact ? 'mt-2.5' : compact ? 'mt-4' : 'mt-8'}`}>
           <div
-            className={`mx-auto aspect-square ${
+            className={`mx-auto aspect-video md:aspect-square ${
               micro
                 ? 'w-[45%] max-w-[48px]'
                 : ultraCompact
@@ -326,7 +326,7 @@ export default function Home() {
     if (categories.length === 0) {
       console.warn('No categories found in productsData:', productsData);
     }
-  }, []);
+  }, [categories]);
 
   const handleBannerPrev = () => {
     setBannerIndex((i) => (i - 1 + banners.length) % banners.length);
@@ -412,19 +412,20 @@ export default function Home() {
           <div className="px-3 py-3 border-b border-gray-100">
             <h2 className="text-base font-bold text-gray-900">Recommended for you</h2>
           </div>
-          <div className="grid grid-cols-2 gap-2 p-3">
+          <div className="grid grid-cols-2 gap-0 p-0">
             {featuredProducts && featuredProducts.length > 0 ? (
               featuredProducts.slice(0, 20).map((product) => (
                 <Link
                   key={product.id}
                   to={`/product/${product.id}`}
-                  className="flex flex-col bg-white rounded overflow-hidden active:scale-95 transition-transform border border-gray-100"
+                  className="flex flex-col bg-white rounded overflow-hidden active:scale-95 transition-transform border-0"
                 >
-                  <div className="relative aspect-square bg-gray-50 flex items-center justify-center">
+                  <div className="relative aspect-video bg-gray-50 flex items-center justify-center w-full overflow-hidden">
                     <img
                       src={product.images?.[0] || 'https://via.placeholder.com/150?text=No+Image'}
                       alt={product.name}
-                      className="w-full h-full object-contain p-2"
+                      className="w-full h-full object-contain object-center p-0"
+                      style={{ objectPosition: 'center center' }}
                     />
                     {product.discount && (
                       <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
@@ -462,7 +463,7 @@ export default function Home() {
           <div className="px-4 mb-3">
             <h2 className="text-gray-600 text-sm font-medium">More to love</h2>
           </div>
-          <div className="grid grid-cols-2 gap-2 px-4">
+          <div className="grid grid-cols-2 gap-0 px-0">
             {featuredProducts && featuredProducts.length > 0 ? (
               featuredProducts.slice(0, 10).map((product) => (
                 <ProductCard key={product.id} product={product} />
@@ -583,6 +584,7 @@ export default function Home() {
                           <div 
                             className="fixed inset-0 bg-black/50 z-[90]"
                             onClick={() => setCategoriesMenuOpenDesktop(false)}
+                            onMouseDown={(e) => e.preventDefault()}
                           />
                           {/* Sidebar menu */}
                           <div 
@@ -592,7 +594,7 @@ export default function Home() {
                               setCategoriesMenuOpenDesktop(true);
                             }}
                             onMouseLeave={() => {
-setCategoriesMenuOpenDesktop(false);
+                              setCategoriesMenuOpenDesktop(false);
                             }}
                           >
                             <div className="px-3 py-2 border-b border-gray-200 bg-gray-50">
@@ -603,9 +605,9 @@ setCategoriesMenuOpenDesktop(false);
                             </div>
                             <div className="py-0 relative">
                               {categories && categories.length > 0 ? (
-                                categories.map((category) => (
+                                categories.map((category, catIdx) => (
                                   <div
-                                    key={category.id || category.name}
+                                    key={category.id || `category-${catIdx}-${category.name}`}
                                     className="relative"
                                     onMouseEnter={() => setHoveredCategory(category)}
                                     onMouseLeave={() => setHoveredCategory(null)}
@@ -627,7 +629,7 @@ setCategoriesMenuOpenDesktop(false);
                                         <div className="p-2 grid grid-cols-2 gap-1.5">
                                           {category.subcategories.map((subcategory, idx) => (
                                             <button
-                                              key={idx}
+                                              key={`subcategory-${category.id || category.name}-${idx}-${subcategory}`}
                                               type="button"
                                               onClick={() => {
                                                 handleCategoryClick(category.name);

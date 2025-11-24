@@ -63,12 +63,12 @@ export default function AliExpressImageZoom({
 	const onTouchStart = () => setShowModal(true);
 
 	return (
-		<div className={`flex flex-col gap-4 ${className}`}>
+		<div className={`flex flex-col gap-0 md:gap-4 ${className}`}>
 			{/* Main image with self-zoom - AliExpress style */}
 			<div className="relative w-full">
 				<div
 					ref={containerRef}
-                    className={`relative border border-gray-100 bg-white overflow-hidden w-full select-none rounded ${aspectClass}`}
+                    className={`relative border-0 md:border border-gray-100 bg-white overflow-hidden w-full select-none rounded-none md:rounded ${aspectClass}`}
 					onMouseEnter={onMouseEnter}
 					onMouseLeave={onMouseLeave}
 					onMouseMove={onMouseMove}
@@ -77,17 +77,18 @@ export default function AliExpressImageZoom({
 					{src ? (
 						<>
 							{/* Base image */}
-							<img ref={imageRef} src={src} alt="Product" className="block w-full h-full object-cover" />
+							<img ref={imageRef} src={src} alt="Product" className="block w-full h-full object-contain object-center md:object-cover" style={{ objectPosition: 'center center' }} />
 							
 							{/* Zoomed overlay image */}
 							<img 
 								src={src} 
 								alt="Product zoomed" 
-								className={`absolute top-0 left-0 w-full h-auto object-contain transition-opacity duration-75 ${hovering ? 'opacity-100' : 'opacity-0'}`}
+								className={`absolute top-0 left-0 w-full h-auto object-contain object-center transition-opacity duration-75 ${hovering ? 'opacity-100' : 'opacity-0'}`}
 								style={{
 									transform: `scale(${zoomRatio})`,
 									transformOrigin: `${cursorPct.x}% ${cursorPct.y}%`,
-									pointerEvents: 'none'
+									pointerEvents: 'none',
+									objectPosition: 'center center'
 								}}
 							/>
 						</>

@@ -178,9 +178,9 @@ function NavbarContent() {
                   <div className="flex flex-col text-xs text-gray-500 text-right">
                     <span className="font-medium text-gray-700">Welcome</span>
                     <div className="flex items-center gap-2 mt-1 text-[#ff4747]">
-                      <Link to="/login" className="font-semibold hover:underline">Sign in</Link>
+                      <Link to="/login" className="font-semibold hover:underline cursor-pointer">Login</Link>
                       <span className="text-gray-300">|</span>
-                      <Link to="/signup" className="font-semibold hover:underline">Register</Link>
+                      <Link to="/signup" className="font-semibold hover:underline cursor-pointer">Register</Link>
                     </div>
                   </div>
                 )}

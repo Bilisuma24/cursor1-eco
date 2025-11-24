@@ -8,24 +8,6 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
 
-  // Generate a consistent, pleasant color per product to tint the shadow.
-  // Falls back gracefully when product fields are missing.
-  const getShadowColor = () => {
-    const key =
-      String(product?.color || product?.category || product?.name || product?.id || 'prod')
-        .toLowerCase();
-    // Simple string hash -> hue [0, 360)
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
-    }
-    const hue = hash % 360;
-    const saturation = 82; // vibrant but soft
-    const lightness = 72; // keeps the shadow pastel-like
-    const alpha = 0.22;
-    return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
-  };
-
   const handleWishlistToggle = async (e) => {
     e.stopPropagation();
     try {
@@ -71,8 +53,7 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   if (viewMode === 'list') {
     return (
       <div 
-        className="bg-white rounded border border-gray-200 overflow-hidden cursor-pointer transition-shadow product-shadow"
-        style={{ ['--shadow-color']: getShadowColor() }}
+        className="bg-white rounded border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => navigate(`/product/${product.id}`)}
       >
         <div className="flex">
@@ -118,12 +99,11 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
 
   return (
     <div 
-      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all flex flex-col h-full hover:border-[#ffd0b3] product-shadow"
-      style={{ ['--shadow-color']: getShadowColor() }}
+      className="group bg-white rounded-none md:rounded-2xl border-0 md:border border-gray-200 overflow-hidden cursor-pointer transition-all flex flex-col h-full hover:border-[#ffd0b3] hover:shadow-lg"
       onClick={() => navigate(`/product/${product.id}`)}
     >
       {/* Image */}
-      <div className="relative aspect-square bg-[#fff7f2] border-b border-gray-100 overflow-hidden">
+      <div className="relative aspect-video md:aspect-square bg-[#fff7f2] border-0 md:border-b border-gray-100 overflow-hidden w-full">
         {isChoiceDeal && (
           <span className="absolute top-3 left-3 bg-[#ff4747] text-white text-[10px] font-semibold uppercase tracking-wide px-3 py-1 rounded-full shadow-sm">
             Choice
@@ -132,7 +112,8 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
         <img
           src={product.images?.[selectedImage] || 'https://via.placeholder.com/300'}
           alt={product.name}
-          className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain object-center p-0 md:p-6 group-hover:scale-105 transition-transform duration-300"
+          style={{ objectPosition: 'center center' }}
         />
         
         {/* Discount badge */}
