@@ -307,13 +307,28 @@ CREATE POLICY "public_read_products"
     const q = params.get('search') || '';
     const cat = params.get('category') || '';
     const subcat = params.get('subcategory') || '';
+    
+    // Only apply filters if they exist in the URL
+    // If no category in URL, explicitly show all products (no category filter)
     setSearchTerm(q);
-    setSelectedCategory(cat || 'For you');
-    setFilters((prev) => ({
-      ...prev,
-      category: cat || '',
-      subcategory: subcat || ''
-    }));
+    
+    // If there's a category in the URL, use it; otherwise set to 'All' to show all products
+    if (cat) {
+      setSelectedCategory(cat);
+      setFilters((prev) => ({
+        ...prev,
+        category: cat,
+        subcategory: subcat || ''
+      }));
+    } else {
+      // No category in URL - show all products
+      setSelectedCategory('All');
+      setFilters((prev) => ({
+        ...prev,
+        category: '', // Empty category means show all
+        subcategory: ''
+      }));
+    }
   }, [location.search]);
 
   useEffect(() => {
