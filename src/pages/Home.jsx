@@ -319,14 +319,14 @@ export default function Home() {
   const categories = productsData.categories || [];
   const heroCategories = categories.slice(0, 8);
   
-  // Debug: Log categories to verify they're loaded
+  // Debug: Log categories to verify they're loaded (only once when categories change)
   useEffect(() => {
-    console.log('Categories loaded:', categories.length, 'categories');
-    console.log('Categories data:', categories);
-    if (categories.length === 0) {
-      console.warn('No categories found in productsData:', productsData);
+    if (categories.length > 0) {
+      if (import.meta.env.DEV) {
+        console.log('Categories loaded:', categories.length, 'categories');
+      }
     }
-  }, [categories]);
+  }, [categories.length]); // Only depend on length to avoid excessive logging
 
   const handleBannerPrev = () => {
     setBannerIndex((i) => (i - 1 + banners.length) % banners.length);

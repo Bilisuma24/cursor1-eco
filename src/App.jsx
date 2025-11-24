@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
 import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu, Camera, Mic, QrCode, ChevronRight } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import StoreProfile from "./pages/StoreProfile";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Profile from "./pages/profile";
@@ -30,6 +31,7 @@ import ImageDebug from "./components/ImageDebug";
 import ImageTestSimple from "./components/ImageTestSimple";
 import CartTest from "./components/CartTest";
 import SimpleCartTest from "./components/SimpleCartTest";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { SupabaseAuthProvider, useAuth } from "./contexts/SupabaseAuthContext";
@@ -406,6 +408,8 @@ function AppContent() {
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/shop" element={<Shop />} />
+              <Route path="/store" element={<Navigate to="/shop" replace />} />
+              <Route path="/store/:sellerId" element={<StoreProfile />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
@@ -449,15 +453,17 @@ function AppContent() {
 function App() {
   // Wrap Router with providers here so NavbarContent can access Supabase auth
   return (
-    <SupabaseAuthProvider>
-      <CartProvider>
-        <ToastProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </ToastProvider>
-      </CartProvider>
-    </SupabaseAuthProvider>
+    <ErrorBoundary>
+      <SupabaseAuthProvider>
+        <CartProvider>
+          <ToastProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </ToastProvider>
+        </CartProvider>
+      </SupabaseAuthProvider>
+    </ErrorBoundary>
   );
 }
 

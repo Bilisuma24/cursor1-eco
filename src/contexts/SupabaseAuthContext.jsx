@@ -219,6 +219,31 @@ export function SupabaseAuthProvider({ children }) {
     }
   };
 
+  const signInWithOAuth = async (provider) => {
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: redirectUrl,
+          // Remove queryParams that might cause issues
+        },
+      });
+      
+      if (error) {
+        console.error('[Auth Context] OAuth sign in error:', error);
+        throw new Error(error.message || `Failed to sign in with ${provider}. Please check your Supabase configuration.`);
+      }
+      
+      // OAuth will redirect, so we don't need to return anything
+      return data;
+    } catch (error) {
+      console.error('[Auth Context] OAuth sign in error:', error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     session,
@@ -230,6 +255,7 @@ export function SupabaseAuthProvider({ children }) {
     updatePassword,
     updateUserMetadata,
     resendConfirmation,
+    signInWithOAuth,
   };
 
   return (

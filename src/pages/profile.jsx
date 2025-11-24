@@ -62,6 +62,8 @@ export default function Profile() {
   const [newAddress, setNewAddress] = useState({ name: '', address: '', city: '', zip: '', country: '', phone: '', isDefault: false });
   const [newPayment, setNewPayment] = useState({ cardNumber: '', expiryDate: '', cvv: '', name: '', isDefault: false });
   const [orderStats, setOrderStats] = useState({ total: 0, pending: 0, completed: 0 });
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   // Fetch profile data
   useEffect(() => {
@@ -485,9 +487,6 @@ export default function Profile() {
       </div>
     );
   }
-
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   // Show AliExpress-style sign-in section when user is not logged in
   if (!user) {
