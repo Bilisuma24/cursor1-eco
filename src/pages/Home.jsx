@@ -133,20 +133,44 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // Clear any existing timer first
+    if (bannerTimer.current) {
+      clearInterval(bannerTimer.current);
+      bannerTimer.current = null;
+    }
+    
     bannerTimer.current = setInterval(() => {
       setBannerIndex((i) => (i + 1) % 2);
     }, 5000);
-    return () => bannerTimer.current && clearInterval(bannerTimer.current);
+    
+    return () => {
+      if (bannerTimer.current) {
+        clearInterval(bannerTimer.current);
+        bannerTimer.current = null;
+      }
+    };
   }, []);
 
   // Auto-rotate Top Deals products
   useEffect(() => {
+    // Clear any existing timer first
+    if (topDealTimer.current) {
+      clearInterval(topDealTimer.current);
+      topDealTimer.current = null;
+    }
+    
     if (trendingProducts.length > 0) {
       topDealTimer.current = setInterval(() => {
         setTopDealIndex((i) => (i + 1) % Math.min(5, trendingProducts.length));
       }, 4000);
-      return () => topDealTimer.current && clearInterval(topDealTimer.current);
     }
+    
+    return () => {
+      if (topDealTimer.current) {
+        clearInterval(topDealTimer.current);
+        topDealTimer.current = null;
+      }
+    };
   }, [trendingProducts.length]);
 
   // Note: Using onMouseEnter/onMouseLeave instead of click handlers for hover functionality
@@ -370,10 +394,10 @@ export default function Home() {
         </div>
 
         {/* Mobile Hero Banner - At Top */}
-        <section className="pt-1 pb-2 bg-white">
-          <div className="relative overflow-hidden bg-[#3b82f6] text-white min-h-[90px] shadow-xl">
+        <section className="pt-1 pb-3 bg-white">
+          <div className="relative overflow-hidden bg-[#3b82f6] text-white min-h-[130px] shadow-xl">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
-            <div className="relative py-2 px-3">
+            <div className="relative py-3 px-3">
               <div className="flex items-center gap-1.5">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1 mb-1">
