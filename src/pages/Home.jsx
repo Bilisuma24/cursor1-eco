@@ -34,15 +34,60 @@ export default function Home() {
 
   const fetchProducts = async () => {
     try {
-      // Fetch products from database
-      const { data: dbProducts, error: dbError } = await supabase
-        .from('product')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let dbProducts = null;
+      
+      try {
+        // Fetch products from database
+        const { data, error: dbError } = await supabase
+          .from('product')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (dbError) {
-        console.error('Error fetching products from database:', dbError);
+        if (dbError) {
+          // Check if it's a network error
+          if (dbError.message?.includes('Failed to fetch') || 
+              dbError.message?.includes('ERR_NAME_NOT_RESOLVED') ||
+              dbError.message?.includes('NetworkError') ||
+              dbError.code === 'PGRST116') {
+            console.warn('Network error fetching products. This might be due to:');
+            console.warn('1. Internet connectivity issues');
+            console.warn('2. Supabase project might be paused (free tier) - check your Supabase dashboard');
+            console.warn('3. Firewall or proxy blocking the request');
+            console.warn('Error details:', dbError);
+          } else {
+            console.error('Error fetching products from database:', dbError);
+          }
+          // Continue with static products if database fetch fails
+          dbProducts = null;
+        } else {
+          dbProducts = data;
+        }
+      } catch (networkError) {
+        // Catch network errors that might be thrown as exceptions
+        if (networkError?.message?.includes('Failed to fetch') || 
+            networkError?.message?.includes('ERR_NAME_NOT_RESOLVED') ||
+            networkError?.name === 'TypeError' ||
+            networkError?.name === 'NetworkError') {
+          console.warn('Network error fetching products (caught as exception). This might be due to:');
+          console.warn('1. Internet connectivity issues');
+          console.warn('2. Supabase project might be paused (free tier) - check your Supabase dashboard');
+          console.warn('3. Firewall or proxy blocking the request');
+          console.warn('4. DNS resolution failure');
+          console.warn('Error details:', networkError);
+        } else {
+          console.error('Unexpected error fetching products:', networkError);
+        }
+        // Continue with static products if database fetch fails
+        dbProducts = null;
       }
+      
+      // If database fetch failed, use only static products
+      if (!dbProducts) {
+        setFeaturedProducts(productsData.products || []);
+        setTrendingProducts(productsData.products || []);
+        return;
+      }
+      
 
       // Helper function to convert image paths to public URLs
       const convertToPublicUrl = (imagePath) => {
@@ -436,43 +481,10 @@ export default function Home() {
           <div className="px-3 py-3 border-b border-gray-100">
             <h2 className="text-base font-bold text-gray-900">Recommended for you</h2>
           </div>
-          <div className="grid grid-cols-2 gap-0 p-0">
+          <div className="grid grid-cols-2 gap-1 p-2">
             {featuredProducts && featuredProducts.length > 0 ? (
               featuredProducts.slice(0, 20).map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.id}`}
-                  className="flex flex-col bg-white rounded overflow-hidden active:scale-95 transition-transform border-0"
-                >
-                  <div className="relative aspect-video bg-gray-50 flex items-center justify-center w-full overflow-hidden">
-                    <img
-                      src={product.images?.[0] || 'https://via.placeholder.com/150?text=No+Image'}
-                      alt={product.name}
-                      className="w-full h-full object-contain object-center p-0"
-                      style={{ objectPosition: 'center center' }}
-                    />
-                    {product.discount && (
-                      <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
-                        -{product.discount}%
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-2">
-                    <p className="text-xs text-gray-800 font-medium line-clamp-2 leading-tight mb-1 min-h-[2.5rem]">
-                      {product.name}
-                    </p>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-bold text-red-600">
-                        {product.currency || 'ETB'}{formatPrice(product.price || 0)}
-                      </span>
-                      {product.originalPrice && (
-                        <span className="text-xs text-gray-400 line-through">
-                          {product.currency || 'ETB'}{formatPrice(product.originalPrice)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
+                <ProductCard key={product.id} product={product} />
               ))
             ) : (
               <div className="col-span-2 p-4 text-center text-gray-500 text-sm">
@@ -506,72 +518,42 @@ export default function Home() {
         <div className="bg-gradient-to-b from-blue-50 via-white to-white pb-16">
           {/* Full-width hero banner */}
           <section className="pt-1">
-            <div className="relative bg-[#3b82f6] text-white shadow-2xl overflow-hidden border-y border-blue-400">
+            <div className="relative bg-[#3b82f6] text-white shadow-xl overflow-hidden border-y border-blue-400">
                 <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.45),_transparent_60%)]" />
-                <div className="relative">
-                {heroCategories.length > 0 && (
-                  <div className="px-3 pb-1">
-                    <div className="flex items-center gap-2 overflow-x-auto">
-                      {heroCategories.map((category, index) => (
-                        <Link
-                          key={`hero-desktop-${category.id || index}`}
-                          to={`/shop?category=${encodeURIComponent(category.name)}`}
-                          className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
-                        >
-                          <span className="text-xl">{category.icon || '📦'}</span>
-                          <span>{category.name}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="px-3 pb-2 pt-1">
-                  <div className="grid gap-2 xl:grid-cols-[110px_minmax(0,1fr)_110px] items-stretch">
-                    {heroDeals[0] && (
-                      <HeroDealCard deal={heroDeals[0]} ultraCompact micro className="hidden lg:flex w-full h-full p-1.5" />
-                    )}
-
-                    <div className="flex flex-col justify-between space-y-1.5 text-left">
-                      <span className="inline-flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/80">
+                <div className="relative px-6 py-5">
+                  <div className="flex items-center justify-between gap-6">
+                    <div className="flex flex-col space-y-2 flex-1">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-white/80">
                         Welcome deal
                       </span>
-                      <h2 className="text-[16px] lg:text-[18px] font-bold leading-snug max-w-md">
+                      <h2 className="text-xl lg:text-2xl font-bold leading-snug max-w-md">
                         Catch limited-time savings for new shoppers
                       </h2>
-                      <p className="text-[9px] text-white/80 max-w-lg">
+                      <p className="text-[11px] text-white/80 max-w-lg">
                         Enjoy fresh picks across electronics, lifestyle, and beyond—curated to deliver the biggest value on your first Kush deals haul.
                       </p>
-                      <div className="flex flex-wrap items-center gap-1.5">
+                      <div className="flex items-center gap-3 mt-2">
                         <button
                           onClick={() => navigate('/shop?tag=welcome-deal')}
-                          className="inline-flex items-center gap-1 bg-white text-[#3b82f6] font-semibold px-2.5 py-1.5 rounded-full shadow-md hover:bg-white/90 transition-colors text-[10px]"
+                          className="inline-flex items-center gap-1.5 bg-white text-[#3b82f6] font-semibold px-5 py-2.5 rounded-full shadow-md hover:bg-white/90 transition-colors text-sm"
                         >
                           Shop now
-                          <ChevronRight className="w-4 h-4" />
+                          <ChevronRight className="w-5 h-5" />
                         </button>
-                        <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide">
-                          <span className="bg-white text-[#3b82f6] rounded-full px-2 py-0.5">
+                        <div className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wide">
+                          <span className="bg-white text-[#3b82f6] rounded-full px-2.5 py-1">
                             -{heroDeals[0]?.discount || 80}%
                           </span>
                           <span>exclusive welcome deal</span>
                         </div>
                       </div>
                     </div>
-
-                    <div className="grid gap-1.5">
-                      {heroDeals.slice(1).map((deal, index) => (
-                        <HeroDealCard
-                          key={deal.id || index}
-                          deal={deal}
-                          ultraCompact
-                          micro
-                          className="w-full h-full p-1.5"
-                        />
-                      ))}
-                    </div>
+                    {heroDeals[0] && (
+                      <div className="hidden lg:block">
+                        <HeroDealCard deal={heroDeals[0]} ultraCompact micro className="w-32 h-32 p-2.5" />
+                      </div>
+                    )}
                   </div>
-                </div>
                 </div>
             </div>
           </section>
@@ -710,39 +692,9 @@ export default function Home() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 p-2">
                 {topDealProducts.map((product, index) => (
-                  <Link
-                    key={product.id || index}
-                    to={`/product/${product.id}`}
-                    className="group bg-white border border-gray-200 rounded-2xl hover:border-[#ffb498] hover:shadow-lg transition-all overflow-hidden"
-                  >
-                    <div className="relative aspect-square bg-gray-50 flex items-center justify-center">
-                      <img
-                        src={product.images?.[0] || 'https://via.placeholder.com/200'}
-                        alt={product.name}
-                        className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform"
-                      />
-                      {product.discount && (
-                        <span className="absolute top-4 left-4 bg-[#ff4747] text-white text-xs font-semibold px-3 py-1 rounded-full">
-                          -{product.discount}%
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-5 space-y-3">
-                      <p className="text-sm text-gray-700 line-clamp-2 min-h-[2.5rem]">{product.name}</p>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-bold text-[#ff4747]">ETB{formatPrice(product.price || 0)}</span>
-                        {product.originalPrice && (
-                          <span className="text-xs text-gray-400 line-through">ETB{formatPrice(product.originalPrice)}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Star className="w-4 h-4 text-[#ffb266] fill-current" />
-                        <span>{product.rating?.toFixed(1) || '4.8'} ({product.reviewCount || '120'} reviews)</span>
-                      </div>
-                    </div>
-                  </Link>
+                  <ProductCard key={product.id || index} product={product} />
                 ))}
               </div>
             </section>
@@ -759,7 +711,7 @@ export default function Home() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 p-2">
                 {trendingProducts.slice(0, 10).map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -775,7 +727,7 @@ export default function Home() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 p-2">
                 {featuredProducts.slice(0, 12).map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

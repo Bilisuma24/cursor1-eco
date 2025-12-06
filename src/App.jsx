@@ -19,6 +19,7 @@ import Orders from "./pages/Orders";
 import ProductDetail from "./pages/ProductDetail";
 import Wishlist from "./pages/Wishlist";
 import PriceAlerts from "./pages/PriceAlerts";
+import Settings from "./pages/Settings";
 import SellerDashboard from "./pages/SellerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AuthCallback from "./pages/auth/AuthCallback";
@@ -373,34 +374,37 @@ function AppContent() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isProductDetailPage = location.pathname.startsWith('/product/');
+  const isDashboardPage = location.pathname.startsWith('/seller-dashboard');
 
   return (
     <>
       <ScrollToTop />
       {/* Header - fixed to remain visible while scrolling */}
-      <header className="bg-white shadow-md fixed inset-x-0 top-0 z-50">
-        {isHomePage ? (
-          <NavbarContent />
-        ) : isProductDetailPage ? (
-          // No header on product detail page
-          null
-        ) : (
-          <div className="bg-white shadow-sm border-b border-gray-200">
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-              <div className="flex items-center justify-between py-3 sm:py-4">
-                {/* Logo - Always visible */}
-                <Link to="/" className="flex items-center space-x-2">
-                  <Logo className="w-10 h-10" />
-                  <span className="text-2xl font-bold text-[#3b82f6]">Kush deals</span>
-                </Link>
+      {!isDashboardPage && (
+        <header className="bg-white shadow-md fixed inset-x-0 top-0 z-50">
+          {isHomePage ? (
+            <NavbarContent />
+          ) : isProductDetailPage ? (
+            // No header on product detail page
+            null
+          ) : (
+            <div className="bg-white shadow-sm border-b border-gray-200">
+              <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+                <div className="flex items-center justify-between py-3 sm:py-4">
+                  {/* Logo - Always visible */}
+                  <Link to="/" className="flex items-center space-x-2">
+                    <Logo className="w-10 h-10" />
+                    <span className="text-2xl font-bold text-[#3b82f6]">Kush deals</span>
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </header>
+          )}
+        </header>
+      )}
 
-      {/* Spacer below fixed header (reduced mobile height) - hidden on product detail pages */}
-      {!isProductDetailPage && <div className="h-[56px] sm:h-[72px]" />}
+      {/* Spacer below fixed header (reduced mobile height) - hidden on product detail pages and dashboard */}
+      {!isProductDetailPage && !isDashboardPage && <div className="h-[56px] sm:h-[72px]" />}
 
       {/* Page Routes */}
       <main>
@@ -427,6 +431,7 @@ function AppContent() {
               <Route path="/orders" element={<Orders />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/price-alerts" element={<PriceAlerts />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/account" element={<Account />} />
               <Route path="/seller-dashboard/*" element={<SellerDashboard />} />

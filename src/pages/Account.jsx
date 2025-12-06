@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, ShoppingBag, Settings, LogOut, Heart, Package, Home, BellRing, CreditCard, MapPin, Globe, Shield, Lock, Mail, Trash2, Plus, Edit, Check, X, Eye, EyeOff, Share2, Download, ShoppingCart, Truck, CheckCircle, ChevronRight, Wallet, Ticket, FileCheck, DollarSign } from "lucide-react";
+import { User, ShoppingBag, Settings, LogOut, Heart, Package, Home, BellRing, CreditCard, MapPin, Globe, Shield, Lock, Mail, Trash2, Plus, Edit, Check, X, Eye, EyeOff, Share2, Download, ShoppingCart, Truck, CheckCircle, ChevronRight, Wallet, Ticket, FileCheck, DollarSign, BarChart3 } from "lucide-react";
 import LevelBadge from "../components/achievements/LevelBadge";
 import LevelProgress from "../components/achievements/LevelProgress";
 import AchievementList from "../components/achievements/AchievementList";
@@ -494,6 +494,15 @@ export default function Account() {
               <User className="w-5 h-5" />
               <span className="text-xs">Profile</span>
             </Link>
+            {(isSeller || profileData?.user_type === 'seller') && (
+              <Link
+                to="/seller-dashboard"
+                className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs">Dashboard</span>
+              </Link>
+            )}
             <Link
               to="/orders"
               className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
@@ -509,25 +518,18 @@ export default function Account() {
               <span className="text-xs">Wishlist</span>
             </Link>
             <Link
-              to="/price-alerts"
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
-            >
-              <BellRing className="w-5 h-5" />
-              <span className="text-xs">Price Alerts</span>
-            </Link>
-            <Link
-              to="/profile"
+              to="/settings"
               className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
             >
               <Settings className="w-5 h-5" />
               <span className="text-xs">Settings</span>
             </Link>
             <Link
-              to="/"
+              to="/price-alerts"
               className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
             >
-              <Home className="w-5 h-5" />
-              <span className="text-xs">Home</span>
+              <BellRing className="w-5 h-5" />
+              <span className="text-xs">Price Alerts</span>
             </Link>
           </div>
         </div>

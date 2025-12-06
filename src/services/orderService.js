@@ -34,7 +34,8 @@ export const orderService = {
             price_at_purchase,
             product_id,
             product (
-              name
+              name,
+              images
             )
           )
         `)
@@ -50,12 +51,35 @@ export const orderService = {
         order_items: order.order_items.filter(item => productIds.includes(item.product_id))
       }));
 
-      // Apply status filter if provided
-      if (statusFilter) {
-        return sellerOrders.filter(order => order.status === statusFilter);
+      // Fetch customer profiles separately
+      const userIds = [...new Set(sellerOrders.map(order => order.user_id).filter(Boolean))];
+      let profilesMap = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profile')
+          .select('user_id, full_name, username')
+          .in('user_id', userIds);
+        
+        if (profiles) {
+          profilesMap = profiles.reduce((acc, profile) => {
+            acc[profile.user_id] = profile;
+            return acc;
+          }, {});
+        }
       }
 
-      return sellerOrders;
+      // Add profile data to orders
+      const sellerOrdersWithProfiles = sellerOrders.map(order => ({
+        ...order,
+        profile: profilesMap[order.user_id] || null
+      }));
+
+      // Apply status filter if provided
+      if (statusFilter) {
+        return sellerOrdersWithProfiles.filter(order => order.status === statusFilter);
+      }
+
+      return sellerOrdersWithProfiles;
     } catch (error) {
       console.error('Error fetching seller orders:', error);
       throw error;
@@ -78,13 +102,22 @@ export const orderService = {
         const sellerItems = order.order_items.map(item => ({
           productName: item.product?.name || 'Unknown Product',
           quantity: item.quantity,
-          price: item.price_at_purchase
+          price: item.price_at_purchase,
+          total: item.price_at_purchase * item.quantity,
+          productImage: item.product?.images?.[0] || null
         }));
+        
+        // Get customer name from profile or use user_id as fallback
+        const customerName = order.profile?.full_name || 
+                           order.profile?.username || 
+                           `Customer ${order.user_id?.slice(0, 8)}` ||
+                           'Customer';
         
         return {
           ...order,
           sellerRevenue,
-          sellerItems
+          sellerItems,
+          customerName
         };
       });
       

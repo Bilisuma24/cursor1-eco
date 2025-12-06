@@ -19,7 +19,10 @@ import {
   Loader2,
   Calendar,
   Target,
-  Activity
+  Activity,
+  Users,
+  ArrowUpRight,
+  Mail
 } from 'lucide-react';
 
 const Overview = () => {
@@ -33,6 +36,11 @@ const Overview = () => {
   const [level, setLevel] = useState(null);
   const [dateRange, setDateRange] = useState(30); // 7, 30, 90 days
   const [comparisonStats, setComparisonStats] = useState(null);
+  const [customers, setCustomers] = useState(0);
+  const [visitors, setVisitors] = useState(0);
+  const [customerGrowth, setCustomerGrowth] = useState(0);
+  const [visitorGrowth, setVisitorGrowth] = useState(0);
+  const [orderGrowth, setOrderGrowth] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -72,7 +80,7 @@ const Overview = () => {
       // Load all dashboard data in parallel
       const [statsData, ordersData, productsData, sales] = await Promise.all([
         analyticsService.getSellerStats(user.id),
-        orderService.getRecentOrders(user.id, 5),
+        orderService.getRecentOrders(user.id, 10),
         analyticsService.getTopProducts(user.id, 5),
         analyticsService.getSalesData(user.id, dateRange)
       ]);
@@ -82,7 +90,20 @@ const Overview = () => {
       setTopProducts(productsData);
       setSalesData(sales || []);
 
-      // Calculate comparison stats (current period vs previous period)
+      // Get all orders for customer calculation
+      const allOrders = await orderService.fetchSellerOrders(user.id);
+      
+      // Calculate unique customers from all orders
+      const uniqueCustomers = new Set();
+      allOrders.forEach(order => {
+        if (order.user_id) uniqueCustomers.add(order.user_id);
+      });
+      const currentCustomers = uniqueCustomers.size;
+
+      // Calculate visitors (estimate: 4x unique customers or 3x total orders, whichever is higher)
+      const currentVisitors = Math.max(currentCustomers * 4, (statsData?.totalOrders || 0) * 3);
+
+      // Calculate current period revenue
       const currentPeriodRevenue = sales?.reduce((sum, item) => sum + item.revenue, 0) || 0;
       
       // Get previous period data for comparison
@@ -94,14 +115,52 @@ const Overview = () => {
         })
         .reduce((sum, item) => sum + item.revenue, 0) || 0;
 
+      // Filter orders for current and previous periods
+      const currentPeriodOrders = allOrders.filter(order => {
+        const orderDate = new Date(order.created_at);
+        return orderDate >= currentPeriodStart;
+      });
+
+      const previousPeriodOrders = allOrders.filter(order => {
+        const orderDate = new Date(order.created_at);
+        return orderDate >= previousPeriodStart && orderDate < currentPeriodStart;
+      });
+
+      // Calculate previous period customers
+      const previousUniqueCustomers = new Set();
+      previousPeriodOrders.forEach(order => {
+        if (order.user_id) previousUniqueCustomers.add(order.user_id);
+      });
+      const previousCustomers = previousUniqueCustomers.size;
+      const previousVisitors = Math.max(previousCustomers * 4, previousPeriodOrders.length * 3);
+
+      // Calculate growth percentages
       const revenueGrowth = previousPeriodRevenue > 0 
-        ? ((currentPeriodRevenue - previousPeriodRevenue) / previousPeriodRevenue * 100).toFixed(1)
+        ? parseFloat(((currentPeriodRevenue - previousPeriodRevenue) / previousPeriodRevenue * 100).toFixed(1))
         : 0;
+
+      const orderGrowth = previousPeriodOrders.length > 0
+        ? parseFloat(((currentPeriodOrders.length - previousPeriodOrders.length) / previousPeriodOrders.length * 100).toFixed(1))
+        : 0;
+
+      const customerGrowth = previousCustomers > 0
+        ? parseFloat(((currentCustomers - previousCustomers) / previousCustomers * 100).toFixed(1))
+        : 0;
+
+      const visitorGrowth = previousVisitors > 0
+        ? parseFloat(((currentVisitors - previousVisitors) / previousVisitors * 100).toFixed(1))
+        : 0;
+
+      setCustomers(currentCustomers);
+      setVisitors(currentVisitors);
+      setCustomerGrowth(customerGrowth);
+      setVisitorGrowth(visitorGrowth);
+      setOrderGrowth(orderGrowth);
 
       setComparisonStats({
         currentRevenue: currentPeriodRevenue,
         previousRevenue: previousPeriodRevenue,
-        revenueGrowth: parseFloat(revenueGrowth),
+        revenueGrowth: revenueGrowth,
         dateRange
       });
     } catch (err) {
@@ -188,299 +247,450 @@ const Overview = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your store.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-gray-500" />
-          <select
-            value={dateRange}
-            onChange={(e) => setDateRange(Number(e.target.value))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-          >
-            <option value={7}>Last 7 days</option>
-            <option value={30}>Last 30 days</option>
-            <option value={90}>Last 90 days</option>
-          </select>
-        </div>
-      </div>
-
-      {level && (
-        <div>
-          <LevelBadge levelName={level?.badge?.split('/').pop()?.replace('.svg','')} badge={level?.badge} />
-          <div className="mt-2 max-w-md">
-            <LevelProgress xp={level?.xp || 0} next={level?.next_level_xp || 100} />
-          </div>
-        </div>
-      )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-emerald-500 p-3 rounded-lg">
-              <DollarSign className="h-6 w-6 text-white" />
-            </div>
-            {comparisonStats?.revenueGrowth !== undefined && (
-              <div className={`flex items-center gap-1 text-sm font-semibold ${
-                comparisonStats.revenueGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'
-              }`}>
-                {comparisonStats.revenueGrowth >= 0 ? (
-                  <TrendingUp className="h-4 w-4" />
-                ) : (
-                  <AlertCircle className="h-4 w-4" />
-                )}
-                {comparisonStats.revenueGrowth > 0 ? '+' : ''}{comparisonStats.revenueGrowth}%
+    <div className="max-w-full">
+      {/* Top Row - Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-4 lg:mb-6">
+        {/* Total Sale */}
+        <div className="bg-white rounded-lg shadow-xl p-3 lg:p-6" style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <p className="text-xs lg:text-sm text-gray-600 mb-1 lg:mb-2">Total Sale</p>
+              <p className="text-lg lg:text-2xl font-semibold text-blue-600">
+                ${(comparisonStats?.currentRevenue || stats?.totalRevenue || 0).toFixed(0)}
+              </p>
+              <div className="flex items-center gap-1 mt-1 lg:mt-2">
+                <ArrowUpRight className="h-2.5 w-2.5 lg:h-3 lg:w-3 text-green-600" />
+                <span className="text-[10px] lg:text-xs text-green-600 font-medium">
+                  {comparisonStats?.revenueGrowth > 0 ? '+' : ''}{comparisonStats?.revenueGrowth || 0}% Last Week
+                </span>
               </div>
-            )}
-          </div>
-          <div className="text-3xl font-bold text-emerald-900 mb-1">
-            ${(comparisonStats?.currentRevenue || stats?.totalRevenue || 0).toFixed(2)}
-          </div>
-          <div className="text-sm font-medium text-emerald-700">Revenue ({dateRange}d)</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-blue-500 p-3 rounded-lg">
-              <ShoppingCart className="h-6 w-6 text-white" />
             </div>
-            <Activity className="h-5 w-5 text-blue-400" />
-          </div>
-          <div className="text-3xl font-bold text-blue-900 mb-1">
-            {stats?.totalOrders || 0}
-          </div>
-          <div className="text-sm font-medium text-blue-700">Total Orders</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-purple-500 p-3 rounded-lg">
-              <Package className="h-6 w-6 text-white" />
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gray-100 rounded-full flex items-center justify-center shrink-0 ml-2">
+              <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 text-green-600" />
             </div>
-            <Target className="h-5 w-5 text-purple-400" />
           </div>
-          <div className="text-3xl font-bold text-purple-900 mb-1">
-            {stats?.totalProducts || 0}
-          </div>
-          <div className="text-sm font-medium text-purple-700">Total Products</div>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-orange-500 p-3 rounded-lg">
-              <Clock className="h-6 w-6 text-white" />
+        {/* Visitors */}
+        <div className="bg-white rounded-lg shadow-xl p-3 lg:p-6" style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <p className="text-xs lg:text-sm text-gray-600 mb-1 lg:mb-2">Visitors</p>
+              <p className="text-lg lg:text-2xl font-semibold text-blue-600">
+                {visitors.toLocaleString()}
+              </p>
+              <div className="flex items-center gap-1 mt-1 lg:mt-2">
+                <ArrowUpRight className="h-2.5 w-2.5 lg:h-3 lg:w-3 text-green-600" />
+                <span className="text-[10px] lg:text-xs text-green-600 font-medium">
+                  {visitorGrowth > 0 ? '+' : ''}{visitorGrowth}% Last Week
+                </span>
+              </div>
             </div>
-            <AlertCircle className="h-5 w-5 text-orange-400" />
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gray-100 rounded-full flex items-center justify-center shrink-0 ml-2">
+              <Users className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
+            </div>
           </div>
-          <div className="text-3xl font-bold text-orange-900 mb-1">
-            {stats?.pendingOrders || 0}
-          </div>
-          <div className="text-sm font-medium text-orange-700">Pending Orders</div>
         </div>
-      </div>
 
-      {/* Growth Chart */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              Revenue Growth
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">Sales performance over the last {dateRange} days</p>
+        {/* New Orders */}
+        <div className="bg-white rounded-lg shadow-xl p-3 lg:p-6" style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <p className="text-xs lg:text-sm text-gray-600 mb-1 lg:mb-2">New Orders</p>
+              <p className="text-lg lg:text-2xl font-semibold text-blue-600">
+                {stats?.totalOrders || 0}
+              </p>
+              <div className="flex items-center gap-1 mt-1 lg:mt-2">
+                <ArrowUpRight className="h-2.5 w-2.5 lg:h-3 lg:w-3 text-green-600" />
+                <span className="text-[10px] lg:text-xs text-green-600 font-medium">
+                  {orderGrowth > 0 ? '+' : ''}{orderGrowth}% Last Week
+                </span>
+              </div>
+            </div>
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gray-100 rounded-full flex items-center justify-center shrink-0 ml-2">
+              <Package className="h-5 w-5 lg:h-6 lg:w-6 text-amber-700" />
+            </div>
           </div>
-          {comparisonStats && (
-            <div className="text-right">
-              <div className="text-sm text-gray-600">Growth Rate</div>
-              <div className={`text-2xl font-bold ${
-                comparisonStats.revenueGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'
-              }`}>
-                {comparisonStats.revenueGrowth >= 0 ? '+' : ''}{comparisonStats.revenueGrowth}%
+        </div>
+
+        {/* Customers */}
+        <div className="bg-white rounded-lg shadow-xl p-3 lg:p-6" style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <p className="text-xs lg:text-sm text-gray-600 mb-1 lg:mb-2">Customers</p>
+              <p className="text-lg lg:text-2xl font-semibold text-blue-600">
+                {customers.toLocaleString()}
+              </p>
+              <div className="flex items-center gap-1 mt-1 lg:mt-2">
+                <ArrowUpRight className="h-2.5 w-2.5 lg:h-3 lg:w-3 text-green-600" />
+                <span className="text-[10px] lg:text-xs text-green-600 font-medium">
+                  {customerGrowth > 0 ? '+' : ''}{customerGrowth}% Last Week
+                </span>
+              </div>
+            </div>
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gray-100 rounded-full flex items-center justify-center shrink-0 ml-2">
+              <Users className="h-5 w-5 lg:h-6 lg:w-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Middle Row - Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
+        {/* Revenue Chart */}
+        <div className="bg-white rounded-lg shadow-xl p-4 lg:p-6" style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="flex items-center justify-between mb-3 lg:mb-4">
+            <h3 className="text-sm lg:text-base font-semibold text-gray-900">Revenue</h3>
+            <select className="text-[10px] lg:text-xs border border-gray-300 rounded px-2 py-1">
+              <option>This Year</option>
+              <option>This Month</option>
+              <option>This Week</option>
+            </select>
+          </div>
+          <div className="mb-3 lg:mb-4">
+            <p className="text-base lg:text-lg font-bold text-yellow-600">
+              ${(stats?.totalRevenue || 0).toLocaleString()} All Time
+            </p>
+          </div>
+          {salesData.length === 0 ? (
+            <div className="h-40 lg:h-48 flex items-center justify-center text-gray-400">
+              <BarChart3 className="h-10 w-10 lg:h-12 lg:w-12" />
+            </div>
+          ) : (
+            <div className="h-48 lg:h-64 relative">
+              <svg className="w-full h-full" viewBox="0 0 500 250" preserveAspectRatio="xMidYMid meet">
+                {/* Y-axis labels */}
+                <text x="15" y="25" fontSize="11" fill="#6b7280" fontFamily="system-ui">100</text>
+                <text x="15" y="75" fontSize="11" fill="#6b7280" fontFamily="system-ui">50</text>
+                <text x="15" y="125" fontSize="11" fill="#6b7280" fontFamily="system-ui">25</text>
+                <text x="15" y="175" fontSize="11" fill="#6b7280" fontFamily="system-ui">10</text>
+                <text x="15" y="225" fontSize="11" fill="#6b7280" fontFamily="system-ui">0</text>
+                
+                {/* Y-axis grid lines */}
+                <line x1="40" y1="20" x2="40" y2="230" stroke="#e5e7eb" strokeWidth="1.5" />
+                <line x1="40" y1="70" x2="480" y2="70" stroke="#f3f4f6" strokeWidth="1" strokeDasharray="2,2" />
+                <line x1="40" y1="120" x2="480" y2="120" stroke="#f3f4f6" strokeWidth="1" strokeDasharray="2,2" />
+                <line x1="40" y1="170" x2="480" y2="170" stroke="#f3f4f6" strokeWidth="1" strokeDasharray="2,2" />
+                
+                {/* X-axis line */}
+                <line x1="40" y1="230" x2="480" y2="230" stroke="#e5e7eb" strokeWidth="1.5" />
+                
+                {/* Prepare data for line chart - use last 10 months or available data */}
+                {(() => {
+                  const chartData = salesData.length > 0 ? salesData.slice(-10) : [];
+                  if (chartData.length === 0) return null;
+                  
+                  const chartWidth = 440;
+                  const chartHeight = 210;
+                  const paddingLeft = 40;
+                  const paddingTop = 20;
+                  const paddingBottom = 20;
+                  const dataPoints = chartData.length;
+                  const pointSpacing = dataPoints > 1 ? chartWidth / (dataPoints - 1) : 0;
+                  
+                  // Normalize data to 0-100 scale
+                  const maxValue = Math.max(...chartData.map(d => d.revenue), 1);
+                  const incomePoints = chartData.map((d, i) => ({
+                    x: paddingLeft + (i * pointSpacing),
+                    y: paddingTop + chartHeight - (d.revenue / maxValue) * chartHeight
+                  }));
+                  
+                  // Expenses are estimated as 70% of income
+                  const expensePoints = chartData.map((d, i) => ({
+                    x: paddingLeft + (i * pointSpacing),
+                    y: paddingTop + chartHeight - ((d.revenue * 0.7) / maxValue) * chartHeight
+                  }));
+                  
+                  // Create smooth path for Income line
+                  const incomePath = incomePoints.map((point, i) => {
+                    if (i === 0) return `M ${point.x} ${point.y}`;
+                    const prevPoint = incomePoints[i - 1];
+                    const cp1x = prevPoint.x + (point.x - prevPoint.x) / 2;
+                    const cp1y = prevPoint.y;
+                    const cp2x = prevPoint.x + (point.x - prevPoint.x) / 2;
+                    const cp2y = point.y;
+                    return `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${point.x} ${point.y}`;
+                  }).join(' ');
+                  
+                  // Create smooth path for Expenses line
+                  const expensePath = expensePoints.map((point, i) => {
+                    if (i === 0) return `M ${point.x} ${point.y}`;
+                    const prevPoint = expensePoints[i - 1];
+                    const cp1x = prevPoint.x + (point.x - prevPoint.x) / 2;
+                    const cp1y = prevPoint.y;
+                    const cp2x = prevPoint.x + (point.x - prevPoint.x) / 2;
+                    const cp2y = point.y;
+                    return `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${point.x} ${point.y}`;
+                  }).join(' ');
+                  
+                  return (
+                    <>
+                      {/* Income line */}
+                      <path
+                        d={incomePath}
+                        fill="none"
+                        stroke="#3b82f6"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      {/* Expenses line */}
+                      <path
+                        d={expensePath}
+                        fill="none"
+                        stroke="#f97316"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      {/* Income points */}
+                      {incomePoints.map((point, i) => (
+                        <circle
+                          key={`income-${i}`}
+                          cx={point.x}
+                          cy={point.y}
+                          r="4"
+                          fill="#3b82f6"
+                          stroke="white"
+                          strokeWidth="1.5"
+                        />
+                      ))}
+                      {/* Expenses points */}
+                      {expensePoints.map((point, i) => (
+                        <circle
+                          key={`expense-${i}`}
+                          cx={point.x}
+                          cy={point.y}
+                          r="4"
+                          fill="#f97316"
+                          stroke="white"
+                          strokeWidth="1.5"
+                        />
+                      ))}
+                    </>
+                  );
+                })()}
+              </svg>
+              
+              {/* X-axis labels (months) */}
+              <div className="absolute bottom-1 lg:bottom-2 left-0 right-0 flex justify-between px-4 lg:px-10">
+                {salesData.length > 0 ? salesData.slice(-10).map((item, index) => (
+                  <span key={index} className="text-[9px] lg:text-xs text-gray-500 font-medium">
+                    {new Date(item.date).toLocaleDateString('en-US', { month: 'short' })}
+                  </span>
+                )) : (
+                  ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'].map((month, i) => (
+                    <span key={i} className="text-[9px] lg:text-xs text-gray-500 font-medium">{month}</span>
+                  ))
+                )}
+              </div>
+              
+              {/* Legend */}
+              <div className="absolute top-1 lg:top-2 right-1 lg:right-2 flex gap-2 lg:gap-4 text-[9px] lg:text-xs">
+                <div className="flex items-center gap-1 lg:gap-1.5">
+                  <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 bg-blue-600 rounded-full"></div>
+                  <span className="text-gray-700 font-medium">Income</span>
+                </div>
+                <div className="flex items-center gap-1 lg:gap-1.5">
+                  <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 bg-orange-500 rounded-full"></div>
+                  <span className="text-gray-700 font-medium">Expenses</span>
+                </div>
               </div>
             </div>
           )}
         </div>
-        {salesData.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <BarChart3 className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-            <p className="text-lg">No sales data available yet</p>
-            <p className="text-sm mt-2">Start selling to see your revenue growth!</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {salesData.map((item) => {
-              const percentage = (item.revenue / maxRevenue) * 100;
-              return (
-                <div key={item.date}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      {new Date(item.date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: dateRange > 30 ? 'numeric' : undefined
-                      })}
-                    </span>
-                    <span className="text-sm font-semibold text-gray-900">
-                      ${item.revenue.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 hover:from-blue-600 hover:to-blue-700"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
-      {/* Order Status Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Order Status Cards */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Activity className="h-5 w-5 text-gray-600" />
-            Order Status Breakdown
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <CheckCircle className="h-5 w-5 text-blue-500" />
-                <span className="text-sm font-medium text-gray-700">Confirmed</span>
+        {/* Email Sent Chart */}
+        <div className="bg-white rounded-lg shadow-xl p-4 lg:p-6" style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="flex items-center justify-between mb-3 lg:mb-4">
+            <h3 className="text-sm lg:text-base font-semibold text-gray-900">Email Sent</h3>
+            <select className="text-[10px] lg:text-xs border border-gray-300 rounded px-2 py-1">
+              <option>This Month</option>
+              <option>This Week</option>
+            </select>
+          </div>
+          <div className="flex items-center justify-center h-40 lg:h-48">
+            <div className="relative w-24 h-24 lg:w-32 lg:h-32">
+              {/* Donut chart representation */}
+              <svg className="transform -rotate-90" width="128" height="128">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  fill="none"
+                  stroke="#e5e7eb"
+                  strokeWidth="16"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="16"
+                  strokeDasharray={`${2 * Math.PI * 56 * 0.7} ${2 * Math.PI * 56}`}
+                  strokeDashoffset="0"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  fill="none"
+                  stroke="#f97316"
+                  strokeWidth="16"
+                  strokeDasharray={`${2 * Math.PI * 56 * 0.45} ${2 * Math.PI * 56}`}
+                  strokeDashoffset={`-${2 * Math.PI * 56 * 0.7}`}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-900">70%</p>
+                  <p className="text-xs text-gray-500">Sent</p>
+                </div>
               </div>
-              <span className="text-lg font-bold text-blue-600">{stats?.confirmedOrders || 0}</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <Truck className="h-5 w-5 text-purple-500" />
-                <span className="text-sm font-medium text-gray-700">Shipped</span>
               </div>
-              <span className="text-lg font-bold text-purple-600">{stats?.shippedOrders || 0}</span>
+          <div className="flex flex-col gap-1.5 lg:gap-2 mt-3 lg:mt-4">
+            <div className="flex items-center gap-1.5 lg:gap-2 text-[10px] lg:text-xs">
+              <div className="w-2.5 h-2.5 lg:w-3 lg:h-3 bg-blue-600 rounded-full"></div>
+              <span>70% Sent</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <span className="text-sm font-medium text-gray-700">Delivered</span>
-              </div>
-              <span className="text-lg font-bold text-green-600">{stats?.deliveredOrders || 0}</span>
+            <div className="flex items-center gap-1.5 lg:gap-2 text-[10px] lg:text-xs">
+              <div className="w-2.5 h-2.5 lg:w-3 lg:h-3 bg-orange-500 rounded-full"></div>
+              <span>45% Read</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-yellow-500" />
-                <span className="text-sm font-medium text-gray-700">Pending</span>
-              </div>
-              <span className="text-lg font-bold text-yellow-600">{stats?.pendingOrders || 0}</span>
+            <div className="flex items-center gap-1.5 lg:gap-2 text-[10px] lg:text-xs">
+              <div className="w-2.5 h-2.5 lg:w-3 lg:h-3 bg-gray-400 rounded-full"></div>
+              <span>45% Read</span>
             </div>
+          </div>
           </div>
         </div>
 
-        {/* Top Products */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Target className="h-5 w-5 text-gray-600" />
-            Top Selling Products
-          </h3>
-          {topProducts.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Package className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-              <p>No sales data available yet</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {topProducts.map((product, index) => {
-                const maxRevenue = Math.max(...topProducts.map(p => p.totalRevenue), 1);
-                const percentage = (product.totalRevenue / maxRevenue) * 100;
+      {/* Bottom Row - Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* Recent Orders Table */}
+        <div className="bg-white rounded-lg shadow-xl overflow-hidden" style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-sm lg:text-base font-semibold text-gray-900">Recent Orders</h3>
+            <select className="text-[10px] lg:text-xs border border-gray-300 rounded px-2 py-1">
+              <option>This Week</option>
+              <option>This Month</option>
+            </select>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-600 uppercase">Invoice</th>
+                  <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-600 uppercase">Customer</th>
+                  <th className="hidden sm:table-cell px-3 lg:px-6 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-600 uppercase">Purchase On</th>
+                  <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-600 uppercase">Amount</th>
+                  <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-600 uppercase">Status</th>
+                  <th className="hidden lg:table-cell px-3 lg:px-6 py-2 lg:py-3 text-left text-[10px] lg:text-xs font-medium text-gray-600 uppercase">Tracking</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="px-4 lg:px-6 py-6 lg:py-8 text-center text-xs lg:text-sm text-gray-500">
+                      No orders yet
+                    </td>
+                  </tr>
+                ) : (
+                  recentOrders.slice(0, 5).map((order) => (
+                    <tr key={order.id} className="hover:bg-gray-50">
+                      <td className="px-3 lg:px-6 py-2 lg:py-3 text-[10px] lg:text-xs text-gray-900">#{order.id.slice(0, 7)}</td>
+                      <td className="px-3 lg:px-6 py-2 lg:py-3 text-[10px] lg:text-xs text-gray-900">
+                        {order.customerName || order.shipping_address?.split(',')[0] || 'Customer'}
+                      </td>
+                      <td className="hidden sm:table-cell px-3 lg:px-6 py-2 lg:py-3 text-[10px] lg:text-xs text-gray-600">
+                        {new Date(order.created_at).toLocaleDateString('en-US', { 
+                          day: 'numeric', 
+                          month: 'short', 
+                          year: 'numeric' 
+                        })}
+                      </td>
+                      <td className="px-3 lg:px-6 py-2 lg:py-3 text-[10px] lg:text-xs font-medium text-gray-900">
+                        ${order.sellerRevenue.toFixed(0)}
+                      </td>
+                      <td className="px-3 lg:px-6 py-2 lg:py-3">
+                        <span className={`text-[10px] lg:text-xs font-medium ${
+                          order.status === 'delivered' ? 'text-green-600' :
+                          order.status === 'cancelled' ? 'text-red-600' :
+                          order.status === 'pending' ? 'text-orange-600' :
+                          'text-blue-600'
+                        }`}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="hidden lg:table-cell px-3 lg:px-6 py-2 lg:py-3 text-[10px] lg:text-xs text-gray-600 font-mono">
+                        {order.id.slice(0, 6).toUpperCase()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Delivery Progress */}
+        <div className="bg-white rounded-lg shadow-xl p-4 lg:p-6" style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="flex items-center justify-between mb-3 lg:mb-4">
+            <h3 className="text-sm lg:text-base font-semibold text-gray-900">Delivery</h3>
+            <select className="text-[10px] lg:text-xs border border-gray-300 rounded px-2 py-1">
+              <option>In Progress</option>
+              <option>Completed</option>
+            </select>
+          </div>
+          <div className="space-y-3 lg:space-y-4">
+            {topProducts.length > 0 ? (
+              topProducts.slice(0, 4).map((product, index) => {
+                // Calculate delivery progress based on order status
+                // For now, use a simple calculation: 100% if delivered, 50% if shipped, 25% if pending
+                const totalOrders = recentOrders.filter(o => 
+                  o.sellerItems?.some(item => item.productName === product.product.name)
+                ).length;
+                const deliveredOrders = recentOrders.filter(o => 
+                  o.status === 'delivered' && o.sellerItems?.some(item => item.productName === product.product.name)
+                ).length;
+                
+                // Calculate percentage based on delivery status
+                const percentage = totalOrders > 0 
+                  ? Math.round((deliveredOrders / totalOrders) * 100)
+                  : (index === 0 ? 65 : index === 1 ? 15 : index === 2 ? 25 : 50);
+                
+                const isFirst = index === 0;
                 return (
-                  <div key={product.product.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 flex-1">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">{product.product.name}</p>
-                          <p className="text-xs text-gray-500">{product.totalQuantity} sold</p>
-                        </div>
+                  <div key={product.product.id} className={`p-2.5 lg:p-3 rounded-lg ${isFirst ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}>
+                    <div className="flex items-center gap-2 lg:gap-3 mb-1.5 lg:mb-2">
+                      <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gray-200 rounded flex items-center justify-center shrink-0">
+                        <Package className="h-3 w-3 lg:h-4 lg:w-4 text-gray-600" />
                       </div>
-                      <span className="text-sm font-bold text-gray-900 ml-4">
-                        ${product.totalRevenue.toFixed(2)}
+                      <p className="text-xs lg:text-sm font-medium text-gray-900 flex-1 truncate">
+                        {product.product.name}
+                      </p>
+                      <span className={`text-[10px] lg:text-xs font-semibold shrink-0 ${isFirst ? 'text-blue-600' : 'text-orange-600'}`}>
+                        {percentage}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 lg:h-2 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full transition-all duration-300"
+                        className={`h-1.5 lg:h-2 rounded-full transition-all duration-500 ${isFirst ? 'bg-blue-600' : 'bg-orange-500'}`}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
                   </div>
                 );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Recent Orders */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5 text-gray-600" />
-            Recent Orders
-          </h3>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {recentOrders.length === 0 ? (
-            <div className="px-6 py-8 text-center">
-              <ShoppingCart className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">No orders yet</p>
-            </div>
-          ) : (
-            recentOrders.map((order) => (
-              <div key={order.id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon(order.status)}
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Order #{order.id.slice(0, 8)}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(order.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      ${order.sellerRevenue.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {order.sellerItems.length} item{order.sellerItems.length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                </div>
-                {order.sellerItems.length > 0 && (
-                  <div className="mt-2 ml-6">
-                    <p className="text-xs text-gray-500">
-                      {order.sellerItems.map(item => `${item.productName} (${item.quantity})`).join(', ')}
-                    </p>
+              })
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Package className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                <p className="text-xs text-gray-600">No delivery data available</p>
                   </div>
                 )}
               </div>
-            ))
-          )}
         </div>
       </div>
     </div>

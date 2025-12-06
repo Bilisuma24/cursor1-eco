@@ -122,22 +122,26 @@ const Orders = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Orders</h1>
-        <p className="text-gray-600 mt-1 text-sm sm:text-base">
-          Manage your orders and track their status ({filteredOrders.length} orders)
-        </p>
+      <div className="mb-6">
+        <div className="mb-4">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+            Orders
+          </h1>
+          <p className="text-sm text-gray-500">
+            Manage your orders and track their status ({filteredOrders.length} orders)
+          </p>
+        </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800">{error}</p>
+        <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl shadow-sm">
+          <p className="text-red-800 font-medium">{error}</p>
         </div>
       )}
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -146,17 +150,17 @@ const Orders = () => {
               placeholder="Search orders by ID or address..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             />
           </div>
         </div>
-        <div className="sm:w-48 w-full">
+        <div className="sm:w-40">
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               {statusOptions.map(option => (
                 <option key={option.value} value={option.value}>
@@ -170,12 +174,14 @@ const Orders = () => {
 
       {/* Orders List */}
       {filteredOrders.length === 0 ? (
-        <div className="text-center py-12">
-          <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <div className="text-center py-16">
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-8 inline-block mb-6">
+            <Package className="h-16 w-16 text-gray-400 mx-auto" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
             {searchTerm || statusFilter ? 'No orders found' : 'No orders yet'}
           </h3>
-          <p className="text-gray-600">
+          <p className="text-gray-600 max-w-md mx-auto">
             {searchTerm || statusFilter 
               ? 'Try adjusting your search or filter criteria'
               : 'Orders will appear here when customers purchase your products'
@@ -183,64 +189,64 @@ const Orders = () => {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {filteredOrders.map((order) => {
             const nextStatus = getNextStatus(order.status);
             
             return (
-              <div key={order.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-3">
+              <div key={order.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-4 hover:shadow-sm transition-shadow">
+                {/* Header */}
+                <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center space-x-2">
-                      {getStatusIcon(order.status)}
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                      <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded ${getStatusColor(order.status)}`}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
+                      <div>
+                        <h3 className="text-xs font-semibold text-gray-900">
+                          Order #{order.id.slice(0, 8)}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          {new Date(order.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <h3 className="text-base sm:text-lg font-medium text-gray-900">
-                        Order #{order.id.slice(0, 8)}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-gray-500">
-                        {new Date(order.created_at).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                    <div className="text-left sm:text-right">
+                      <p className="text-sm font-semibold text-gray-900">
+                        ${order.sellerRevenue.toFixed(2)}
                       </p>
+                      <p className="text-xs text-gray-500">Your Revenue</p>
                     </div>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p className="text-lg font-semibold text-gray-900">
-                      ${order.sellerRevenue.toFixed(2)}
-                    </p>
-                    <p className="text-sm text-gray-500">Your Revenue</p>
                   </div>
                 </div>
 
                 {/* Order Items */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">Your Products:</h4>
-                  <div className="space-y-2">
+                <div className="px-5 py-3">
+                  <h4 className="text-xs font-medium text-gray-900 mb-2">Your Products</h4>
+                  <div className="space-y-1.5">
                     {order.sellerItems.map((item, index) => (
-                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 px-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
+                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <div className="flex items-center space-x-2">
                           {item.productImage && (
                             <img
                               src={item.productImage}
                               alt={item.productName}
-                              className="w-10 h-10 rounded-lg object-cover"
+                              className="w-8 h-8 rounded object-cover"
                             />
                           )}
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{item.productName}</p>
+                            <p className="text-xs font-medium text-gray-900">{item.productName}</p>
                             <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                           </div>
                         </div>
-                        <div className="text-left sm:text-right">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="text-right">
+                          <p className="text-xs font-semibold text-gray-900">
                             ${item.total.toFixed(2)}
                           </p>
                           <p className="text-xs text-gray-500">
@@ -254,34 +260,34 @@ const Orders = () => {
 
                 {/* Shipping Address */}
                 {order.shipping_address && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Shipping Address:</h4>
-                    <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                  <div className="px-5 pb-3">
+                    <h4 className="text-xs font-medium text-gray-900 mb-1.5">Shipping Address:</h4>
+                    <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100">
                       {order.shipping_address}
                     </p>
                   </div>
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2 text-sm">
+                <div className="px-5 py-3 bg-gray-50 border-t border-gray-200">
+                  <div className="flex items-center justify-between gap-2">
                     <button
                       onClick={() => {/* TODO: Implement order details modal */}}
-                      className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
+                      className="flex items-center space-x-1.5 text-blue-600 hover:text-blue-700 text-xs px-3 py-1.5 rounded hover:bg-blue-50 transition-colors"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3.5 w-3.5" />
                       <span>View Details</span>
                     </button>
+                    
+                    {nextStatus && (
+                      <button
+                        onClick={() => handleStatusUpdate(order.id, nextStatus)}
+                        className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 transition-colors text-xs font-medium"
+                      >
+                        Mark as {nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}
+                      </button>
+                    )}
                   </div>
-                  
-                  {nextStatus && (
-                    <button
-                      onClick={() => handleStatusUpdate(order.id, nextStatus)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm w-full sm:w-auto"
-                    >
-                      Mark as {nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}
-                    </button>
-                  )}
                 </div>
               </div>
             );

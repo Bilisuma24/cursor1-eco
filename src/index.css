@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Product Card Glow Shadow - Responsive blur */
+.product-glow-shadow {
+  filter: blur(30px);
+}
+
+@media (min-width: 768px) {
+  .product-glow-shadow {
+    filter: blur(80px);
+  }
+}
+
 /* MOBILE-FIRST: Foundation styles */
 html, body {
   overflow-x: hidden;

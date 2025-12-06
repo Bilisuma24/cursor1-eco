@@ -15,6 +15,7 @@ export default function Shop() {
   const [sortBy, setSortBy] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [networkError, setNetworkError] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -62,6 +63,18 @@ export default function Shop() {
         console.error('Error message:', dbError.message);
         console.error('Error details:', JSON.stringify(dbError, null, 2));
         
+        // Check if it's a network error
+        if (dbError.message?.includes('Failed to fetch') || 
+            dbError.message?.includes('ERR_INTERNET_DISCONNECTED') ||
+            dbError.message?.includes('ERR_NAME_NOT_RESOLVED') ||
+            dbError.message?.includes('NetworkError') ||
+            dbError.code === 'PGRST116') {
+          console.error('🌐🌐🌐 NETWORK ERROR - Cannot fetch seller products! 🌐🌐🌐');
+          console.error('Seller products are stored in Supabase but cannot be loaded due to network issues.');
+          console.error('The app will show static products only until connection is restored.');
+          setNetworkError(true);
+        }
+        
         // Check if it's a permissions/RLS issue
         if (dbError.code === '42501' || dbError.code === 'PGRST301' || 
             dbError.message?.includes('permission') || 
@@ -90,16 +103,40 @@ CREATE POLICY "public_read_products"
           console.log('Products breakdown:');
           const sellerProducts = dbProducts.filter(p => p.seller_id);
           const adminProducts = dbProducts.filter(p => !p.seller_id);
-          console.log(`  - Seller products: ${sellerProducts.length}`);
-          console.log(`  - Admin/Other products: ${adminProducts.length}`);
+          console.log(`  - Seller products (with seller_id): ${sellerProducts.length}`);
+          console.log(`  - Admin/Other products (no seller_id): ${adminProducts.length}`);
           
           if (sellerProducts.length > 0) {
-            console.log('Sample seller product:', {
+            console.log('✅ Sample seller product:', {
               id: sellerProducts[0].id,
               name: sellerProducts[0].name,
               price: sellerProducts[0].price,
-              seller_id: sellerProducts[0].seller_id
+              seller_id: sellerProducts[0].seller_id,
+              images: sellerProducts[0].images?.length || 0
             });
+            console.log('✅ ALL SELLER PRODUCTS:', sellerProducts.map(p => ({
+              id: p.id,
+              name: p.name,
+              seller_id: p.seller_id,
+              price: p.price
+            })));
+          } else {
+            console.error('❌❌❌ CRITICAL: No products with seller_id found! ❌❌❌');
+            console.error('This means either:');
+            console.error('  1. No seller has posted products yet');
+            console.error('  2. Products were created without seller_id');
+            console.error('  3. seller_id column might not exist in database');
+            console.error('  4. RLS policy is filtering out products with seller_id');
+            console.error('All fetched products (first 10):', dbProducts.slice(0, 10).map(p => ({ 
+              id: p.id, 
+              name: p.name, 
+              has_seller_id: !!p.seller_id,
+              seller_id: p.seller_id,
+              created_at: p.created_at
+            })));
+            if (dbProducts.length > 10) {
+              console.error(`... and ${dbProducts.length - 10} more products`);
+            }
           }
         } else {
           console.warn('⚠️ Query succeeded but returned 0 products.');
@@ -107,6 +144,7 @@ CREATE POLICY "public_read_products"
           console.warn('  1. No products in database');
           console.warn('  2. RLS policy is filtering them out');
           console.warn('  3. All products are being blocked');
+          console.warn('  4. Check Supabase dashboard to verify products exist');
         }
       }
 
@@ -253,10 +291,31 @@ CREATE POLICY "public_read_products"
         sizes: product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : null,
         gender: product.gender || null,
         isFromDatabase: true, // Flag to identify database products
+        seller_id: product.seller_id || null, // Preserve seller_id to identify seller products
+        isSellerProduct: !!product.seller_id, // Explicit flag for seller products
       };
       });
 
       console.log(`✅ Transformed ${transformedDbProducts.length} database products`);
+      
+      // Detailed logging for seller products
+      const sellerProductsInTransformed = transformedDbProducts.filter(p => p.seller_id || p.isSellerProduct);
+      console.log(`🔍 DETAILED SELLER PRODUCT CHECK:`);
+      console.log(`   - Total transformed products: ${transformedDbProducts.length}`);
+      console.log(`   - Products with seller_id: ${sellerProductsInTransformed.length}`);
+      if (sellerProductsInTransformed.length > 0) {
+        console.log(`   - Seller product IDs:`, sellerProductsInTransformed.map(p => ({ id: p.id, name: p.name, seller_id: p.seller_id })));
+      } else {
+        console.warn(`   ⚠️ NO SELLER PRODUCTS FOUND IN TRANSFORMED PRODUCTS!`);
+        console.warn(`   - All transformed products:`, transformedDbProducts.map(p => ({ 
+          id: p.id, 
+          name: p.name, 
+          has_seller_id: !!p.seller_id,
+          seller_id: p.seller_id,
+          isSellerProduct: p.isSellerProduct,
+          isFromDatabase: p.isFromDatabase
+        })));
+      }
 
       // Combine database products with static products
       // Database products will take precedence (avoid duplicates by ID)
@@ -274,25 +333,54 @@ CREATE POLICY "public_read_products"
         return acc;
       }, []);
 
-      const sellerProductCount = transformedDbProducts.length;
+      const sellerProductCount = transformedDbProducts.filter(p => p.seller_id || p.isSellerProduct).length;
       const totalCount = uniqueProducts.length;
       
       console.log(`📊 Product Summary:`);
-      console.log(`   - Seller/Database products: ${sellerProductCount}`);
+      console.log(`   - Seller/Database products (total): ${transformedDbProducts.length}`);
+      console.log(`   - Seller products (with seller_id): ${sellerProductCount}`);
       console.log(`   - Static products: ${staticProducts.length}`);
       console.log(`   - Total unique products: ${totalCount}`);
+      
+      // Final check - verify seller products are in the final list
+      const finalSellerProducts = uniqueProducts.filter(p => p.seller_id || p.isSellerProduct);
+      console.log(`🔍 FINAL CHECK - Seller products in display list: ${finalSellerProducts.length}`);
+      if (finalSellerProducts.length > 0) {
+        console.log(`✅ Seller products will be displayed:`, finalSellerProducts.map(p => ({ id: p.id, name: p.name })));
+      } else {
+        console.error(`❌❌❌ NO SELLER PRODUCTS IN FINAL DISPLAY LIST! ❌❌❌`);
+        console.error(`This means seller products are being filtered out or not included.`);
+      }
       
       if (sellerProductCount === 0 && dbProducts && dbProducts.length === 0) {
         console.warn('⚠️ No products found in database. Products may be blocked by RLS policies.');
       } else if (dbError && dbError.code === '42501') {
         console.error('🚫 RLS POLICY ERROR: Products are blocked from public viewing!');
         console.error('   Run the SQL fix in fix-shop-product-visibility.sql');
+      } else if (sellerProductCount === 0 && dbProducts && dbProducts.length > 0) {
+        console.error('❌❌❌ CRITICAL: Products fetched but NONE have seller_id! ❌❌❌');
+        console.error('This means products in database were created without seller_id.');
+        console.error('All fetched products:', dbProducts.map(p => ({ 
+          id: p.id, 
+          name: p.name, 
+          seller_id: p.seller_id,
+          has_seller_id: !!p.seller_id 
+        })));
       }
 
       setProducts(uniqueProducts);
       setFilteredProducts(uniqueProducts);
+      setNetworkError(false); // Clear network error on success
     } catch (error) {
       console.error('Error fetching products:', error);
+      // Check if it's a network error
+      if (error?.message?.includes('Failed to fetch') || 
+          error?.message?.includes('ERR_INTERNET_DISCONNECTED') ||
+          error?.name === 'TypeError' ||
+          error?.name === 'NetworkError') {
+        setNetworkError(true);
+        console.error('🌐 Network error: Seller products cannot be loaded');
+      }
       // Fallback to static products on error
       setProducts(productsData.products);
       setFilteredProducts(productsData.products);
@@ -384,6 +472,11 @@ CREATE POLICY "public_read_products"
     // Apply express shipping filter
     if (filters.express) {
       filtered = filtered.filter(product => product.shipping?.express);
+    }
+
+    // Apply seller products filter
+    if (filters.sellerOnly) {
+      filtered = filtered.filter(product => product.isSellerProduct === true || (product.isFromDatabase && product.seller_id));
     }
 
     // Apply sorting
@@ -509,6 +602,27 @@ CREATE POLICY "public_read_products"
           {/* Right Panel - Product Grid */}
           <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-3 pb-20">
+              {/* Network Error Banner - Mobile */}
+              {networkError && (
+                <div className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <span className="text-red-600 text-lg">⚠️</span>
+                    <div className="flex-1">
+                      <h3 className="text-red-900 font-semibold text-sm mb-1">No Internet Connection</h3>
+                      <p className="text-red-800 text-xs mb-2">
+                        Seller products require internet. Showing static products only.
+                      </p>
+                      <button
+                        onClick={fetchProducts}
+                        className="text-xs text-red-700 hover:text-red-900 underline font-medium"
+                      >
+                        Retry Connection
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <h2 className="text-sm font-semibold text-gray-900 mb-3">Recommended</h2>
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-8">
@@ -516,24 +630,9 @@ CREATE POLICY "public_read_products"
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2 p-2">
                     {filteredProducts.map((product) => (
-                      <Link
-                        key={product.id}
-                        to={`/product/${product.id}`}
-                        className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-orange-500 transition-colors"
-                      >
-                        <div className="aspect-square bg-gray-50">
-                          <img
-                            src={product.images?.[0] || product.image_url || 'https://via.placeholder.com/150'}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="p-2">
-                          <p className="text-xs text-gray-900 line-clamp-2 min-h-[32px]">{product.name}</p>
-                        </div>
-                      </Link>
+                      <ProductCard key={product.id} product={product} />
                     ))}
                   </div>
                   {/* Category Button at Bottom */}
@@ -576,24 +675,121 @@ CREATE POLICY "public_read_products"
         />
 
         <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Network Error Banner - Prominent */}
+          {networkError && (
+            <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-red-600 text-xl">⚠️</span>
+                <div className="flex-1">
+                  <h3 className="text-red-900 font-semibold mb-1">No Internet Connection</h3>
+                  <p className="text-red-800 text-sm mb-2">
+                    Seller products are stored in Supabase and require an internet connection to load.
+                    Currently showing static products only.
+                  </p>
+                  <button
+                    onClick={fetchProducts}
+                    className="text-sm text-red-700 hover:text-red-900 underline font-medium"
+                  >
+                    Retry Connection
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Results Header - Desktop Optimized */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {searchTerm ? `Search results for "${searchTerm}"` : 'All Products'}
               </h1>
-              <p className="text-base text-gray-600">
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-                {products.some(p => p.isFromDatabase) && (
-                  <span className="ml-2 text-sm text-green-600">
-                    ({products.filter(p => p.isFromDatabase).length} from sellers)
-                  </span>
-                )}
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-base text-gray-600">
+                  {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+                  {!networkError && products.some(p => p.isSellerProduct || (p.isFromDatabase && p.seller_id)) && (
+                    <span className="ml-2 text-sm text-green-600 font-semibold">
+                      ({products.filter(p => p.isSellerProduct || (p.isFromDatabase && p.seller_id)).length} from sellers)
+                    </span>
+                  )}
+                  {networkError && (
+                    <span className="ml-2 text-sm text-red-600 font-semibold">
+                      (Offline - Seller products unavailable)
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
 
             {/* Sort and View Controls - Desktop */}
             <div className="flex items-center gap-4">
+              {/* Diagnostic Button - Always show for debugging */}
+              <button
+                onClick={async () => {
+                  console.log('🔍 DIAGNOSTIC: Checking database for seller products...');
+                  try {
+                    const { data: allProducts, error } = await supabase
+                      .from('product')
+                      .select('*')
+                      .order('created_at', { ascending: false });
+                    
+                    if (error) {
+                      console.error('❌ Diagnostic error:', error);
+                      alert(`Error: ${error.message}`);
+                      return;
+                    }
+                    
+                    const sellerProducts = allProducts?.filter(p => p.seller_id) || [];
+                    const allProductsCount = allProducts?.length || 0;
+                    
+                    console.log('📊 DIAGNOSTIC RESULTS:');
+                    console.log(`   - Total products in database: ${allProductsCount}`);
+                    console.log(`   - Products with seller_id: ${sellerProducts.length}`);
+                    console.log(`   - Products in current state: ${products.length}`);
+                    console.log(`   - Seller products in current state: ${products.filter(p => p.seller_id || p.isSellerProduct).length}`);
+                    
+                    if (sellerProducts.length > 0) {
+                      console.log('✅ Seller products found in database:', sellerProducts.map(p => ({ 
+                        id: p.id, 
+                        name: p.name, 
+                        seller_id: p.seller_id 
+                      })));
+                      alert(`✅ Found ${sellerProducts.length} seller products in database!\n\nCheck console for details.`);
+                    } else {
+                      console.warn('⚠️ No seller products in database!');
+                      alert(`⚠️ No seller products found in database.\n\nTotal products: ${allProductsCount}\n\nCheck console for details.`);
+                    }
+                  } catch (err) {
+                    console.error('Diagnostic failed:', err);
+                    alert(`Error: ${err.message}`);
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200"
+                title="Check database for seller products"
+              >
+                <span>🔍</span>
+                <span>Check DB</span>
+              </button>
+              
+              {/* Seller Products Filter Toggle */}
+              {products.some(p => p.isSellerProduct || (p.isFromDatabase && p.seller_id)) && (
+                <button
+                  onClick={() => setFilters(prev => ({ ...prev, sellerOnly: !prev.sellerOnly }))}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    filters.sellerOnly
+                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <span>🏪</span>
+                  <span>Seller Products</span>
+                  {filters.sellerOnly && (
+                    <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                      {products.filter(p => p.isSellerProduct || (p.isFromDatabase && p.seller_id)).length}
+                    </span>
+                  )}
+                </button>
+              )}
+              
               <div className="flex items-center space-x-2">
                 <SortAsc className="w-5 h-5 text-gray-500" />
                 <select
@@ -673,9 +869,9 @@ CREATE POLICY "public_read_products"
           ) : (
             <div className={
               viewMode === 'grid'
-                ? 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                ? 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 lg:gap-8 p-2 md:p-4'
                 : 'space-y-4'
-            }>
+            } style={{ overflow: 'visible' }}>
               {filteredProducts.map((product) => (
                 <ProductCard
                   key={product.id}

@@ -365,8 +365,8 @@ const Settings = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Store Information</h2>
-          <p className="text-gray-600 mt-1">Manage your store details and branding</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Store Information</h2>
+          <p className="text-gray-600 text-sm">Manage your store details and branding</p>
         </div>
         {!isEditingStore && (
           <button
@@ -514,8 +514,8 @@ const Settings = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Account Settings</h2>
-          <p className="text-gray-600 mt-1">Manage your personal information</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Settings</h2>
+          <p className="text-gray-600 text-sm">Manage your personal information</p>
         </div>
         {!isEditingProfile && (
           <button
@@ -1099,115 +1099,123 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Seller Settings</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage your store and account preferences</p>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="mb-4">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+            Settings
+          </h1>
+          <p className="text-sm text-gray-500">Manage your store and account preferences</p>
+        </div>
+      </div>
 
-          {/* Messages */}
+      {/* Messages */}
+      {(error || success) && (
+        <div className="space-y-3">
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
-              {error}
+            <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-xl shadow-lg">
+              <p className="font-semibold">{error}</p>
             </div>
           )}
           {success && (
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg">
-              {success}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 text-green-800 px-6 py-4 rounded-xl shadow-lg">
+              <p className="font-semibold">{success}</p>
             </div>
           )}
+        </div>
+      )}
 
-          {/* Tabs */}
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex space-x-8">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition ${
-                      activeTab === tab.id
-                        ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+      {/* Tabs */}
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
+        <nav className="flex space-x-1 overflow-x-auto px-5 border-b border-gray-200" aria-label="Tabs">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 py-3 px-4 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
 
-          {/* Tab Content */}
-          <div>
-            {activeTab === 'store' && renderStoreSettings()}
-            {activeTab === 'account' && renderAccountSettings()}
-            {activeTab === 'appearance' && renderAppearanceSettings()}
-            {activeTab === 'notifications' && renderNotifications()}
-            {activeTab === 'payment' && renderPayment()}
-            {activeTab === 'security' && renderSecurity()}
-          </div>
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === 'store' && renderStoreSettings()}
+          {activeTab === 'account' && renderAccountSettings()}
+          {activeTab === 'appearance' && renderAppearanceSettings()}
+          {activeTab === 'notifications' && renderNotifications()}
+          {activeTab === 'payment' && renderPayment()}
+          {activeTab === 'security' && renderSecurity()}
+        </div>
+      </div>
 
-          {/* Messages */}
+      {/* Messages */}
+      {(successMessage || errorMessage) && (
+        <div className="space-y-3">
           {successMessage && (
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg mt-6">
-              {successMessage}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 text-green-800 px-6 py-4 rounded-xl shadow-lg">
+              <p className="font-semibold">{successMessage}</p>
             </div>
           )}
           {errorMessage && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mt-6">
-              {errorMessage}
+            <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-xl shadow-lg">
+              <p className="font-semibold">{errorMessage}</p>
             </div>
           )}
+        </div>
+      )}
 
-          {/* Action Buttons */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
-            <div className="flex gap-2">
-              <button
-                onClick={handleExportSettings}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export</span>
-              </button>
-              
-              <label className="flex items-center space-x-2 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 cursor-pointer">
-                <Upload className="w-4 h-4" />
-                <span>Import</span>
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImportSettings}
-                  className="hidden"
-                />
-              </label>
-              
-              <button
-                onClick={handleResetSettings}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Reset</span>
-              </button>
-            </div>
-            
-            <div className="flex gap-2">
-              {isEditing && (
-                <button
-                  onClick={saveSettings}
-                  className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>Save Changes</span>
-                </button>
-              )}
-            </div>
-          </div>
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-6">
+        <div className="flex gap-3">
+          <button
+            onClick={handleExportSettings}
+            className="flex items-center space-x-2 px-5 py-2.5 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold text-sm shadow-sm hover:shadow-md"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export</span>
+          </button>
+          
+          <label className="flex items-center space-x-2 px-5 py-2.5 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold text-sm shadow-sm hover:shadow-md cursor-pointer">
+            <Upload className="w-4 h-4" />
+            <span>Import</span>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportSettings}
+              className="hidden"
+            />
+          </label>
+          
+          <button
+            onClick={handleResetSettings}
+            className="flex items-center space-x-2 px-5 py-2.5 text-red-700 bg-red-50 rounded-xl hover:bg-red-100 transition-all duration-200 font-semibold text-sm shadow-sm hover:shadow-md"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Reset</span>
+          </button>
+        </div>
+        
+        <div className="flex gap-2">
+          {isEditing && (
+            <button
+              onClick={saveSettings}
+              className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white px-6 py-2.5 rounded-xl hover:from-blue-700 hover:via-blue-600 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 font-semibold text-sm transform hover:scale-[1.02]"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save Changes</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

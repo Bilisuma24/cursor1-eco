@@ -4,6 +4,201 @@ import { Heart, ShoppingCart, Trash2, Eye, CheckCircle, ArrowUpDown, ArrowDown, 
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { useImageColors } from "../hooks/useImageColors";
+
+// Wishlist Card Component with Glow Effect
+function WishlistCard({ product, handleRemove, handleMoveToCart, removingId, pushToast, formatPrice, formatDate }) {
+  const imageUrl = product.images?.[0] || '';
+  const { colors } = useImageColors(imageUrl, 2);
+  const glowColors = useMemo(() => {
+    if (colors && colors.length >= 2 && colors[0] !== 'rgb(200, 200, 200)') {
+      return {
+        primary: colors[0] || 'rgb(255, 200, 200)',
+        secondary: colors[1] || 'rgb(255, 220, 220)',
+      };
+    }
+    return {
+      primary: 'rgb(255, 200, 200)',
+      secondary: 'rgb(255, 220, 220)',
+    };
+  }, [colors]);
+
+  return (
+    <div className="relative group" style={{ overflow: 'visible', isolation: 'isolate' }}>
+      {/* Adaptive Glow Shadow - Subtle on mobile */}
+      <div 
+        className="absolute -inset-2 sm:-inset-4 -z-10 opacity-[0.25] sm:opacity-[0.5] group-hover:opacity-[0.35] sm:group-hover:opacity-[0.7] transition-opacity duration-300 rounded-md sm:rounded-xl product-glow-shadow"
+        style={{
+          background: `radial-gradient(ellipse 90% 70% at 50% 50%, ${glowColors.primary} 0%, ${glowColors.secondary} 40%, transparent 75%)`,
+          pointerEvents: 'none',
+          willChange: 'opacity',
+        }}
+      />
+      <div className="bg-white dark:bg-gray-800 rounded-md sm:rounded-xl shadow-sm sm:shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden group/card flex flex-col h-full relative z-[1]">
+        {/* Image Container - Smaller on mobile */}
+        <div className="relative aspect-square overflow-hidden bg-gray-50 flex-shrink-0 max-h-[140px] sm:max-h-none border border-gray-100 bg-white rounded">
+          <img
+            src={product.images?.[0] || `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              const currentSrc = e.target.src || '';
+              if (!currentSrc.includes('data:image/svg')) {
+                const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">Image Error</text></svg>`)}`;
+                e.target.src = svgPlaceholder;
+              } else {
+                e.target.style.display = 'none';
+              }
+            }}
+          />
+          
+          {/* Discount Badge */}
+          {product.discount && (
+            <div className="absolute top-1 left-1 sm:top-3 sm:left-3 bg-red-500 text-white text-[9px] sm:text-xs font-bold px-1 sm:px-2 py-0.5 sm:py-1 rounded shadow-lg">
+              -{product.discount}%
+            </div>
+          )}
+
+          {/* Remove from Wishlist Button */}
+          <button
+            onClick={() => handleRemove(product.id, product.name)}
+            disabled={removingId === product.id}
+            className="absolute top-1 right-1 sm:top-3 sm:right-3 p-1 sm:p-1.5 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed z-10 min-w-[24px] min-h-[24px] sm:min-w-[32px] sm:min-h-[32px] flex items-center justify-center"
+            title="Remove from wishlist"
+          >
+            {removingId === product.id ? (
+              <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+            ) : (
+              <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+            )}
+          </button>
+
+          {/* Quick Actions - Hidden on mobile, shown on hover for desktop */}
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden sm:flex">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Link
+                to={`/product/${product.id}`}
+                className="bg-white text-gray-800 px-3 sm:px-4 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors duration-200 flex items-center space-x-2 text-xs sm:text-sm"
+              >
+                <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>View</span>
+              </Link>
+              <button
+                onClick={() => handleMoveToCart(product)}
+                className="bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white px-3 sm:px-4 py-2 rounded-full font-medium transition-all duration-200 flex items-center space-x-2 text-xs sm:text-sm shadow-md"
+              >
+                <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Add to Cart</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Product Info - Flex grow to push actions to bottom */}
+        <div className="p-2 sm:p-3 flex flex-col flex-grow">
+          <h3 className="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:mb-1.5 line-clamp-2 hover:text-blue-600 transition-colors duration-200 min-h-[1.75rem] sm:min-h-[2.5rem] leading-tight">
+            {product.name}
+          </h3>
+
+          {/* Price - Prominent on mobile */}
+          <div className="flex flex-wrap items-baseline gap-0.5 sm:gap-2 mb-1 sm:mb-1.5">
+            <span className="text-xs sm:text-lg font-bold text-red-600 dark:text-red-400">
+              {formatPrice(product.price)}
+            </span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-[9px] sm:text-sm text-gray-500 dark:text-gray-400 line-through">
+                {formatPrice(product.originalPrice)}
+              </span>
+            )}
+          </div>
+
+          {/* Date Added & Availability - Single line on mobile */}
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5 flex-wrap">
+            <div className="flex items-center gap-0.5 text-[8px] sm:text-xs text-gray-500 dark:text-gray-400">
+              <Calendar className="w-2 h-2 sm:w-3 sm:h-3 flex-shrink-0" />
+              <span className="truncate">{formatDate(product.addedAt || product.created_at)}</span>
+            </div>
+            {product.stock !== undefined && (
+              <div className={`flex items-center gap-0.5 text-[8px] sm:text-xs ${
+                product.stock > 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                <AlertCircle className="w-2 h-2 sm:w-3 sm:h-3 flex-shrink-0" />
+                <span>{product.stock > 0 ? 'In Stock' : 'Out'}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Rating - Compact, hidden on very small mobile */}
+          {product.rating && (
+            <div className="hidden xs:flex items-center space-x-0.5 mb-1 sm:mb-2">
+              {Array.from({ length: 5 }, (_, i) => (
+                <span
+                  key={i}
+                  className={`text-[8px] sm:text-xs ${
+                    i < Math.floor(product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'
+                  }`}
+                >
+                  ★
+                </span>
+              ))}
+              {product.reviewCount && (
+                <span className="text-[8px] sm:text-xs text-gray-500 ml-0.5">({product.reviewCount > 999 ? '999+' : product.reviewCount.toLocaleString()})</span>
+              )}
+            </div>
+          )}
+
+          {/* Seller Info - Hidden on mobile to save space */}
+          {product.seller && (
+            <div className="hidden sm:block text-xs text-gray-600 dark:text-gray-400 mb-1.5 sm:mb-2 truncate">
+              by {product.seller.name}
+            </div>
+          )}
+
+          {/* Actions - Push to bottom */}
+          <div className="flex flex-col gap-1 sm:gap-1.5 mt-auto pt-1.5">
+            {/* Primary Action - Full width on mobile, smaller */}
+            <button
+              onClick={() => handleMoveToCart(product)}
+              disabled={product.stock === 0}
+              className="w-full bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white py-2 sm:py-2.5 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all duration-200 font-medium text-[10px] sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[32px] sm:min-h-[40px] flex items-center justify-center shadow-md hover:shadow-lg"
+            >
+              <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+              <span className="truncate">Add to Cart</span>
+            </button>
+            
+            {/* Secondary Actions - Row on mobile, better spacing */}
+            <div className="flex gap-1 sm:gap-1.5">
+              <Link
+                to={`/product/${product.id}`}
+                className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-md sm:rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 text-center font-medium text-[9px] sm:text-xs min-h-[28px] sm:min-h-[36px] flex items-center justify-center"
+              >
+                View
+              </Link>
+              <button
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: product.name,
+                      text: `Check out ${product.name} on my wishlist!`,
+                      url: `${window.location.origin}/product/${product.id}`
+                    }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(`${window.location.origin}/product/${product.id}`);
+                    pushToast({ type: 'success', title: 'Link copied', message: 'Product link copied to clipboard' });
+                  }
+                }}
+                className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-md sm:rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 text-[9px] sm:text-xs font-medium flex items-center justify-center gap-0.5 sm:gap-1 min-h-[28px] sm:min-h-[36px]"
+              >
+                <Share2 className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Wishlist() {
   const { wishlist, removeFromWishlist, addToCart } = useCart();
@@ -313,170 +508,18 @@ export default function Wishlist() {
         </div>
 
         {/* RESPONSIVE: 2 columns on mobile */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 sm:gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 sm:gap-4 lg:gap-6 p-2">
           {sortedWishlist.map((product) => (
-            <div key={product.id} className="bg-white dark:bg-gray-800 rounded-md sm:rounded-xl shadow-sm sm:shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden group flex flex-col h-full">
-              {/* Image Container - Smaller on mobile */}
-              <div className="relative aspect-square overflow-hidden bg-gray-50 flex-shrink-0 max-h-[140px] sm:max-h-none border border-gray-100 bg-white rounded">
-                <img
-                  src={product.images?.[0] || `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    const currentSrc = e.target.src || '';
-                    if (!currentSrc.includes('data:image/svg')) {
-                      const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">Image Error</text></svg>`)}`;
-                      e.target.src = svgPlaceholder;
-                    } else {
-                      e.target.style.display = 'none';
-                    }
-                  }}
-                />
-                
-                {/* Discount Badge */}
-                {product.discount && (
-                  <div className="absolute top-1 left-1 sm:top-3 sm:left-3 bg-red-500 text-white text-[9px] sm:text-xs font-bold px-1 sm:px-2 py-0.5 sm:py-1 rounded shadow-lg">
-                    -{product.discount}%
-                  </div>
-                )}
-
-                {/* Remove from Wishlist Button */}
-                <button
-                  onClick={() => handleRemove(product.id, product.name)}
-                  disabled={removingId === product.id}
-                  className="absolute top-1 right-1 sm:top-3 sm:right-3 p-1 sm:p-1.5 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed z-10 min-w-[24px] min-h-[24px] sm:min-w-[32px] sm:min-h-[32px] flex items-center justify-center"
-                  title="Remove from wishlist"
-                >
-                  {removingId === product.id ? (
-                    <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                  ) : (
-                    <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
-                  )}
-                </button>
-
-                {/* Quick Actions - Hidden on mobile, shown on hover for desktop */}
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden sm:flex">
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Link
-                      to={`/product/${product.id}`}
-                      className="bg-white text-gray-800 px-3 sm:px-4 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors duration-200 flex items-center space-x-2 text-xs sm:text-sm"
-                    >
-                      <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      <span>View</span>
-                    </Link>
-                    <button
-                      onClick={() => handleMoveToCart(product)}
-                      className="bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white px-3 sm:px-4 py-2 rounded-full font-medium transition-all duration-200 flex items-center space-x-2 text-xs sm:text-sm shadow-md"
-                    >
-                      <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      <span>Add to Cart</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Product Info - Flex grow to push actions to bottom */}
-              <div className="p-2 sm:p-3 flex flex-col flex-grow">
-                <h3 className="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:mb-1.5 line-clamp-2 hover:text-blue-600 transition-colors duration-200 min-h-[1.75rem] sm:min-h-[2.5rem] leading-tight">
-                  {product.name}
-                </h3>
-
-                {/* Price - Prominent on mobile */}
-                <div className="flex flex-wrap items-baseline gap-0.5 sm:gap-2 mb-1 sm:mb-1.5">
-                  <span className="text-xs sm:text-lg font-bold text-red-600 dark:text-red-400">
-                    {formatPrice(product.price)}
-                  </span>
-                  {product.originalPrice && product.originalPrice > product.price && (
-                    <span className="text-[9px] sm:text-sm text-gray-500 dark:text-gray-400 line-through">
-                      {formatPrice(product.originalPrice)}
-                    </span>
-                  )}
-                </div>
-
-                {/* Date Added & Availability - Single line on mobile */}
-                <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5 flex-wrap">
-                  <div className="flex items-center gap-0.5 text-[8px] sm:text-xs text-gray-500 dark:text-gray-400">
-                    <Calendar className="w-2 h-2 sm:w-3 sm:h-3 flex-shrink-0" />
-                    <span className="truncate">{formatDate(product.addedAt || product.created_at)}</span>
-                  </div>
-                  {product.stock !== undefined && (
-                    <div className={`flex items-center gap-0.5 text-[8px] sm:text-xs ${
-                      product.stock > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      <AlertCircle className="w-2 h-2 sm:w-3 sm:h-3 flex-shrink-0" />
-                      <span>{product.stock > 0 ? 'In Stock' : 'Out'}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Rating - Compact, hidden on very small mobile */}
-                {product.rating && (
-                  <div className="hidden xs:flex items-center space-x-0.5 mb-1 sm:mb-2">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <span
-                        key={i}
-                        className={`text-[8px] sm:text-xs ${
-                          i < Math.floor(product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'
-                        }`}
-                      >
-                        ★
-                      </span>
-                    ))}
-                    {product.reviewCount && (
-                      <span className="text-[8px] sm:text-xs text-gray-500 ml-0.5">({product.reviewCount > 999 ? '999+' : product.reviewCount.toLocaleString()})</span>
-                    )}
-                  </div>
-                )}
-
-                {/* Seller Info - Hidden on mobile to save space */}
-                {product.seller && (
-                  <div className="hidden sm:block text-xs text-gray-600 dark:text-gray-400 mb-1.5 sm:mb-2 truncate">
-                    by {product.seller.name}
-                  </div>
-                )}
-
-                {/* Actions - Push to bottom */}
-                <div className="flex flex-col gap-1 sm:gap-1.5 mt-auto pt-1.5">
-                  {/* Primary Action - Full width on mobile, smaller */}
-                  <button
-                    onClick={() => handleMoveToCart(product)}
-                    disabled={product.stock === 0}
-                    className="w-full bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white py-2 sm:py-2.5 px-2 sm:px-3 rounded-md sm:rounded-lg transition-all duration-200 font-medium text-[10px] sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[32px] sm:min-h-[40px] flex items-center justify-center shadow-md hover:shadow-lg"
-                  >
-                    <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
-                    <span className="truncate">Add to Cart</span>
-                  </button>
-                  
-                  {/* Secondary Actions - Row on mobile, better spacing */}
-                  <div className="flex gap-1 sm:gap-1.5">
-                    <Link
-                      to={`/product/${product.id}`}
-                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-md sm:rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 text-center font-medium text-[9px] sm:text-xs min-h-[28px] sm:min-h-[36px] flex items-center justify-center"
-                    >
-                      View
-                    </Link>
-                    <button
-                      onClick={() => {
-                        if (navigator.share) {
-                          navigator.share({
-                            title: product.name,
-                            text: `Check out ${product.name} on my wishlist!`,
-                            url: `${window.location.origin}/product/${product.id}`
-                          }).catch(() => {});
-                        } else {
-                          navigator.clipboard.writeText(`${window.location.origin}/product/${product.id}`);
-                          pushToast({ type: 'success', title: 'Link copied', message: 'Product link copied to clipboard' });
-                        }
-                      }}
-                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-md sm:rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 text-[9px] sm:text-xs font-medium flex items-center justify-center gap-0.5 sm:gap-1 min-h-[28px] sm:min-h-[36px]"
-                    >
-                      <Share2 className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
-                      <span className="hidden sm:inline">Share</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <WishlistCard 
+              key={product.id} 
+              product={product}
+              handleRemove={handleRemove}
+              handleMoveToCart={handleMoveToCart}
+              removingId={removingId}
+              pushToast={pushToast}
+              formatPrice={formatPrice}
+              formatDate={formatDate}
+            />
           ))}
         </div>
 

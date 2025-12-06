@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { User, ShoppingBag, Heart, BellRing, Settings, Home } from "lucide-react";
+import { User, ShoppingBag, Heart, BellRing, Settings, Home, BarChart3 } from "lucide-react";
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import { useUserRole } from "../hooks/useUserRole";
 import UserTypeModal from "../components/UserTypeModal";
@@ -9,7 +9,7 @@ import RegisterModal from "../components/RegisterModal";
 
 export default function Login() {
   const { user } = useAuth();
-  const { userRole, loading: roleLoading } = useUserRole();
+  const { userRole, isSeller, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [showUserTypeModal, setShowUserTypeModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -107,6 +107,15 @@ export default function Login() {
               <User className="w-5 h-5" />
               <span className="text-xs">Profile</span>
             </Link>
+            {isSeller && (
+              <Link
+                to="/seller-dashboard"
+                className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs">Dashboard</span>
+              </Link>
+            )}
             <Link
               to="/orders"
               className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
@@ -122,18 +131,18 @@ export default function Login() {
               <span className="text-xs">Wishlist</span>
             </Link>
             <Link
+              to="/settings"
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
+            >
+              <Settings className="w-5 h-5" />
+              <span className="text-xs">Settings</span>
+            </Link>
+            <Link
               to="/price-alerts"
               className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
             >
               <BellRing className="w-5 h-5" />
               <span className="text-xs">Price Alerts</span>
-            </Link>
-            <Link
-              to="/profile"
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"
-            >
-              <Settings className="w-5 h-5" />
-              <span className="text-xs">Settings</span>
             </Link>
           </div>
         </div>
