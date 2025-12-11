@@ -3,62 +3,154 @@ import { useNavigate, Link } from "react-router-dom";
 import { User, ShoppingBag, Heart, BellRing, Settings, Home, BarChart3 } from "lucide-react";
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import { useUserRole } from "../hooks/useUserRole";
-import UserTypeModal from "../components/UserTypeModal";
 import LoginModal from "../components/LoginModal";
 import RegisterModal from "../components/RegisterModal";
+import { supabase } from "../lib/supabaseClient";
 
 export default function Login() {
   const { user } = useAuth();
   const { userRole, isSeller, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
-  const [showUserTypeModal, setShowUserTypeModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [creatingProfile, setCreatingProfile] = useState(false);
 
-  // Check if user needs to select role and redirect if they have one
+  // Automatically create profile with "buyer" role ONLY if user has no role AND no profile exists
   useEffect(() => {
-    if (user && !roleLoading) {
-      if (userRole) {
+    const autoCreateProfile = async () => {
+      if (user && !roleLoading && !userRole && !creatingProfile) {
+        console.log('User has no role, checking if profile exists...');
+        setCreatingProfile(true);
+        
+        try {
+          // First, check if profile exists in database
+          const { data: existingProfile, error: fetchError } = await supabase
+            .from('profile')
+            .select('user_type, user_id')
+            .eq('user_id', user.id)
+            .single();
+
+          // If profile exists, use its user_type (NEVER override existing profiles)
+          if (existingProfile) {
+            console.log('✅ Profile exists with user_type:', existingProfile.user_type);
+            // NEVER update existing profile - just redirect based on user_type
+            if (existingProfile.user_type === "seller") {
+              navigate("/seller-dashboard", { replace: true });
+            } else {
+              navigate("/profile", { replace: true });
+            }
+            setCreatingProfile(false);
+            return;
+          }
+
+          // Check localStorage for profile data (from signup)
+          const localProfile = localStorage.getItem('user_profile');
+          let userType = 'buyer'; // Default fallback
+          
+          if (localProfile) {
+            try {
+              const parsed = JSON.parse(localProfile);
+              if (parsed.user_type && parsed.user_id === user.id) {
+                userType = parsed.user_type;
+                console.log('Found user_type in localStorage:', userType);
+              }
+            } catch (e) {
+              console.warn('Error parsing localStorage profile:', e);
+            }
+          }
+
+          // Check user metadata for user_type (set during signup)
+          if (user.user_metadata?.user_type) {
+            userType = user.user_metadata.user_type;
+            console.log('Found user_type in user metadata:', userType);
+          }
+
+          console.log('Creating NEW profile with user_type:', userType);
+          
+          const profileData = {
+            user_id: user.id,
+            username: user.email?.split('@')[0] || 'user',
+            full_name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            user_type: userType, // Use detected user_type, not always 'buyer'
+          };
+
+          // CRITICAL: Use INSERT, not UPSERT - only create if doesn't exist
+          // This prevents overwriting existing profiles
+          const { data: insertData, error: insertError } = await supabase
+            .from('profile')
+            .insert(profileData)
+            .select()
+            .single();
+
+          // If insert fails because profile exists, fetch existing profile and use its user_type
+          if (insertError && (insertError.code === '23505' || insertError.message?.includes('duplicate'))) {
+            console.log('⚠️ Profile already exists, fetching existing profile...');
+            const { data: fetchedProfile, error: fetchErr } = await supabase
+              .from('profile')
+              .select('user_type, user_id')
+              .eq('user_id', user.id)
+              .single();
+            
+            if (fetchErr) {
+              console.error('Error fetching existing profile:', fetchErr);
+            } else if (fetchedProfile) {
+              userType = fetchedProfile.user_type || userType;
+              console.log('✅ Using EXISTING profile user_type (NOT overwriting):', userType);
+              // CRITICAL: Do NOT update the profile - just use what exists
+            }
+          } else if (insertError) {
+            console.warn('Profile creation error:', insertError);
+            // Save to localStorage as fallback
+            localStorage.setItem('user_profile', JSON.stringify({
+              ...profileData,
+              created_at: new Date().toISOString(),
+            }));
+          } else if (insertData) {
+            console.log('✅ NEW Profile created with user_type:', insertData.user_type || userType);
+          }
+
+          // Update user metadata (optional, non-critical)
+          try {
+            await supabase.auth.updateUser({
+              data: { user_type: userType }
+            });
+          } catch (e) {
+            console.warn('User metadata update error (non-critical):', e);
+          }
+
+          // Redirect based on user_type
+          if (userType === "seller") {
+            navigate("/seller-dashboard", { replace: true });
+          } else {
+            navigate("/profile", { replace: true });
+          }
+        } catch (error) {
+          console.error('Error auto-creating profile:', error);
+          // Still redirect to profile - don't block the user
+          navigate("/profile", { replace: true });
+        } finally {
+          setCreatingProfile(false);
+        }
+      } else if (user && !roleLoading && userRole) {
         // User has a role - redirect based on role
         if (userRole === "seller") {
           navigate("/seller-dashboard", { replace: true });
         } else if (userRole === "buyer") {
           navigate("/profile", { replace: true });
         }
-      } else {
-        // User logged in but no role (null or undefined) - show modal
-        console.log('User has no role, showing role selection modal');
-        setShowUserTypeModal(true);
       }
-    }
-  }, [user, userRole, roleLoading, navigate]);
+    };
 
+    autoCreateProfile();
+  }, [user, userRole, roleLoading, navigate, creatingProfile]);
 
-  const handleRoleSelected = (selectedRole) => {
-    console.log('Role selected:', selectedRole);
-    setShowUserTypeModal(false);
-    // Small delay to ensure profile is created
-    setTimeout(() => {
-      if (selectedRole === "seller") {
-        navigate("/seller-dashboard", { replace: true });
-      } else {
-        navigate("/profile", { replace: true });
-      }
-    }, 500);
-  };
-
-  // Show user type modal if user is logged in but has no role
-  if (showUserTypeModal && user) {
-    return <UserTypeModal user={user} onComplete={handleRoleSelected} />;
-  }
-
-  // Show loading while checking auth state or role (only if user exists)
-  if (user && roleLoading) {
+  // Show loading while checking auth state, role, or creating profile
+  if (user && (roleLoading || creatingProfile)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking your account...</p>
+          <p className="text-gray-600">{creatingProfile ? 'Setting up your account...' : 'Checking your account...'}</p>
         </div>
       </div>
     );

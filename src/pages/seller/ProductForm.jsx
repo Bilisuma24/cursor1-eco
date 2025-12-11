@@ -428,7 +428,37 @@ const ProductForm = () => {
         // Create new product
         result = await productService.createProduct(productData);
         console.log('Product created successfully:', result);
-        setUploadProgress('Product created successfully!');
+        
+        // Verify product was actually created
+        if (result?.data?.id) {
+          console.log('✅ Product verified in database with ID:', result.data.id);
+          setUploadProgress('Product created and saved successfully!');
+        } else {
+          console.warn('⚠️ Product creation returned but no ID found');
+          setUploadProgress('Product created (verifying...)');
+          
+          // Wait a moment and verify the product exists
+          await new Promise(resolve => setTimeout(resolve, 500));
+          try {
+            const { data: verifyData, error: verifyError } = await supabase
+              .from('product')
+              .select('id, name, seller_id')
+              .eq('seller_id', user.id)
+              .eq('name', productData.name)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single();
+            
+            if (verifyError || !verifyData) {
+              console.error('❌ Product verification failed:', verifyError);
+              throw new Error('Product was not saved to database. Please try again.');
+            }
+            console.log('✅ Product verified:', verifyData);
+          } catch (verifyErr) {
+            console.error('Product verification error:', verifyErr);
+            throw new Error('Product creation may have failed. Please check your products list.');
+          }
+        }
       }
       setProgress(90);
 

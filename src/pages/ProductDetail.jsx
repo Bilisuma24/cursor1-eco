@@ -10,7 +10,9 @@ import {
   Minus, 
   Plus,
   Share2,
-  MessageCircle
+  MessageCircle,
+  ArrowLeft,
+  Package
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import productsData from "../data/products.js";
@@ -34,6 +36,8 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   
   // Soft, product-based shadow color for a more attractive feel
   const getShadowColor = () => {
@@ -345,6 +349,22 @@ export default function ProductDetail() {
     loadProduct();
   }, [id]);
 
+  // Reset image dimensions when image index changes
+  useEffect(() => {
+    if (product?.images && product.images[currentImageIndex]) {
+      setImageDimensions({ width: 0, height: 0 });
+      // Create a new image to get dimensions
+      const img = new Image();
+      img.onload = () => {
+        setImageDimensions({
+          width: img.naturalWidth,
+          height: img.naturalHeight
+        });
+      };
+      img.src = product.images[currentImageIndex];
+    }
+  }, [currentImageIndex, product?.images]);
+
   if (loading || !product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -643,26 +663,6 @@ export default function ProductDetail() {
     </div>
   );
 
-  const renderServiceHighlights = (extraClasses = "") => (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-1.5 ${extraClasses}`}>
-      <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700">
-        <Truck className="w-4 h-4 text-[#2dae6f]" />
-        <span>Free shipping available</span>
-      </div>
-      <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700">
-        <Shield className="w-4 h-4 text-[#ff6a3c]" />
-        <span>Buyer protection & easy returns</span>
-      </div>
-      <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700">
-        <Check className="w-4 h-4 text-[#ff6a3c]" />
-        <span>Authentic quality guarantee</span>
-      </div>
-      <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700">
-        <MessageCircle className="w-4 h-4 text-[#ff6a3c]" />
-        <span>24/7 customer support</span>
-      </div>
-    </div>
-  );
 
   const seller = product.seller || {};
   const sellerInitial = (seller.name || 'Store').charAt(0).toUpperCase();
@@ -817,8 +817,9 @@ export default function ProductDetail() {
   ) : null;
 
   return (
-    <div className="bg-[#f7f7f7] overflow-x-hidden pb-8 lg:pb-12">
-      <div className="bg-white border-b-0 lg:border-b border-gray-200 sticky top-0 z-40">
+    <div className="bg-[#f7f7f7] overflow-x-hidden pb-8 lg:pb-12" style={{ margin: 0, padding: 0 }}>
+      {/* Desktop Header */}
+      <div className="hidden lg:block bg-white border-b-0 lg:border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-0">
           <div className="flex items-center gap-4 py-1 lg:py-0">
             <Link to="/" className="flex items-center gap-2 flex-shrink-0">
@@ -834,14 +835,92 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-0 lg:px-6">
-        <div className="lg:hidden -mt-[33px] md:-mt-0">
-          <div className="bg-white border-0 lg:border border-gray-200 rounded-none lg:rounded-lg overflow-hidden product-shadow"
-               style={{ ['--shadow-color']: getShadowColor() }}>
-            <AliExpressImageZoom images={product.images} aspectClass="aspect-square" />
-          </div>
+      {/* Mobile Fullscreen Image - Starts from top */}
+      <div className="lg:hidden" style={{ margin: 0, padding: 0, width: '100vw', marginLeft: 'calc(-50vw + 50%)' }}>
+        <div 
+          className="relative overflow-hidden bg-white"
+          style={{
+            ...(imageDimensions.width > 0 && imageDimensions.height > 0 && {
+              aspectRatio: `${imageDimensions.width} / ${imageDimensions.height}`
+            }),
+            maxHeight: '80vh',
+            minHeight: '40vh',
+            ...(!(imageDimensions.width > 0 && imageDimensions.height > 0) && {
+              height: '60vh'
+            }),
+            margin: 0,
+            padding: 0,
+            width: '100vw',
+            display: 'block'
+          }}
+        >
+            {product.images && product.images.length > 0 ? (
+              <>
+                <img
+                  src={product.images[currentImageIndex]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  style={{
+                    display: 'block',
+                    margin: 0,
+                    padding: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                  onLoad={(e) => {
+                    const img = e.target;
+                    if (img.naturalWidth && img.naturalHeight) {
+                      setImageDimensions({
+                        width: img.naturalWidth,
+                        height: img.naturalHeight
+                      });
+                    }
+                  }}
+                />
+                {/* Floating Navigation Buttons */}
+                <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-safe pb-4 z-10" style={{ paddingTop: 'max(env(safe-area-inset-top), 1rem)' }}>
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md"
+                  >
+                    <ArrowLeft className="w-5 h-5 text-gray-700" />
+                  </button>
+                  <button
+                    onClick={handleWishlistToggle}
+                    className={`w-10 h-10 rounded-full backdrop-blur-sm flex items-center justify-center shadow-md ${
+                      isWishlisted ? 'bg-[#ff6a3c]' : 'bg-white/90'
+                    }`}
+                  >
+                    <Heart className={`w-5 h-5 ${isWishlisted ? 'text-white fill-white' : 'text-gray-700'}`} />
+                  </button>
+                </div>
+                {/* Carousel Dots */}
+                {product.images.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+                    {product.images.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`h-2 rounded-full transition-all ${
+                          index === currentImageIndex ? 'bg-white w-6' : 'bg-white/60 w-2'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                <Package className="w-16 h-16 text-gray-400" />
+              </div>
+            )}
+        </div>
+      </div>
 
-          <div className="bg-white border border-gray-200 rounded-2xl product-shadow p-2 space-y-2"
+      <div className="max-w-6xl mx-auto px-0 lg:px-6">
+        <div className="lg:hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl product-shadow p-2 space-y-2 mt-4"
                style={{ ['--shadow-color']: getShadowColor() }}>
             <div>
               <h1 className="text-xl font-bold text-gray-900 leading-tight">
@@ -857,14 +936,13 @@ export default function ProductDetail() {
                 <span className="text-gray-300">|</span>
                 <span>{product.sold}+ orders</span>
               </div>
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-700">
+                <Truck className="w-4 h-4 text-[#2dae6f]" />
+                <span>Free shipping available</span>
+              </div>
             </div>
 
             {renderPriceSection()}
-
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Truck className="w-4 h-4 text-[#2dae6f]" />
-              <span>Fast shipping worldwide • Easy returns</span>
-            </div>
 
             {renderOptionsSection()}
 
@@ -875,8 +953,6 @@ export default function ProductDetail() {
             </div>
 
             {renderActionButtons()}
-
-            {renderServiceHighlights('mt-4')}
           </div>
 
           <div style={{ ['--shadow-color']: getShadowColor() }} className="product-shadow rounded-2xl">
@@ -920,6 +996,10 @@ export default function ProductDetail() {
                     <span>{product.reviewCount} reviews</span>
                     <span>{product.sold}+ orders</span>
                   </div>
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-700">
+                    <Truck className="w-4 h-4 text-[#2dae6f]" />
+                    <span>Free shipping available</span>
+                  </div>
                 </div>
 
                 {renderPriceSection()}
@@ -928,10 +1008,6 @@ export default function ProductDetail() {
                   <span className="inline-flex items-center gap-2 bg-[#fff1ea] text-[#ff6a3c] px-3 py-1 rounded-full font-semibold">
                     <Truck className="w-4 h-4" />
                     Free shipping
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-[#ff6a3c]" />
-                    Buyer protection 30 days
                   </span>
                   <span className="inline-flex items-center gap-2">
                     <Check className="w-4 h-4 text-[#2dae6f]" />
@@ -950,8 +1026,6 @@ export default function ProductDetail() {
                 </div>
 
                 {renderActionButtons('mt-3')}
-
-                {renderServiceHighlights('mt-4')}
               </div>
 
               <div style={{ ['--shadow-color']: getShadowColor() }} className="product-shadow rounded-2xl">

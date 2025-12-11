@@ -1,11 +1,16 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, Star, Truck } from "lucide-react";
+import { Heart, Star, Truck, ShoppingCart } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useImageColors } from "../hooks/useImageColors";
 
-export default function ProductCard({ product, onAddToCart, viewMode = 'grid' }) {
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useCart();
+export default function ProductCard({ product, onAddToCart, onAdd, viewMode = 'grid' }) {
+  const { addToWishlist, removeFromWishlist, isInWishlist, addToCart } = useCart();
+  // Support both onAddToCart and onAdd props for compatibility
+  const handleAddToCart = onAddToCart || onAdd || ((product) => {
+    // Fallback: use CartContext addToCart if no handler provided
+    addToCart(product, 1);
+  });
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   
@@ -86,8 +91,8 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-3.5 h-3.5 ${
-          i < Math.floor(rating) ? 'text-[#ffb266] fill-current' : 'text-gray-300'
+        className={`w-3 h-3 ${
+          i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
         }`}
       />
     ));
@@ -149,112 +154,92 @@ export default function ProductCard({ product, onAddToCart, viewMode = 'grid' })
   }
 
   const isChoiceDeal = (product.rating || 0) >= 4.6;
+  const hasSale = product.originalPrice && product.originalPrice > product.price;
 
   return (
-    <div className="relative group" style={{ overflow: 'visible', isolation: 'isolate' }}>
-      {/* Adaptive Glow Shadow - Subtle on mobile, more prominent on desktop */}
-      <div 
-        className="absolute -inset-2 md:-inset-8 -z-10 opacity-[0.25] md:opacity-[0.6] group-hover:opacity-[0.35] md:group-hover:opacity-[0.8] transition-opacity duration-300 rounded-none md:rounded-2xl product-glow-shadow"
-        style={{
-          background: `radial-gradient(ellipse 90% 70% at 50% 50%, ${glowColors.primary} 0%, ${glowColors.secondary} 40%, transparent 75%)`,
-          pointerEvents: 'none',
-          willChange: 'opacity',
-        }}
-      />
-      
+    <div className="relative">
       {/* Product Card */}
       <div 
-        className="group/card bg-white rounded-none md:rounded-2xl border-0 md:border border-gray-200 overflow-hidden cursor-pointer transition-all flex flex-col h-full hover:border-[#ffd0b3] hover:shadow-md md:hover:shadow-lg relative z-[1]"
+        className="bg-white border border-gray-200 overflow-hidden cursor-pointer flex flex-col h-full hover:shadow-md transition-shadow"
         onClick={() => navigate(`/product/${product.id}`)}
       >
-      {/* Image */}
-      <div className="relative aspect-square bg-[#fff7f2] border-0 md:border-b border-gray-100 overflow-hidden w-full">
-        {/* Seller Product Badge */}
-        {(product.isSellerProduct || (product.isFromDatabase && product.seller_id)) && (
-          <span className="absolute top-2 left-2 md:top-3 md:left-3 bg-green-600 text-white text-[9px] md:text-[10px] font-semibold px-2 md:px-3 py-0.5 md:py-1 rounded-full shadow-sm z-10 flex items-center gap-1">
-            <span>🏪</span>
-            <span className="hidden sm:inline">Seller</span>
-          </span>
-        )}
-        {isChoiceDeal && (
-          <span className={`absolute ${product.isFromDatabase ? 'top-2 right-2 md:top-3 md:right-3' : 'top-2 left-2 md:top-3 md:left-3'} bg-[#ff4747] text-white text-[9px] md:text-[10px] font-semibold uppercase tracking-wide px-2 md:px-3 py-0.5 md:py-1 rounded-full shadow-sm z-10`}>
-            Choice
-          </span>
-        )}
+      {/* Image Container - AliExpress Style */}
+      <div className="relative border-b border-gray-200 overflow-hidden w-full aspect-square">
+        {/* Product Image - fills 100% of 1:1 frame with no space */}
         <img
           src={product.images?.[selectedImage] || 'https://via.placeholder.com/300'}
           alt={product.name}
-          className="w-full h-full object-contain object-center p-2 md:p-6 group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover"
           style={{ objectPosition: 'center center' }}
         />
         
-        {/* Discount badge */}
-        {product.originalPrice && product.originalPrice > product.price && (
-          <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-white text-[#ff4747] text-[10px] md:text-xs font-semibold px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full border border-[#ffd0b3] shadow-sm">
+        {/* Sale Badge - Top Left (rectangular red badge) */}
+        {hasSale && (
+          <div className="absolute top-2 left-2 bg-[#ff4747] text-white text-[10px] font-semibold px-2 py-0.5 z-10">
+            Sale
+          </div>
+        )}
+        
+        {/* Choice Badge - Top Left (rectangular red badge, only if no Sale or if both should show) */}
+        {isChoiceDeal && !hasSale && (
+          <div className="absolute top-2 left-2 bg-[#ff4747] text-white text-[10px] font-semibold uppercase px-2 py-0.5 z-10">
+            Choice
+          </div>
+        )}
+        
+        {/* Discount Percentage Badge - Top Right (circular white badge) */}
+        {hasSale && (
+          <div className="absolute top-2 right-2 bg-white text-[#ff4747] text-xs font-semibold w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 shadow-sm z-10">
             -{Math.round(100 - (product.price / product.originalPrice) * 100)}%
           </div>
         )}
-
-        {/* Wishlist button */}
+        
+        {/* Shopping Cart Icon - Bottom Right (white circular button) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
-            handleWishlistToggle(e);
+            handleAddToCart(product);
           }}
-          className={`absolute bottom-2 right-2 md:bottom-3 md:right-3 w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center border border-white/70 backdrop-blur bg-white/80 transition-colors ${
-            isInWishlist(product.id)
-              ? 'text-[#ff4747]'
-              : 'text-gray-600 hover:text-[#ff4747]'
-          }`}
+          className="absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all z-10"
+          title="Add to cart"
         >
-          <Heart className={`w-3 h-3 md:w-4 md:h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+          <ShoppingCart className="w-5 h-5 text-gray-900" />
         </button>
-
-        {/* Image counter */}
-        {product.images && product.images.length > 1 && (
-          <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 bg-black/60 text-white text-[9px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full">
-            {selectedImage + 1}/{product.images.length}
-          </div>
-        )}
       </div>
 
-      {/* Product Info */}
-      <div className="px-2 py-2 md:px-4 md:py-4 flex flex-col gap-1.5 md:gap-3 flex-1">
-        <h3 className="text-xs md:text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem] md:min-h-[2.75rem] group-hover:text-[#ff4747] transition-colors leading-tight">
+      {/* Product Info - AliExpress Style */}
+      <div className="px-3 py-3 flex flex-col gap-2 flex-1">
+        <h3 className="text-xs font-normal text-gray-900 line-clamp-2 leading-tight">
           {product.name || 'Untitled Product'}
         </h3>
 
         {/* Price */}
-        <div className="flex flex-wrap items-baseline gap-1 md:gap-2">
-          <div className="text-base md:text-xl font-bold text-[#ff4747]">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <div className="text-base font-bold text-[#ff4747]">
             {getCurrencySymbol()}{formatPrice(product.price || 0)}
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
-            <div className="text-[10px] md:text-xs text-gray-400 line-through">
+            <div className="text-sm text-gray-400 line-through">
               {getCurrencySymbol()}{formatPrice(product.originalPrice)}
             </div>
           )}
-          <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-[#ff4747] bg-[#ffe8dc] px-2 py-0.5 rounded-full">
-            Deal
-          </span>
         </div>
 
-        {/* Rating */}
+        {/* Rating and Sold Count - AliExpress Format */}
         {product.rating && (
-          <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-1 text-xs text-gray-600">
             {renderStars(product.rating)}
-            <span className="font-medium text-gray-600">{product.rating?.toFixed(1)}</span>
-            <span className="text-gray-400">({product.reviewCount || 0})</span>
+            <span className="font-medium text-gray-700">{product.rating?.toFixed(1)}</span>
+            <span className="text-gray-500">|</span>
+            <span className="text-gray-500">{product.sold ? `${product.sold} sold` : 'Popular'}</span>
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between text-[10px] md:text-xs text-gray-500">
-          <span className="hidden sm:flex items-center gap-1 text-[#2dae6f] font-semibold">
-            <Truck className="w-3 h-3 md:w-4 md:h-4" />
-            <span className="hidden md:inline">Free shipping</span>
-          </span>
-          <span className="text-[9px] md:text-xs">{product.sold ? `${product.sold}+ sold` : 'Popular'}</span>
-        </div>
+        {!product.rating && product.sold && (
+          <div className="text-xs text-gray-500">
+            {product.sold} sold
+          </div>
+        )}
       </div>
     </div>
     </div>

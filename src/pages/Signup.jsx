@@ -102,55 +102,49 @@ export default function SignUp() {
         console.error("Failed to save to localStorage:", localError);
       }
 
-      // Try to sync to database in background (non-blocking)
+      // Try to sync to database in background (non-blocking) - Use Supabase client directly
       (async () => {
         try {
-          const supabaseUrl = 'https://azvslusinlvnjymaufhw.supabase.co';
-          const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6dnNsdXNpbmx2bmp5bWF1Zmh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NjYwNjYsImV4cCI6MjA3NTU0MjA2Nn0.4MdiznfE-UOdDn25X8XocML44UrCxpsJ2fIgvULevnw';
+          console.log("🔐 Syncing profile to database with user_type:", formData.userType);
+          console.log("🔐 Profile data to save:", profileDataToSave);
           
-          // Get session token
-          let authToken = supabaseKey;
-          try {
-            const sessionTimeout = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Session timeout')), 2000)
-            );
-            const { data: { session } } = await Promise.race([
-              supabase.auth.getSession(),
-              sessionTimeout
-            ]);
-            if (session?.access_token) {
-              authToken = session.access_token;
+          // CRITICAL: Use INSERT first, if it fails due to duplicate, that's okay
+          // This prevents overwriting existing profiles
+          const { data: insertData, error: insertError } = await supabase
+            .from('profile')
+            .insert(profileDataToSave)
+            .select()
+            .single();
+
+          if (insertError && (insertError.code === '23505' || insertError.message?.includes('duplicate'))) {
+            // Profile already exists - try to update ONLY if user_type is different
+            console.log("Profile already exists, checking if update needed...");
+            const { data: existingProfile } = await supabase
+              .from('profile')
+              .select('user_type')
+              .eq('user_id', result.user.id)
+              .single();
+            
+            if (existingProfile && existingProfile.user_type !== formData.userType) {
+              console.log(`⚠️ Profile exists with different user_type. Current: ${existingProfile.user_type}, New: ${formData.userType}`);
+              console.log('⚠️ NOT updating to preserve existing user_type');
+            } else {
+              console.log('✅ Profile already exists with correct user_type:', existingProfile?.user_type);
             }
-          } catch (e) {
-            console.warn('Could not get session token, using anon key');
-          }
-
-          // Try to create profile with 3 second timeout
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Profile sync timeout')), 3000)
-          );
-
-          const response = await Promise.race([
-            fetch(`${supabaseUrl}/rest/v1/profile`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': supabaseKey,
-                'Authorization': `Bearer ${authToken}`,
-                'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify(profileDataToSave)
-            }),
-            timeoutPromise
-          ]);
-
-          if (response.ok) {
-            console.log("Profile synced to database successfully");
             localStorage.removeItem('pending_profile_sync');
-          } else {
-            const errorText = await response.text();
-            console.warn("Profile sync failed (will retry later):", response.status, errorText);
+          } else if (insertError) {
+            console.warn("Profile sync failed (will retry later):", insertError);
             // Keep pending_profile_sync flag - will retry on next login
+          } else if (insertData) {
+            console.log("✅ Profile created in database with user_type:", insertData?.user_type);
+            localStorage.removeItem('pending_profile_sync');
+            
+            // Verify user_type was saved correctly
+            if (insertData?.user_type !== formData.userType) {
+              console.error('❌ CRITICAL: user_type mismatch! Expected:', formData.userType, 'Got:', insertData?.user_type);
+            } else {
+              console.log('✅ Verified: user_type saved correctly as', insertData.user_type);
+            }
           }
         } catch (error) {
           console.warn("Profile sync failed (will retry later):", error.message);

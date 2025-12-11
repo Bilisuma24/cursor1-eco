@@ -179,7 +179,7 @@ export default function DashboardLayout({ children }) {
       )}
 
       {/* Blue Sidebar - Hidden on mobile */}
-      <aside className="hidden lg:flex w-64 bg-blue-600 min-h-screen sticky top-0 flex-col rounded-r-3xl">
+      <aside className="hidden lg:flex w-52 bg-blue-600 min-h-screen sticky top-0 flex-col rounded-r-3xl">
         <div className="p-6 flex flex-col h-full">
           {/* Logo */}
           <div className="mb-10 flex items-center gap-3">

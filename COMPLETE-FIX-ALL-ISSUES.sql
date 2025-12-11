@@ -156,18 +156,21 @@ DROP POLICY IF EXISTS "Users can upload to product-images" ON storage.objects;
 
 -- Step 3: Create NEW storage policies
 -- PUBLIC can VIEW all product images (for displaying products)
+DROP POLICY IF EXISTS "Product images are publicly viewable" ON storage.objects;
 CREATE POLICY "Product images are publicly viewable"
   ON storage.objects FOR SELECT
   TO public
   USING (bucket_id = 'product-images');
 
 -- Authenticated users can INSERT (upload) images to product-images bucket
+DROP POLICY IF EXISTS "Authenticated users can upload product images" ON storage.objects;
 CREATE POLICY "Authenticated users can upload product images"
   ON storage.objects FOR INSERT
   TO authenticated
   WITH CHECK (bucket_id = 'product-images');
 
 -- Authenticated users can UPDATE their own images
+DROP POLICY IF EXISTS "Authenticated users can update product images" ON storage.objects;
 CREATE POLICY "Authenticated users can update product images"
   ON storage.objects FOR UPDATE
   TO authenticated
@@ -175,6 +178,7 @@ CREATE POLICY "Authenticated users can update product images"
   WITH CHECK (bucket_id = 'product-images');
 
 -- Authenticated users can DELETE images from product-images bucket
+DROP POLICY IF EXISTS "Authenticated users can delete product images" ON storage.objects;
 CREATE POLICY "Authenticated users can delete product images"
   ON storage.objects FOR DELETE
   TO authenticated

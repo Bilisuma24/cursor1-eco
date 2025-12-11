@@ -323,15 +323,39 @@ CREATE POLICY "public_read_products"
       console.log(`📦 Using ${staticProducts.length} static products`);
       
       // Prioritize database products (seller products) over static
+      // IMPORTANT: Include ALL database products, even if they have seller_id
       const combinedProducts = [...transformedDbProducts, ...staticProducts];
       
       // Remove duplicates based on ID (database products first)
+      // This ensures seller products are included
       const uniqueProducts = combinedProducts.reduce((acc, product) => {
         if (!acc.find(p => p.id === product.id)) {
           acc.push(product);
         }
         return acc;
       }, []);
+      
+      // CRITICAL: Ensure seller products are NOT filtered out
+      // Log all products to verify seller products are included
+      const sellerProductsInFinal = uniqueProducts.filter(p => p.seller_id || p.isSellerProduct);
+      console.log(`🔍 FINAL PRODUCT LIST CHECK:`);
+      console.log(`   - Total products in final list: ${uniqueProducts.length}`);
+      console.log(`   - Seller products in final list: ${sellerProductsInFinal.length}`);
+      if (sellerProductsInFinal.length > 0) {
+        console.log(`✅ Seller products ARE in final list:`, sellerProductsInFinal.map(p => ({ 
+          id: p.id, 
+          name: p.name, 
+          seller_id: p.seller_id 
+        })));
+      } else {
+        console.error(`❌ NO SELLER PRODUCTS IN FINAL LIST!`);
+        console.error(`   - All products:`, uniqueProducts.map(p => ({ 
+          id: p.id, 
+          name: p.name, 
+          has_seller_id: !!p.seller_id,
+          seller_id: p.seller_id 
+        })));
+      }
 
       const sellerProductCount = transformedDbProducts.filter(p => p.seller_id || p.isSellerProduct).length;
       const totalCount = uniqueProducts.length;

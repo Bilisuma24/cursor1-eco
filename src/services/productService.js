@@ -116,14 +116,38 @@ export const productService = {
     }
   },
 
-  // Create a new product - DIRECT REST API WITH SESSION TOKEN
+  // Create a new product - USING SUPABASE CLIENT (more reliable)
   async createProduct(productData) {
     try {
       console.log('========== PRODUCT CREATION START ==========');
       console.log('Creating product with data:', JSON.stringify(productData, null, 2));
       
+      // CRITICAL: Get seller_id from multiple sources to ensure it's set
+      let sellerId = productData.seller_id;
+      
+      // If seller_id is missing, try to get it from Supabase session
+      if (!sellerId) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user?.id) {
+            sellerId = session.user.id;
+            console.log('⚠️ seller_id was missing, got from session:', sellerId);
+          }
+        } catch (sessionError) {
+          console.error('Could not get session for seller_id:', sessionError);
+        }
+      }
+      
+      // Verify seller_id is present
+      if (!sellerId) {
+        throw new Error('seller_id is required to create a product. Please make sure you are logged in.');
+      }
+      
       // Remove null/undefined/empty array fields to avoid schema errors
       const cleanedData = { ...productData };
+      
+      // CRITICAL: Always ensure seller_id is set (don't let it be removed)
+      cleanedData.seller_id = sellerId;
       
       // Only include colors if it's a non-empty array
       if (!cleanedData.colors || cleanedData.colors.length === 0) {
@@ -145,141 +169,63 @@ export const productService = {
         delete cleanedData.shipping_cost;
       }
       
-      // Only include shipping flags if they exist (handle gracefully if columns don't exist)
-      // These will be kept if they have boolean values, removed if columns don't exist and error occurs
-      
-      console.log('Cleaned product data (null/empty fields removed):', JSON.stringify(cleanedData, null, 2));
-      
-      const supabaseUrl = 'https://azvslusinlvnjymaufhw.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6dnNsdXNpbmx2bmp5bWF1Zmh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5NjYwNjYsImV4cCI6MjA3NTU0MjA2Nn0.4MdiznfE-UOdDn25X8XocML44UrCxpsJ2fIgvULevnw';
-      
-      // Get session token from localStorage (Supabase stores it there)
-      let authToken = supabaseKey;
-      try {
-        // Supabase stores session in localStorage with key pattern: sb-<project-ref>-auth-token
-        // Check multiple possible keys
-        const possibleKeys = [
-          'sb-azvslusinlvnjymaufhw-auth-token',
-          ...Object.keys(localStorage).filter(key => key.includes('supabase') && key.includes('auth'))
-        ];
-        
-        for (const sessionKey of possibleKeys) {
-          const sessionData = localStorage.getItem(sessionKey);
-          if (sessionData) {
-            try {
-              const session = JSON.parse(sessionData);
-              // Check if it's the current session format
-              if (session?.access_token) {
-                authToken = session.access_token;
-                console.log('Found session token in localStorage:', sessionKey);
-                break;
-              }
-              // Or check if it's the state format
-              if (session?.state?.access_token) {
-                authToken = session.state.access_token;
-                console.log('Found session token in localStorage (state format):', sessionKey);
-                break;
-              }
-            } catch (e) {
-              // Continue to next key
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('Could not get session from localStorage:', e);
+      // Ensure images is an array (not null)
+      if (!cleanedData.images || !Array.isArray(cleanedData.images)) {
+        cleanedData.images = cleanedData.images ? [cleanedData.images] : [];
       }
       
-      // Fallback: try to get session from Supabase client (but with timeout)
-      if (authToken === supabaseKey) {
-        try {
-          const sessionTimeout = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Session timeout')), 2000);
-          });
-          const sessionPromise = supabase.auth.getSession();
-          const { data: { session } } = await Promise.race([sessionPromise, sessionTimeout]);
-          if (session?.access_token) {
-            authToken = session.access_token;
-            console.log('Got session token from Supabase client');
-          }
-        } catch (e) {
-          console.warn('Could not get session from Supabase client:', e.message);
-        }
+      // CRITICAL: Double-check seller_id is still present after cleaning
+      if (!cleanedData.seller_id) {
+        cleanedData.seller_id = sellerId;
+        console.log('⚠️ seller_id was removed during cleaning, restored:', sellerId);
       }
       
-      console.log('Using auth token:', authToken.substring(0, 20) + '...');
-      console.log('Making REST API request...');
+      console.log('Cleaned product data (with seller_id):', JSON.stringify(cleanedData, null, 2));
+      console.log('🔍 VERIFICATION - seller_id in cleanedData:', cleanedData.seller_id);
       
-      const startTime = Date.now();
-      const response = await fetch(`${supabaseUrl}/rest/v1/product`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${authToken}`,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(cleanedData)
-      });
+      // Verify we have an authenticated session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession) {
+        throw new Error('No authenticated session found. Please log in again.');
+      }
+      console.log('✅ Authenticated session verified. User ID:', currentSession.user.id);
+      console.log('✅ seller_id to be inserted:', cleanedData.seller_id);
+      console.log('✅ Session user ID matches seller_id:', currentSession.user.id === cleanedData.seller_id);
+      
+      // Use Supabase client directly (more reliable than REST API)
+      console.log('Using Supabase client to insert product...');
+      const { data, error } = await supabase
+        .from('product')
+        .insert([cleanedData])
+        .select()
+        .single();
 
-      const endTime = Date.now();
-      console.log(`Request completed in ${endTime - startTime}ms`);
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('REST API error response:', errorText);
+      if (error) {
+        console.error('========== SUPABASE INSERT ERROR ==========');
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
         
-        let errorObj;
-        try {
-          errorObj = JSON.parse(errorText);
-        } catch (e) {
-          errorObj = { message: errorText };
+        // If RLS error, provide helpful message
+        if (error.code === '42501' || error.message?.includes('permission') || error.message?.includes('policy')) {
+          throw new Error(`Permission denied: ${error.message}. Make sure RLS policies allow sellers to insert products with their seller_id.`);
         }
         
-        // If error is about missing columns, try again without those columns
-        const errorMessage = errorObj.message || errorText;
-        if (errorMessage.includes("Could not find the") && errorMessage.includes("column")) {
-          console.warn('Missing column detected, attempting retry without problematic fields...');
-          
-          // Extract column name from error message
-          const columnMatch = errorMessage.match(/Could not find the '(\w+)' column/);
-          if (columnMatch) {
-            const missingColumn = columnMatch[1];
-            console.warn(`Removing missing column '${missingColumn}' and retrying...`);
-            
-            // Create a new cleaned data without the missing column
-            const retryData = { ...cleanedData };
-            delete retryData[missingColumn];
-            
-            // Retry the request
-            const retryResponse = await fetch(`${supabaseUrl}/rest/v1/product`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': supabaseKey,
-                'Authorization': `Bearer ${authToken}`,
-                'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify(retryData)
-            });
-            
-            if (retryResponse.ok) {
-              console.log('Product created successfully after removing missing column');
-              return { success: true, warning: `Product created but '${missingColumn}' field was not saved (column doesn't exist in database)` };
-            }
-            
-            // If retry also failed, check for more missing columns
-            const retryErrorText = await retryResponse.text();
-            console.error('Retry also failed:', retryErrorText);
-          }
-        }
-        
-        throw new Error(`Database error (${response.status}): ${errorObj.message || errorText}`);
+        throw new Error(`Database error: ${error.message || error.code}`);
       }
 
       console.log('========== PRODUCT CREATED SUCCESSFULLY ==========');
-      return { success: true };
+      console.log('Created product:', data);
+      console.log('🔍 VERIFICATION - Created product seller_id:', data?.seller_id);
+      
+      // Verify the product was created with seller_id
+      if (!data?.seller_id) {
+        console.error('❌ CRITICAL: Product was created but seller_id is NULL!');
+        throw new Error('Product was created but seller_id was not saved. This is a database issue.');
+      }
+      
+      return { success: true, data };
     } catch (error) {
       console.error('========== PRODUCT CREATION FAILED ==========');
       console.error('Error creating product:', error);
@@ -431,12 +377,91 @@ export const productService = {
   // Delete a product
   async deleteProduct(productId) {
     try {
-      const { error } = await supabase
+      console.log('deleteProduct called with ID:', productId);
+      
+      if (!productId) {
+        throw new Error('Product ID is required');
+      }
+
+      // First, try to delete associated images from storage if they exist
+      try {
+        const { data: productData } = await supabase
+          .from('product')
+          .select('images, image_url')
+          .eq('id', productId)
+          .single();
+
+        if (productData) {
+          const imagesToDelete = [];
+          
+          // Collect all image paths
+          if (productData.images && Array.isArray(productData.images)) {
+            imagesToDelete.push(...productData.images);
+          }
+          if (productData.image_url) {
+            if (Array.isArray(productData.image_url)) {
+              imagesToDelete.push(...productData.image_url);
+            } else {
+              imagesToDelete.push(productData.image_url);
+            }
+          }
+
+          // Delete images from storage (non-blocking - continue even if this fails)
+          for (const imagePath of imagesToDelete) {
+            if (imagePath && typeof imagePath === 'string' && !imagePath.startsWith('http')) {
+              try {
+                const pathParts = imagePath.split('/');
+                const fileName = pathParts[pathParts.length - 1];
+                await supabase.storage
+                  .from('product-images')
+                  .remove([fileName]);
+              } catch (storageError) {
+                console.warn('Failed to delete image from storage:', imagePath, storageError);
+                // Continue with product deletion even if image deletion fails
+              }
+            }
+          }
+        }
+      } catch (fetchError) {
+        console.warn('Could not fetch product images for deletion:', fetchError);
+        // Continue with product deletion
+      }
+
+      // Check if product is referenced in order_items (which has ON DELETE RESTRICT)
+      const { data: orderItems, error: checkError } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('product_id', productId)
+        .limit(1);
+
+      if (checkError) {
+        console.warn('Could not check order_items:', checkError);
+      }
+
+      if (orderItems && orderItems.length > 0) {
+        throw new Error('Cannot delete product: It is referenced in existing orders. Please contact an administrator.');
+      }
+
+      // Delete the product from database
+      const { data, error } = await supabase
         .from('product')
         .delete()
-        .eq('id', productId);
+        .eq('id', productId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase delete error:', error);
+        // Provide more helpful error messages
+        if (error.code === '23503') {
+          throw new Error('Cannot delete product: It is referenced in other records (orders, cart, etc.).');
+        } else if (error.code === '42501') {
+          throw new Error('Permission denied: You do not have permission to delete products. Please check your user role.');
+        } else {
+          throw new Error(error.message || 'Failed to delete product');
+        }
+      }
+
+      console.log('Product deleted successfully:', data);
       return true;
     } catch (error) {
       console.error('Error deleting product:', error);

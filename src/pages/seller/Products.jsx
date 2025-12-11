@@ -1,24 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/SupabaseAuthContext';
 import { productService } from '../../services/productService';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, Eye, Package } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 
 const Products = () => {
   const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState('');
+  const lastLoadTime = useRef(0);
 
   useEffect(() => {
     if (user) {
       loadProducts();
     }
     loadCategories();
+  }, [user]);
+
+  // Refresh products when navigating to this page (e.g., after creating a product)
+  useEffect(() => {
+    const now = Date.now();
+    // Only refresh if it's been more than 1 second since last load (prevents duplicate loads)
+    if (user && now - lastLoadTime.current > 1000) {
+      console.log('Page loaded/navigated, refreshing products...');
+      loadProducts();
+    }
+  }, [location.pathname, user]);
+
+  // Refresh products when page becomes visible (e.g., after creating a product)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        const now = Date.now();
+        // Only refresh if it's been more than 2 seconds since last load
+        if (now - lastLoadTime.current > 2000) {
+          console.log('Page became visible, refreshing products...');
+          loadProducts();
+        }
+      }
+    };
+
+    const handleFocus = () => {
+      if (user) {
+        const now = Date.now();
+        // Only refresh if it's been more than 2 seconds since last load
+        if (now - lastLoadTime.current > 2000) {
+          console.log('Window focused, refreshing products...');
+          loadProducts();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [user]);
 
   const loadProducts = async () => {
@@ -29,11 +74,38 @@ const Products = () => {
     
     try {
       setLoading(true);
+      setError('');
+      
+      // Try using Supabase client directly first (more reliable)
+      try {
+        const { data: supabaseProducts, error: supabaseError } = await supabase
+          .from('product')
+          .select('*')
+          .eq('seller_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (supabaseError) {
+          console.warn('Supabase client fetch failed, trying REST API:', supabaseError);
+          throw supabaseError;
+        }
+
+        console.log(`✅ Loaded ${supabaseProducts?.length || 0} products via Supabase client`);
+        setProducts(supabaseProducts || []);
+        lastLoadTime.current = Date.now();
+        return;
+      } catch (supabaseErr) {
+        console.warn('Supabase client method failed, falling back to REST API');
+      }
+
+      // Fallback to REST API
       const data = await productService.fetchSellerProducts(user.id);
-      setProducts(data);
+      console.log(`✅ Loaded ${data?.length || 0} products via REST API`);
+      setProducts(data || []);
+      lastLoadTime.current = Date.now();
     } catch (err) {
-      setError('Failed to load products');
+      setError('Failed to load products. Please refresh the page.');
       console.error('Error loading products:', err);
+      setProducts([]);
     } finally {
       setLoading(false);
     }

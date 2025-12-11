@@ -18,8 +18,10 @@ CREATE TABLE "product" (
   "description" TEXT,
   "price" DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
   "image_url" TEXT,
+  "images" TEXT[],
   "category" TEXT,
   "stock" INTEGER DEFAULT 0 CHECK (stock >= 0),
+  "seller_id" UUID REFERENCES auth.users("id") ON DELETE SET NULL,
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -27,6 +29,7 @@ CREATE TABLE "product" (
 -- Create index for faster queries
 CREATE INDEX "idx_product_category" ON "product" ("category");
 CREATE INDEX "idx_product_created_at" ON "product" ("created_at" DESC);
+CREATE INDEX "idx_product_seller_id" ON "product" ("seller_id");
 
 -- =====================================================
 -- 2. PROFILE TABLE

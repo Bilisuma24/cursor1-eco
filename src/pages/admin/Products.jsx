@@ -59,11 +59,17 @@ export default function AdminProducts() {
       return;
     }
     setDeletingId(id);
+    setError(null);
     try {
+      console.log('Attempting to delete product:', id);
       await productService.deleteProduct(id);
+      console.log('Product deleted successfully');
       await load();
     } catch (e) {
-      setError(e.message);
+      console.error('Delete error details:', e);
+      const errorMessage = e?.message || e?.error?.message || e?.toString() || 'Failed to delete product. Please check console for details.';
+      setError(`Delete failed: ${errorMessage}`);
+      alert(`Failed to delete product: ${errorMessage}`);
     } finally {
       setDeletingId(null);
     }
