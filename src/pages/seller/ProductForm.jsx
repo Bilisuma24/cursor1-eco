@@ -337,6 +337,15 @@ const ProductForm = () => {
       return;
     }
 
+    // CRITICAL: Verify Supabase session exists before proceeding
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (!session) {
+      console.error('No Supabase session found!');
+      setError('Your session has expired. Please log out and log back in.');
+      return;
+    }
+    console.log('✅ Supabase session verified. User ID:', session.user.id);
+
     console.log('User ID:', user.id);
     console.log('Form data:', formData);
 
