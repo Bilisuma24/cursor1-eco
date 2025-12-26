@@ -141,7 +141,7 @@ export default function Home() {
           description: product.description || '',
           price: product.price || 0,
           currency: product.currency || 'ETB',
-          images: convertedImages.length > 0 ? convertedImages : [`data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`],
+          images: convertedImages,
           category: product.category || 'General',
           rating: product.rating || 4.0,
           reviewCount: product.review_count || 0,
@@ -164,11 +164,14 @@ export default function Home() {
         return acc;
       }, []);
 
+      // Filter out products without images
+      const productsWithImages = uniqueProducts.filter(p => (p.images?.[0] || p.image));
+
       // Store all products
-      setAllProducts(uniqueProducts);
+      setAllProducts(productsWithImages);
       // Set featured and trending products
-      setFeaturedProducts(uniqueProducts.slice(0, 20));
-      setTrendingProducts(uniqueProducts.slice(0, 20));
+      setFeaturedProducts(productsWithImages.slice(0, 20));
+      setTrendingProducts(productsWithImages.slice(0, 20));
     } catch (error) {
       console.error('Error fetching products:', error);
       const fallbackProducts = productsData.products || [];
@@ -602,45 +605,7 @@ export default function Home() {
             {/* Promo Banner Ad Section */}
             <div className="my-8">
               <CategoryPromoBanner
-                products={(() => {
-                  // Get all products with discounts (prioritize database products)
-                  const dbProducts = allProducts.filter(p =>
-                    p.isFromDatabase &&
-                    p.discount &&
-                    p.discount > 0
-                  );
-
-                  // If no database products with discounts, use any database products
-                  const fallbackDbProducts = allProducts.filter(p => p.isFromDatabase);
-
-                  // Use database products first, then fallback
-                  const availableProducts = dbProducts.length > 0 ? dbProducts : fallbackDbProducts;
-
-                  const diverseProducts = [];
-                  const seenCategories = new Set();
-
-                  // First pass: try to get different categories
-                  for (const p of availableProducts) {
-                    if (diverseProducts.length >= 4) break;
-                    const cat = p.category || 'General';
-                    if (!seenCategories.has(cat)) {
-                      diverseProducts.push(p);
-                      seenCategories.add(cat);
-                    }
-                  }
-
-                  // Second pass: fill up to 4 if needed
-                  if (diverseProducts.length < 4) {
-                    for (const p of availableProducts) {
-                      if (diverseProducts.length >= 4) break;
-                      if (!diverseProducts.find(dp => dp.id === p.id)) {
-                        diverseProducts.push(p);
-                      }
-                    }
-                  }
-
-                  return diverseProducts;
-                })()}
+                products={allProducts.filter(p => (p.isSuperDeal || (p.isFromDatabase && p.discount && p.discount > 0)) && (p.images?.[0] || p.image))}
                 title="SuperDeals"
               />
             </div>

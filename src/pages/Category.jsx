@@ -77,7 +77,7 @@ export default function Category() {
           description: product.description || '',
           price: product.price || 0,
           currency: product.currency || 'ETB',
-          images: convertedImages.length > 0 ? convertedImages : [`data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`],
+          images: convertedImages,
           category: product.category || 'General',
           rating: product.rating || 4.0,
           reviewCount: product.review_count || 0,
@@ -109,7 +109,10 @@ export default function Category() {
         return acc;
       }, []);
 
-      setProducts(uniqueProducts);
+      // Filter out products without images
+      const productsWithImages = uniqueProducts.filter(p => (p.images?.[0] || p.image));
+
+      setProducts(productsWithImages);
     } catch (error) {
       console.error('Error fetching category products:', error);
       // Fallback to static products filtered by category
@@ -146,6 +149,10 @@ export default function Category() {
         (p.brand && p.brand.toLowerCase().includes(lowerQ));
 
       if (!matchesSearch) return false;
+    }
+    // 3. Image availability filter
+    if (!(p.images?.[0] || p.image)) {
+      return false;
     }
     return true;
   });
@@ -591,41 +598,7 @@ export default function Category() {
                         {/* Insert promo banner after every 8 products */}
                         {(index + 1) % 8 === 0 && index < filteredProducts.length - 1 && (
                           <CategoryPromoBanner
-                            products={(() => {
-                              // Get database products with discounts
-                              const dbProducts = products.filter(p =>
-                                p.isFromDatabase &&
-                                p.discount &&
-                                p.discount > 0
-                              );
-
-                              // Fallback to any database products
-                              const fallbackDbProducts = products.filter(p => p.isFromDatabase);
-
-                              const availableProducts = dbProducts.length > 0 ? dbProducts : fallbackDbProducts;
-                              const diverseProducts = [];
-                              const seenCategories = new Set();
-
-                              for (const p of availableProducts) {
-                                if (diverseProducts.length >= 4) break;
-                                const cat = p.category || 'General';
-                                if (!seenCategories.has(cat)) {
-                                  diverseProducts.push(p);
-                                  seenCategories.add(cat);
-                                }
-                              }
-
-                              if (diverseProducts.length < 4) {
-                                for (const p of availableProducts) {
-                                  if (diverseProducts.length >= 4) break;
-                                  if (!diverseProducts.find(dp => dp.id === p.id)) {
-                                    diverseProducts.push(p);
-                                  }
-                                }
-                              }
-
-                              return diverseProducts;
-                            })()}
+                            products={products.filter(p => (p.isSuperDeal || (p.isFromDatabase && p.discount && p.discount > 0)) && (p.images?.[0] || p.image))}
                             title="SuperDeals"
                           />
                         )}
