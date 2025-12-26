@@ -3,6 +3,7 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import ProductGrid from "../components/ProductGrid";
+import CategoryPromoBanner from "../components/CategoryPromoBanner";
 import productsData from "../data/products.js";
 import { supabase } from "../lib/supabaseClient";
 
@@ -584,8 +585,51 @@ export default function Category() {
                   </div>
                 ) : filteredProducts.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {filteredProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                    {filteredProducts.map((product, index) => (
+                      <React.Fragment key={product.id}>
+                        <ProductCard product={product} />
+                        {/* Insert promo banner after every 8 products */}
+                        {(index + 1) % 8 === 0 && index < filteredProducts.length - 1 && (
+                          <CategoryPromoBanner
+                            products={(() => {
+                              // Get database products with discounts
+                              const dbProducts = products.filter(p =>
+                                p.isFromDatabase &&
+                                p.discount &&
+                                p.discount > 0
+                              );
+
+                              // Fallback to any database products
+                              const fallbackDbProducts = products.filter(p => p.isFromDatabase);
+
+                              const availableProducts = dbProducts.length > 0 ? dbProducts : fallbackDbProducts;
+                              const diverseProducts = [];
+                              const seenCategories = new Set();
+
+                              for (const p of availableProducts) {
+                                if (diverseProducts.length >= 4) break;
+                                const cat = p.category || 'General';
+                                if (!seenCategories.has(cat)) {
+                                  diverseProducts.push(p);
+                                  seenCategories.add(cat);
+                                }
+                              }
+
+                              if (diverseProducts.length < 4) {
+                                for (const p of availableProducts) {
+                                  if (diverseProducts.length >= 4) break;
+                                  if (!diverseProducts.find(dp => dp.id === p.id)) {
+                                    diverseProducts.push(p);
+                                  }
+                                }
+                              }
+
+                              return diverseProducts;
+                            })()}
+                            title="SuperDeals"
+                          />
+                        )}
+                      </React.Fragment>
                     ))}
                   </div>
                 ) : (

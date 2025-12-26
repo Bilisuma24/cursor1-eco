@@ -4,6 +4,7 @@ import { Search, Star, ChevronRight, ChevronLeft, Menu, ChevronDown, Sparkles } 
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import ProductCard from "../components/ProductCard";
+import CategoryPromoBanner from "../components/CategoryPromoBanner";
 import productsData from "../data/products.js";
 import { supabase } from "../lib/supabaseClient";
 
@@ -597,6 +598,52 @@ export default function Home() {
                 ))}
               </div>
             </section>
+
+            {/* Promo Banner Ad Section */}
+            <div className="my-8">
+              <CategoryPromoBanner
+                products={(() => {
+                  // Get all products with discounts (prioritize database products)
+                  const dbProducts = allProducts.filter(p =>
+                    p.isFromDatabase &&
+                    p.discount &&
+                    p.discount > 0
+                  );
+
+                  // If no database products with discounts, use any database products
+                  const fallbackDbProducts = allProducts.filter(p => p.isFromDatabase);
+
+                  // Use database products first, then fallback
+                  const availableProducts = dbProducts.length > 0 ? dbProducts : fallbackDbProducts;
+
+                  const diverseProducts = [];
+                  const seenCategories = new Set();
+
+                  // First pass: try to get different categories
+                  for (const p of availableProducts) {
+                    if (diverseProducts.length >= 4) break;
+                    const cat = p.category || 'General';
+                    if (!seenCategories.has(cat)) {
+                      diverseProducts.push(p);
+                      seenCategories.add(cat);
+                    }
+                  }
+
+                  // Second pass: fill up to 4 if needed
+                  if (diverseProducts.length < 4) {
+                    for (const p of availableProducts) {
+                      if (diverseProducts.length >= 4) break;
+                      if (!diverseProducts.find(dp => dp.id === p.id)) {
+                        diverseProducts.push(p);
+                      }
+                    }
+                  }
+
+                  return diverseProducts;
+                })()}
+                title="SuperDeals"
+              />
+            </div>
 
             {/* Recommended products */}
             <section className="bg-white md:bg-transparent rounded-2xl md:rounded-none border border-gray-200 md:border-0 shadow-sm md:shadow-none px-6 md:px-0 py-6 md:py-0">
