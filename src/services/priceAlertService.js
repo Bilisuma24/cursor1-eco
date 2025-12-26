@@ -160,7 +160,7 @@ export const priceAlertService = {
         .select('*')
         .eq('user_id', userId)
         .eq('product_id', productId)
-        .single();
+        .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors when no row found
 
       // PGRST116 = no rows found (this is OK)
       // PGRST205/406 = table doesn't exist or schema issue (gracefully handle)
@@ -170,7 +170,7 @@ export const priceAlertService = {
         }
         // Handle 406 Not Acceptable (table doesn't exist) or PGRST205
         if (error.code === 'PGRST205' || error.status === 406 || error.message?.includes('Not Acceptable')) {
-          // Table doesn't exist yet - return flag to indicate this
+          // Table doesn't exist yet - return flag to indicate this (don't log as error)
           return { success: true, data: null, tableExists: false };
         }
         // Only log other errors
@@ -181,12 +181,12 @@ export const priceAlertService = {
     } catch (error) {
       // Check if it's a 406 error from the network request
       if (error?.status === 406 || error?.message?.includes('Not Acceptable') || error?.code === 'PGRST205') {
-        // Return a special flag to indicate table doesn't exist
+        // Return a special flag to indicate table doesn't exist (don't log as error)
         return { success: true, data: null, tableExists: false };
       }
       // Only log unexpected errors
       console.error('Error fetching product alert:', error);
-      return { success: true, data: null };
+      return { success: true, data: null, tableExists: true };
     }
   },
 

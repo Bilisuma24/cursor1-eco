@@ -344,7 +344,7 @@ export default function Cart() {
                         </Link>
                         <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4 space-y-1 lg:space-y-0">
                           <div className="flex items-center space-x-2 lg:space-x-3">
-                            <span className="text-sm lg:text-lg xl:text-xl font-bold text-red-600 dark:text-red-400">
+                            <span className="text-sm lg:text-lg xl:text-xl font-medium text-red-600 dark:text-red-400">
                               ETB{formatPrice(item.price)}
                             </span>
                             {item.originalPrice && item.originalPrice > item.price && (

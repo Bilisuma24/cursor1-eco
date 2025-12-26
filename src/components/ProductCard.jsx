@@ -128,7 +128,7 @@ export default function ProductCard({ product, onAddToCart, onAdd, viewMode = 'g
           </div>
           <div className="flex-1 p-3 flex flex-col justify-between">
             <div>
-              <h3 className="text-sm font-normal text-gray-900 line-clamp-2 mb-2">
+              <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">
                 {product.name}
               </h3>
               <div className="flex items-center gap-1 mb-2">
@@ -137,7 +137,7 @@ export default function ProductCard({ product, onAddToCart, onAdd, viewMode = 'g
               </div>
             </div>
             <div>
-              <div className="text-lg font-bold text-red-600">
+              <div className="text-lg font-medium text-red-600">
                 {getCurrencySymbol()}{formatPrice(product.price || 0)}
               </div>
               {product.originalPrice && (
@@ -155,91 +155,114 @@ export default function ProductCard({ product, onAddToCart, onAdd, viewMode = 'g
 
   const isChoiceDeal = (product.rating || 0) >= 4.6;
   const hasSale = product.originalPrice && product.originalPrice > product.price;
+  const discountPercent = hasSale ? Math.round(100 - (product.price / product.originalPrice) * 100) : 0;
+  const hasCoupons = product.couponsApplicable !== false; // Default to true if not specified
 
   return (
-    <div className="relative">
-      {/* Product Card */}
+    <div className="relative w-full">
+      {/* Product Card - AliExpress Mobile App Exact Match */}
       <div 
-        className="bg-white border border-gray-200 overflow-hidden cursor-pointer flex flex-col h-full hover:shadow-md transition-shadow"
+        className="bg-white overflow-hidden cursor-pointer flex flex-col h-full rounded-sm"
         onClick={() => navigate(`/product/${product.id}`)}
       >
-      {/* Image Container - AliExpress Style */}
-      <div className="relative border-b border-gray-200 overflow-hidden w-full aspect-square">
-        {/* Product Image - fills 100% of 1:1 frame with no space */}
+      {/* Image Container - Square Frame, AliExpress Style - Smaller on mobile */}
+      <div className="relative w-full aspect-[3/4] sm:aspect-square overflow-hidden bg-[#f5f5f5]">
+        {/* Product Image - fills 100% of square frame */}
         <img
           src={product.images?.[selectedImage] || 'https://via.placeholder.com/300'}
           alt={product.name}
-          className="w-full h-full object-cover"
-          style={{ objectPosition: 'center center' }}
+          className="absolute inset-0 w-full h-full object-cover"
         />
         
-        {/* Sale Badge - Top Left (rectangular red badge) */}
-        {hasSale && (
-          <div className="absolute top-2 left-2 bg-[#ff4747] text-white text-[10px] font-semibold px-2 py-0.5 z-10">
-            Sale
+        {/* Badges Container - Top Left, Horizontal Layout (AliExpress Style) */}
+        <div className="absolute top-0.5 left-0.5 flex flex-row gap-0.5 z-10">
+          {/* Choice Badge - Yellow rectangular (AliExpress yellow #FFD700) */}
+          {isChoiceDeal && (
+            <div className="bg-yellow-400 text-gray-900 text-[7px] font-semibold uppercase px-0.5 py-0.5 rounded leading-none">
+              Choice
+            </div>
+          )}
+          
+          {/* SuperDeals Badge - Purple (AliExpress purple) */}
+          {product.superDeals && (
+            <div className="bg-purple-500 text-white text-[7px] font-semibold px-0.5 py-0.5 rounded leading-none">
+              SuperDeals
+            </div>
+          )}
+        </div>
+        
+        {/* Discount Percentage Badge - Top Right (circular white badge, AliExpress style) */}
+        {hasSale && discountPercent > 0 && (
+          <div className="absolute top-0.5 right-0.5 bg-white text-[#ff4747] text-[7px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm z-10">
+            -{discountPercent}%
           </div>
         )}
         
-        {/* Choice Badge - Top Left (rectangular red badge, only if no Sale or if both should show) */}
-        {isChoiceDeal && !hasSale && (
-          <div className="absolute top-2 left-2 bg-[#ff4747] text-white text-[10px] font-semibold uppercase px-2 py-0.5 z-10">
-            Choice
-          </div>
-        )}
-        
-        {/* Discount Percentage Badge - Top Right (circular white badge) */}
-        {hasSale && (
-          <div className="absolute top-2 right-2 bg-white text-[#ff4747] text-xs font-semibold w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 shadow-sm z-10">
-            -{Math.round(100 - (product.price / product.originalPrice) * 100)}%
-          </div>
-        )}
-        
-        {/* Shopping Cart Icon - Bottom Right (white circular button) */}
+        {/* Shopping Cart Icon - Bottom Right (white circular button, AliExpress style) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             handleAddToCart(product);
           }}
-          className="absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all z-10"
+          className="absolute bottom-1 right-1 w-6 h-6 rounded-full flex items-center justify-center bg-white shadow-lg z-10 active:scale-95 transition-transform"
           title="Add to cart"
         >
-          <ShoppingCart className="w-5 h-5 text-gray-900" />
+          <ShoppingCart className="w-3 h-3 text-gray-800" strokeWidth={2} />
         </button>
       </div>
 
-      {/* Product Info - AliExpress Style */}
-      <div className="px-3 py-3 flex flex-col gap-2 flex-1">
-        <h3 className="text-xs font-normal text-gray-900 line-clamp-2 leading-tight">
+      {/* Product Info - AliExpress Mobile App Style - Compact on mobile */}
+      <div className="px-0.5 py-0.5 sm:px-1 sm:py-1 flex flex-col gap-0.5 flex-1">
+        {/* Product Name - AliExpress small text, truncated */}
+        <h3 className="text-[9px] font-semibold text-gray-900 line-clamp-2 leading-tight min-h-[1.75rem]">
           {product.name || 'Untitled Product'}
         </h3>
 
-        {/* Price */}
-        <div className="flex flex-wrap items-baseline gap-2">
-          <div className="text-base font-bold text-[#ff4747]">
+        {/* Coupons Applicable Text - AliExpress style */}
+        {hasCoupons && (
+          <div className="text-[8px] text-gray-600 leading-tight">
+            Coupons applicable
+          </div>
+        )}
+
+        {/* Rating and Sold Count - AliExpress Format: "X sold ★ rating" or "X added to cart" */}
+        {product.addedToCart ? (
+          <div className="text-[8px] text-gray-600 leading-tight">
+            {product.addedToCart.toLocaleString()} added to cart
+          </div>
+        ) : product.sold && product.rating ? (
+          <div className="flex items-center gap-0.5 text-[8px] text-gray-600 leading-tight">
+            <span>{product.sold.toLocaleString()} sold</span>
+            <span className="text-yellow-400">★</span>
+            <span>{product.rating.toFixed(1)}</span>
+          </div>
+        ) : product.sold ? (
+          <div className="text-[8px] text-gray-600 leading-tight">
+            {product.sold.toLocaleString()} sold
+          </div>
+        ) : null}
+
+        {/* Price Section - AliExpress Mobile Format */}
+        <div className="flex flex-col gap-0 mt-0.5">
+          {/* Current Price - Bold red (AliExpress red #ff4747) */}
+          <div className="text-[11px] font-medium text-[#ff4747] leading-tight">
             {getCurrencySymbol()}{formatPrice(product.price || 0)}
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
-            <div className="text-sm text-gray-400 line-through">
-              {getCurrencySymbol()}{formatPrice(product.originalPrice)}
-            </div>
+            <>
+              {/* Original Price - Strikethrough gray */}
+              <div className="text-[8px] text-gray-400 line-through leading-tight">
+                {getCurrencySymbol()}{formatPrice(product.originalPrice)}
+              </div>
+              {/* Discount Text - Small red (AliExpress style) */}
+              {discountPercent > 0 && (
+                <div className="text-[8px] text-[#ff4747] leading-tight font-medium">
+                  -{discountPercent}%
+                </div>
+              )}
+            </>
           )}
         </div>
-
-        {/* Rating and Sold Count - AliExpress Format */}
-        {product.rating && (
-          <div className="flex items-center gap-1 text-xs text-gray-600">
-            {renderStars(product.rating)}
-            <span className="font-medium text-gray-700">{product.rating?.toFixed(1)}</span>
-            <span className="text-gray-500">|</span>
-            <span className="text-gray-500">{product.sold ? `${product.sold} sold` : 'Popular'}</span>
-          </div>
-        )}
-
-        {!product.rating && product.sold && (
-          <div className="text-xs text-gray-500">
-            {product.sold} sold
-          </div>
-        )}
       </div>
     </div>
     </div>

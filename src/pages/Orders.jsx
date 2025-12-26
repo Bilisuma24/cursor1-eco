@@ -284,7 +284,7 @@ export default function Orders() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-gray-900">{formatPrice(order.total)}</div>
+                      <div className="text-lg font-medium text-gray-900">{formatPrice(order.total)}</div>
                       <p className="text-sm text-gray-600">{order.items.length} item(s)</p>
                     </div>
                   </div>

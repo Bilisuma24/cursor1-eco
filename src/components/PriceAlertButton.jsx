@@ -22,7 +22,7 @@ export default function PriceAlertButton({ product, currentPrice }) {
   }, [user, product?.id, tableExists]);
 
   const loadAlert = async () => {
-    if (!user || !product?.id) return;
+    if (!user || !product?.id || !tableExists) return; // Don't make request if we know table doesn't exist
 
     try {
       const result = await priceAlertService.getProductAlert(user.id, product.id);
@@ -43,6 +43,9 @@ export default function PriceAlertButton({ product, currentPrice }) {
       // Check if error is due to table not existing (406 or PGRST205)
       if (error?.status === 406 || error?.code === 'PGRST205' || error?.message?.includes('Not Acceptable')) {
         setTableExists(false);
+      } else {
+        // Only log unexpected errors
+        console.error('Error loading price alert:', error);
       }
       setAlert(null);
       setTargetPrice('');

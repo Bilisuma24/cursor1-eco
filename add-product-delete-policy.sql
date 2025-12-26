@@ -24,3 +24,12 @@ CREATE POLICY "Users can delete products"
 
 
 
+
+
+
+
+
+
+
+
+

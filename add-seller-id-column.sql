@@ -14,3 +14,12 @@ CREATE INDEX IF NOT EXISTS "idx_product_seller_id" ON "product" ("seller_id");
 
 
 
+
+
+
+
+
+
+
+
+

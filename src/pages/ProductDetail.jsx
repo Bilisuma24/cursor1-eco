@@ -452,7 +452,7 @@ export default function ProductDetail() {
   const renderPriceSection = () => (
     <div className="bg-gradient-to-br from-[#fff6f2] to-white border border-[#ffd5c2] rounded-xl p-2 sm:p-2.5 shadow-sm space-y-1.5">
       <div className="flex flex-wrap items-baseline gap-3">
-        <span className="text-3xl sm:text-4xl font-bold text-[#ff4747]">
+        <span className="text-3xl sm:text-4xl font-medium text-[#ff4747]">
           {formatPrice(product.price)}
         </span>
         {product.originalPrice && (
@@ -617,14 +617,14 @@ export default function ProductDetail() {
         <button
           onClick={handleBuyNow}
           disabled={product.stock !== undefined && product.stock !== null && product.stock === 0}
-          className="min-h-[52px] rounded-xl bg-gradient-to-r from-[#ff9248] to-[#ff6a3c] text-white font-semibold text-base py-3.5 px-4 shadow-lg shadow-orange-200/60 hover:from-[#ff7c3a] hover:to-[#ff512f] active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-[52px] rounded-xl bg-gradient-to-r from-[#ff9248] to-[#ff6a3c] text-white font-medium text-base py-3.5 px-4 shadow-lg shadow-orange-200/60 hover:from-[#ff7c3a] hover:to-[#ff512f] active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Buy Now
         </button>
         <button
           onClick={handleAddToCart}
           disabled={product.stock !== undefined && product.stock !== null && product.stock === 0}
-          className="min-h-[52px] rounded-xl border-2 border-[#ff6a3c] text-[#ff6a3c] font-semibold text-base py-3.5 px-4 bg-white hover:bg-[#fff4ef] active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-[52px] rounded-xl border-2 border-[#ff6a3c] text-[#ff6a3c] font-medium text-base py-3.5 px-4 bg-white hover:bg-[#fff4ef] active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
         </button>
@@ -985,7 +985,7 @@ export default function ProductDetail() {
                       Hot deal
                     </span>
                   )}
-                  <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+                  <h1 className="text-3xl font-semibold text-gray-900 leading-tight">
                     {product.name}
                   </h1>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">

@@ -557,6 +557,28 @@ CREATE POLICY "public_read_products"
   const categories = productsData.categories || [];
   const allCategories = ['For you', 'All', ...categories.map(cat => cat.name)];
 
+  // Get subcategories for the selected category
+  const getSubcategoriesForCategory = () => {
+    if (!filters.category) return [];
+    const categoryObj = categories.find(cat => cat.name === filters.category);
+    return categoryObj?.subcategories || [];
+  };
+
+  const availableSubcategories = getSubcategoriesForCategory();
+
+  // Handle subcategory selection
+  const handleSubcategorySelect = (subcategory) => {
+    if (filters.subcategory === subcategory) {
+      // If already selected, clear subcategory filter
+      setFilters((prev) => ({ ...prev, subcategory: '' }));
+      navigate(`/shop?category=${encodeURIComponent(filters.category)}`);
+    } else {
+      // Select new subcategory
+      setFilters((prev) => ({ ...prev, subcategory }));
+      navigate(`/shop?category=${encodeURIComponent(filters.category)}&subcategory=${encodeURIComponent(subcategory)}`);
+    }
+  };
+
   // Mobile category handler
   const handleCategorySelect = (categoryName) => {
     if (categoryName === 'For you') {
@@ -654,7 +676,7 @@ CREATE POLICY "public_read_products"
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-3 gap-2 p-2">
+                  <div className="grid grid-cols-2 gap-2 p-2">
                     {filteredProducts.map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}
@@ -696,7 +718,9 @@ CREATE POLICY "public_read_products"
           onFilterChange={handleFilterChange}
           categories={productsData.categories}
           filters={filters}
+          products={products}
         />
+
 
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Network Error Banner - Prominent */}
@@ -909,7 +933,7 @@ CREATE POLICY "public_read_products"
           {/* Load More Button - Desktop */}
           {filteredProducts.length > 0 && (
             <div className="text-center mt-12">
-              <button className="bg-blue-600 text-white px-10 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-base shadow-md hover:shadow-lg">
+              <button className="bg-blue-600 text-white px-10 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-base shadow-md hover:shadow-lg">
                 Load More Products
               </button>
             </div>

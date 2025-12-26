@@ -102,7 +102,7 @@ function WishlistCard({ product, handleRemove, handleMoveToCart, removingId, pus
 
           {/* Price - Prominent on mobile */}
           <div className="flex flex-wrap items-baseline gap-0.5 sm:gap-2 mb-1 sm:mb-1.5">
-            <span className="text-xs sm:text-lg font-bold text-red-600 dark:text-red-400">
+            <span className="text-xs sm:text-lg font-medium text-red-600 dark:text-red-400">
               {formatPrice(product.price)}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (

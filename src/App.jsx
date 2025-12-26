@@ -1,11 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
-import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu, Camera, Mic, QrCode, ChevronRight } from "lucide-react";
+import { Search, Heart, User, ChevronDown, Globe, MapPin, LogOut, ChevronUp, ShoppingCart, Menu, Camera, Mic, QrCode, ChevronRight, Bell } from "lucide-react";
 import { useState, useContext, useEffect, useRef } from "react";
 import productsData from "./data/products.js";
 import Logo from "./components/Logo";
+import Navbar from "./components/Navbar";
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
+import Category from "./pages/Category";
+import SearchResults from "./pages/SearchResults";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import StoreProfile from "./pages/StoreProfile";
@@ -39,263 +42,6 @@ import { SupabaseAuthProvider, useAuth } from "./contexts/SupabaseAuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { useUserRole } from "./hooks/useUserRole";
 import { PublicRoute } from "./components/ProtectedRoute";
-
-function NavbarContent() {
-  const { user, signOut, loading: authLoading } = useAuth();
-  const { userRole, isSeller, isAdmin, loading: roleLoading } = useUserRole();
-  const { wishlist, getCartItemsCount } = useCart();
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchCategory, setSearchCategory] = useState("");
-  const dropdownRef = useRef(null);
-  const cartItemsCount = typeof getCartItemsCount === "function" ? getCartItemsCount() : 0;
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (searchTerm.trim()) params.set("search", searchTerm);
-    if (searchCategory) params.set("category", searchCategory);
-    const qs = params.toString();
-    window.location.href = `/shop${qs ? `?${qs}` : ""}`;
-  };
-
-  const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen);
-
-  const handleLogout = async () => {
-    await signOut();
-    setUserDropdownOpen(false);
-    window.location.href = "/login";
-  };
-
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    if (user?.user_metadata?.name) {
-      return user.user_metadata.name.split(' ').map(n => n[0]).join('').toUpperCase();
-    }
-    if (user?.email) {
-      return user.email[0].toUpperCase();
-    }
-    return 'U';
-  };
-
-  const getUserDisplayName = () => {
-    return user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
-  };
-
-  const getAvatarUrl = () => user?.user_metadata?.avatar_url || "";
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setUserDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  return (
-    <div className="bg-white shadow-sm border-b border-gray-200">
-      {/* Desktop layout */}
-      <div className="hidden lg:block">
-        <div className="bg-white">
-          <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-8">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 min-w-[180px]">
-              <Logo className="w-12 h-12" />
-              <div className="flex flex-col items-start">
-                <span className="text-2xl text-[#3b82f6] leading-none font-bold">Kush deals</span>
-                <span className="text-xs uppercase tracking-[0.2em] text-[#ff6a3c] font-semibold">MARKETSPACE</span>
-              </div>
-            </Link>
-
-            {/* Search + quick tools */}
-            <div className="flex-1 flex flex-col justify-center items-center gap-1">
-              <form onSubmit={handleSearch} className="w-full max-w-xl">
-                <div className="flex items-stretch border border-[#ff4747] rounded-full overflow-hidden bg-white shadow-sm">
-                  <select
-                    value={searchCategory}
-                    onChange={(e) => setSearchCategory(e.target.value)}
-                    className="hidden xl:block w-28 bg-gray-100 text-sm text-gray-600 px-3 focus:outline-none focus:ring-0 border-r border-gray-200"
-                  >
-                    <option value="">All Categories</option>
-                    {productsData.categories.map((c) => (
-                      <option key={c.id} value={c.name}>{c.name}</option>
-                    ))}
-                  </select>
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Search for great deals, products, and trends"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-28 h-9 text-sm text-gray-700 focus:outline-none"
-                    />
-                    <div className="absolute right-24 top-1/2 -translate-y-1/2 flex items-center gap-1 text-gray-400">
-                      <button type="button" className="p-1 hover:text-[#ff4747] transition-colors" title="Image search">
-                        <Camera className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1 hover:text-[#ff4747] transition-colors" title="Voice search">
-                        <Mic className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <button
-                      type="submit"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 bg-[#ff4747] hover:bg-[#ff2e2e] transition-colors text-white font-semibold uppercase text-[11px] px-4 py-1.5 rounded-full"
-                    >
-                      Search
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-6 text-sm text-gray-700">
-              <div ref={dropdownRef} className="relative">
-                {user ? (
-                  <button
-                    type="button"
-                    onClick={toggleUserDropdown}
-                    className="flex items-center gap-2 hover:text-[#ff4747] transition-colors"
-                  >
-                    {getAvatarUrl() ? (
-                      <img src={getAvatarUrl()} alt="Avatar" className="w-9 h-9 rounded-full object-cover border border-gray-200" />
-                    ) : (
-                      <div className="w-9 h-9 bg-[#ff4747] text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                        {getUserInitials()}
-                      </div>
-                    )}
-                    <div className="flex flex-col items-start">
-                      <span className="text-[11px] text-gray-500 leading-none">Hi,</span>
-                      <span className="text-sm font-semibold leading-tight">{getUserDisplayName()}</span>
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
-                  </button>
-                ) : (
-                  <div className="flex flex-col text-xs text-gray-500 text-right">
-                    <span className="font-medium text-gray-700">Welcome</span>
-                    <div className="flex items-center gap-2 mt-1 text-[#ff4747]">
-                      <Link to="/login" className="font-semibold hover:underline cursor-pointer">Login</Link>
-                      <span className="text-gray-300">|</span>
-                      <Link to="/signup" className="font-semibold hover:underline cursor-pointer">Register</Link>
-                    </div>
-                  </div>
-                )}
-                {user && userDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-3 w-60 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">{getUserDisplayName()}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
-                    </div>
-                    <div className="py-1">
-                      <Link
-                        to="/profile"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <User className="w-4 h-4" />
-                        <span>Profile</span>
-                      </Link>
-                      <Link
-                        to="/orders"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <span>Orders</span>
-                      </Link>
-                      {isSeller && (
-                        <Link
-                          to="/seller-dashboard"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          <span>Seller Dashboard</span>
-                        </Link>
-                      )}
-                      {isAdmin && (
-                        <Link
-                          to="/admin"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          <span>Admin Dashboard</span>
-                        </Link>
-                      )}
-                    </div>
-                    <div className="border-t border-gray-100">
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-[#ff4747] font-semibold hover:bg-[#fff1ed]"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Logout</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <Link to="/cart" className="relative flex flex-col items-center gap-1 hover:text-[#ff4747] transition-colors">
-                <ShoppingCart className="w-6 h-6" />
-                {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
-                    {cartItemsCount}
-                  </span>
-                )}
-                <span className="text-xs font-medium">Cart</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile layout */}
-      <div className="lg:hidden">
-        <div className="px-3 py-2 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <Logo className="w-9 h-9" />
-            <span className="text-lg font-bold text-[#3b82f6]">Kush deals</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link to="/wishlist" className="relative text-gray-700 hover:text-[#ff4747]">
-              <Heart className="w-5 h-5" />
-              {wishlist.length > 0 && (
-                <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
-                  {wishlist.length}
-                </span>
-              )}
-            </Link>
-            <Link to="/cart" className="relative text-gray-700 hover:text-[#ff4747]">
-              <ShoppingCart className="w-5 h-5" />
-              {cartItemsCount > 0 && (
-                <span className="absolute -top-1 -right-2 bg-[#ff4747] text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
-                  {cartItemsCount}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
-        <div className="px-3 pb-2">
-          <form onSubmit={handleSearch} className="relative">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search for products"
-              className="w-full bg-gray-100 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none"
-            />
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4.5 h-4.5" />
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function FooterContent() {
   return (
@@ -380,70 +126,55 @@ function AppContent() {
     <>
       <ScrollToTop />
       {/* Header - fixed to remain visible while scrolling */}
-      {!isDashboardPage && (
-        <header className="bg-white shadow-md fixed inset-x-0 top-0 z-50">
-          {isHomePage ? (
-            <NavbarContent />
-          ) : isProductDetailPage ? (
-            // No header on product detail page
-            null
-          ) : (
-            <div className="bg-white shadow-sm border-b border-gray-200">
-              <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-                <div className="flex items-center justify-between py-3 sm:py-4">
-                  {/* Logo - Always visible */}
-                  <Link to="/" className="flex items-center space-x-2">
-                    <Logo className="w-10 h-10" />
-                    <span className="text-2xl font-bold text-[#3b82f6]">Kush deals</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
+      {!isDashboardPage && !isProductDetailPage && (
+        <header className="fixed inset-x-0 top-0 z-[9999] overflow-visible">
+          <Navbar />
         </header>
       )}
 
-      {/* Spacer below fixed header (reduced mobile height) - hidden on product detail pages and dashboard */}
-      {!isProductDetailPage && !isDashboardPage && <div className="h-[56px] sm:h-[72px]" />}
+      {/* Spacer below fixed header */}
+      {!isProductDetailPage && !isDashboardPage && <div className="h-[82px] md:h-[100px]" />}
 
       {/* Page Routes */}
       <main>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/store" element={<Navigate to="/shop" replace />} />
-              <Route path="/store/:sellerId" element={<StoreProfile />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              
-              {/* Auth Routes - Redirect if already logged in */}
-              <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
-              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-              <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              
-              {/* Protected Routes */}
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/price-alerts" element={<PriceAlerts />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
-              <Route path="/admin/*" element={<AdminDashboard />} />
-              
-              {/* Test/Dev Routes */}
-              <Route path="/test" element={<ImageTest />} />
-              <Route path="/debug" element={<ImageDebug />} />
-              <Route path="/simple" element={<ImageTestSimple />} />
-              <Route path="/cart-test" element={<CartTest />} />
-              <Route path="/simple-cart-test" element={<SimpleCartTest />} />
-            </Routes>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/category/:categoryName" element={<Category />} />
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/store" element={<Navigate to="/shop" replace />} />
+          <Route path="/store/:sellerId" element={<StoreProfile />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+
+          {/* Auth Routes - Redirect if already logged in */}
+          <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+
+          {/* Protected Routes */}
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/price-alerts" element={<PriceAlerts />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
+          <Route path="/admin/*" element={<AdminDashboard />} />
+
+          {/* Test/Dev Routes */}
+          <Route path="/test" element={<ImageTest />} />
+          <Route path="/debug" element={<ImageDebug />} />
+          <Route path="/simple" element={<ImageTestSimple />} />
+          <Route path="/cart-test" element={<CartTest />} />
+          <Route path="/simple-cart-test" element={<SimpleCartTest />} />
+        </Routes>
       </main>
 
       {/* Mobile Bottom Navigation - Global */}

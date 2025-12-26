@@ -11,6 +11,7 @@ export function CartProvider({ children }) {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(false);
   const [wishlistDbAvailable, setWishlistDbAvailable] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false); // Prevent multiple simultaneous adds
   const { user } = useAuth();
   const { push: pushToast } = useToast();
 
@@ -53,23 +54,34 @@ export function CartProvider({ children }) {
   const loadUserCartAndWishlist = useCallback(async (userId) => {
     setLoading(true);
     try {
-      // Load cart via Supabase client with joined product details
+      // Load cart via Supabase client (without foreign key join)
       const { data: cartData, error: cartError } = await supabase
         .from('cart')
-        .select(`
-          *,
-          product:product_id (*)
-        `)
+        .select('*')
         .eq('user_id', userId);
 
       if (cartError) {
         console.error('Error loading cart:', cartError);
       } else {
+        // Fetch all product IDs from cart
+        const productIds = (cartData || []).map(item => item.product_id).filter(Boolean);
+        
+        // Fetch all products at once if there are any
+        let productsFromDb = [];
+        if (productIds.length > 0) {
+          const { data: dbProducts } = await supabase
+            .from('product')
+            .select('*')
+            .in('id', productIds);
+          productsFromDb = dbProducts || [];
+        }
+        
+        // Transform cart items with product data
         const transformedCartItems = (cartData || []).map(item => {
-          const productFromJoin = item.product || null;
-          // Fallback to static productsData by id if join not available
+          const productFromDb = productsFromDb.find(p => p.id === item.product_id);
           const productFromStatic = productsData.products.find(p => p.id === item.product_id);
-          const product = productFromJoin || productFromStatic || {};
+          const product = productFromDb || productFromStatic || {};
+          
           return {
             cartId: item.id,
             id: item.product_id,
@@ -81,16 +93,45 @@ export function CartProvider({ children }) {
             ...product,
           };
         }).filter(item => item && (item.name || item.product_id)) || [];
-        setCartItems(transformedCartItems);
+        
+        // Remove duplicates based on cartId AND product_id+color+size combination to prevent multiplication
+        const uniqueCartItems = transformedCartItems.reduce((acc, item) => {
+          // Check if we already have this exact cart item (by cartId)
+          const existingByCartId = acc.find(i => i.cartId === item.cartId);
+          if (existingByCartId) {
+            return acc; // Skip duplicate by cartId
+          }
+          
+          // Also check for duplicates by product_id + color + size (in case cartId is missing or duplicate)
+          const existingByProduct = acc.find(i => 
+            i.product_id === item.product_id && 
+            i.selectedColor === item.selectedColor && 
+            i.selectedSize === item.selectedSize
+          );
+          
+          if (existingByProduct) {
+            // If duplicate found, keep the one with the higher quantity or newer cartId
+            if (item.quantity > existingByProduct.quantity || 
+                (item.cartId && !existingByProduct.cartId) ||
+                (item.cartId && existingByProduct.cartId && item.cartId > existingByProduct.cartId)) {
+              // Replace with the new item
+              const index = acc.indexOf(existingByProduct);
+              acc[index] = item;
+            }
+            return acc;
+          }
+          
+          acc.push(item);
+          return acc;
+        }, []);
+        
+        setCartItems(uniqueCartItems);
       }
 
-      // Load wishlist via Supabase client with joined product details
+      // Load wishlist via Supabase client (without foreign key join)
       const { data: wishlistData, error: wishlistError } = await supabase
         .from('wishlist')
-        .select(`
-          *,
-          product:product_id (*)
-        `)
+        .select('*')
         .eq('user_id', userId);
 
       if (wishlistError) {
@@ -115,10 +156,25 @@ export function CartProvider({ children }) {
           }
         }
       } else {
+        // Fetch all product IDs from wishlist
+        const productIds = (wishlistData || []).map(item => item.product_id).filter(Boolean);
+        
+        // Fetch all products at once if there are any
+        let productsFromDb = [];
+        if (productIds.length > 0) {
+          const { data: productsData } = await supabase
+            .from('product')
+            .select('*')
+            .in('id', productIds);
+          productsFromDb = productsData || [];
+        }
+        
+        // Transform wishlist items with product data
         const transformedWishlist = (wishlistData || []).map(item => {
-          const productFromJoin = item.product || null;
+          const productFromDb = productsFromDb.find(p => p.id === item.product_id);
           const productFromStatic = productsData.products.find(p => p.id === item.product_id);
-          const product = productFromJoin || productFromStatic || {};
+          const product = productFromDb || productFromStatic || {};
+          
           return {
             wishlistId: item.id,
             id: item.product_id,
@@ -179,6 +235,12 @@ export function CartProvider({ children }) {
   const addToCart = useCallback(async (product, quantity = 1, selectedColor = null, selectedSize = null) => {
     console.log('addToCart called:', { product: product?.name, quantity, user: user?.id, hasUser: !!user });
     
+    // Prevent multiple simultaneous calls
+    if (addingToCart) {
+      console.log('addToCart already in progress, skipping...');
+      return;
+    }
+    
     if (!product || !product.id) {
       console.error('Invalid product:', product);
       throw new Error('Invalid product');
@@ -190,6 +252,8 @@ export function CartProvider({ children }) {
       window.location.href = '/signup';
       return;
     }
+    
+    setAddingToCart(true);
 
     if (user) {
       // Fallback to local storage when product ids are not UUIDs (e.g., demo/static products)
@@ -246,9 +310,13 @@ export function CartProvider({ children }) {
         console.warn('Falling back to local storage for cart');
         addToCartLocal(product, quantity, selectedColor, selectedSize);
         pushToast({ type: 'info', title: 'Added to cart', message: `${product.name} added (local cart)` });
+      } finally {
+        setAddingToCart(false);
       }
+    } else {
+      setAddingToCart(false);
     }
-  }, [user, loadUserCartAndWishlist, addToCartLocal, getAuthToken, pushToast, isValidUuid]);
+  }, [user, loadUserCartAndWishlist, addToCartLocal, getAuthToken, pushToast, isValidUuid, addingToCart]);
 
   const removeFromCart = useCallback(async (id, selectedColor = null, selectedSize = null) => {
     if (user) {

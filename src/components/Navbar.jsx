@@ -1,51 +1,78 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, ChevronDown, Settings } from "lucide-react";
+import { Menu, X, User, LogOut, ChevronDown, ShoppingCart } from "lucide-react";
 import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
-import DarkModeToggle from "./DarkModeToggle";
 import SearchSuggestions from "./SearchSuggestions";
-import LevelBadge from "./achievements/LevelBadge";
-import { getUserLevel } from "../services/achievementService";
 import { useUserRole } from "../hooks/useUserRole";
+import { useCart } from "../contexts/CartContext";
 import Logo from "./Logo";
+import productsData from "../data/products.js";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, signOut, loading: authLoading } = useSupabaseAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
-  const [level, setLevel] = useState(null);
   const { userRole, isSeller, isAdmin } = useUserRole();
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const [categoriesMenuOpenDesktop, setCategoriesMenuOpenDesktop] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const categoriesMenuRefDesktop = useRef(null);
+  const closeTimeoutRef = useRef(null);
+  const hoveredCategoryTimeoutRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setCategoriesMenuOpenDesktop(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimeoutRef.current = setTimeout(() => {
+      setCategoriesMenuOpenDesktop(false);
+      setHoveredCategory(null);
+    }, 300);
+  };
+
+  const handleCategoryMouseEnter = (category) => {
+    if (hoveredCategoryTimeoutRef.current) {
+      clearTimeout(hoveredCategoryTimeoutRef.current);
+      hoveredCategoryTimeoutRef.current = null;
+    }
+    setHoveredCategory(category);
+  };
+
+  const handleCategoryMouseLeave = () => {
+    hoveredCategoryTimeoutRef.current = setTimeout(() => {
+      setHoveredCategory(null);
+    }, 100); // Short delay for subcategory transition
+  };
+
+  // Header category labels (AliExpress-style row under search)
+  const headerCategories = [
+    "Dollar Express",
+    "Local shipping",
+    "Home & Furniture",
+    "Weekly deals",
+    "Top Brands",
+    "Choice",
+    "FunTime",
+    "More",
+  ];
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen);
-  
-  // Swipe gesture handlers for mobile menu
-  const minSwipeDistance = 50;
 
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientY);
-  };
-
-  const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientY);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchEnd - touchStart; // Positive = downward swipe
-    const isDownSwipe = distance > minSwipeDistance;
-    
-    // Close menu on downward swipe
-    if (isDownSwipe && menuOpen) {
-      setMenuOpen(false);
-    }
-  };
+  const publicLinks = [
+    { name: "Home", path: "/" },
+    { name: "Shop", path: "/shop" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
+  ];
 
   const handleLogout = async () => {
     await signOut();
@@ -96,347 +123,320 @@ const Navbar = () => {
     };
   }, [menuOpen]);
 
-  // Fetch compact level badge (buyer)
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        if (!user) return;
-        const lvl = await getUserLevel(user.id, 'buyer');
-        if (mounted) setLevel(lvl);
-      } catch {}
-    })();
-    return () => { mounted = false; };
-  }, [user]);
-
-  const publicLinks = [
-    { name: "Home", path: "/" },
-    { name: "Shop", path: "/shop" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
-  ];
-
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    if (user?.user_metadata?.name) {
-      return user.user_metadata.name.split(' ').map(n => n[0]).join('').toUpperCase();
-    }
-    if (user?.email) {
-      return user.email[0].toUpperCase();
-    }
-    return 'U';
-  };
-
   const getUserDisplayName = () => {
     return user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
   };
 
-  const getAvatarUrl = () => user?.user_metadata?.avatar_url || "";
+  const handleHeaderCategoryClick = (category) => {
+    if (category === "All Categories") {
+      navigate("/shop");
+    } else {
+      // Navigate to shop with category filter
+      navigate(`/shop?category=${encodeURIComponent(category)}`);
+    }
+  };
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 overflow-x-hidden shadow-sm">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-2.5 md:py-3 mobile-container">
-        <Link
-          to="/"
-          className="flex items-center gap-2 whitespace-nowrap"
-        >
-          <Logo className="w-8 h-8" />
-          <span className="text-lg font-bold text-[#3b82f6]">Kush deals</span>
-        </Link>
+    <nav className="bg-white border-b border-gray-200 relative z-[9999] shadow-sm overflow-visible">
+      <div className="max-w-7xl mx-auto px-4 mobile-container">
+        <div className="flex justify-between items-center pt-1.5 md:pt-3">
+          {/* Logo & Name */}
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 whitespace-nowrap"
+          >
+            <Logo className="w-8 h-8 md:w-12 md:h-12" />
+            <span className="text-base md:text-2xl text-[#3b82f6] leading-none font-bold">Kush deals</span>
+          </Link>
 
-        {/* Desktop Search */}
-        <div className="hidden md:block flex-1 px-4 max-w-2xl">
+          {/* Desktop Search (Hidden on Mobile) */}
+          <div className="hidden md:block flex-1 px-4 max-w-2xl">
+            <SearchSuggestions onSearch={(q) => navigate(`/shop?search=${encodeURIComponent(q)}`)} />
+          </div>
+
+          {/* Actions: Cart & User (Desktop) / Cart & Menu (Mobile) */}
+          <div className="flex items-center space-x-2 md:space-x-6">
+            {/* Desktop User Menu (Hidden on Mobile) */}
+            {user ? (
+              <div className="hidden md:flex relative items-center gap-2" ref={dropdownRef}>
+                <button
+                  onClick={toggleUserDropdown}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-[#ff4747] transition-all"
+                >
+                  <div className="flex flex-col items-start">
+                    <span className="text-[11px] text-gray-500 leading-none">Hi,</span>
+                    <span className="text-sm font-semibold leading-tight">{getUserDisplayName()}</span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* User Dropdown */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Profile</span>
+                    </Link>
+                    {isSeller && (
+                      <Link
+                        to="/seller-dashboard"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Seller Dashboard
+                      </Link>
+                    )}
+                    <Link
+                      to="/orders"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      Orders
+                    </Link>
+                    <div className="border-t border-gray-100 my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center space-x-4">
+                <Link
+                  to="/login"
+                  className="text-sm font-semibold text-gray-700 hover:text-[#ff4747]"
+                >
+                  Sign In / Register
+                </Link>
+              </div>
+            )}
+
+            {/* Cart Icon - Visible on both Mobile and Desktop */}
+            <Link to="/cart" className="relative p-1.5 text-gray-700 hover:text-[#ff4747] transition-colors">
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-[#ff4747] text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Mobile Menu Button - Visible only on Mobile */}
+            <button
+              onClick={toggleMenu}
+              className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+        {/* Mobile Search Bar Row - Visible only on mobile */}
+        <div className="md:hidden pb-1.5 pt-0.5">
           <SearchSuggestions onSearch={(q) => navigate(`/shop?search=${encodeURIComponent(q)}`)} />
         </div>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center space-x-4">
-          {publicLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              className="text-sm text-gray-700 font-medium hover:text-orange-500 whitespace-nowrap"
+        {/* Bottom Row: Desktop category strip integrated into header */}
+        <div className="hidden md:flex items-center justify-between pb-3 mt-1">
+          {/* All Categories pill with Sidebar Menu */}
+          <div
+            className="relative"
+            ref={categoriesMenuRefDesktop}
+            onMouseEnter={handleMouseEnter}
+          >
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-[#f2f2f2] hover:bg-gray-200 text-sm font-bold text-[#191919] transition-all whitespace-nowrap"
             >
-              {link.name}
-            </Link>
-          ))}
-          
-          {/* Achievements badge */}
-          {level && (
-            <LevelBadge levelName={level?.badge?.split('/').pop()?.replace('.svg','')} badge={level?.badge} />
-          )}
+              <Menu className="w-4 h-4" />
+              <span>All Categories</span>
+            </button>
 
-          {/* Dark Mode Toggle */}
-          <DarkModeToggle />
-          
-          {/* User Menu */}
-          {user ? (
-            <div className="relative flex items-center gap-2" ref={dropdownRef}>
-              <Link
-                to="/profile"
-                className="flex items-center space-x-2 text-gray-700 hover:text-gradient transition-all duration-300 hover-scale ripple"
-                title="Profile"
+            {categoriesMenuOpenDesktop && (
+              <div
+                className="absolute left-0 top-full w-56 bg-white shadow-2xl z-[99999] rounded-xl border border-gray-100"
+                style={{ marginTop: '8px' }}
+                onMouseEnter={handleMouseEnter}
               >
-                {getAvatarUrl() ? (
-                  <img src={getAvatarUrl()} alt="Avatar" className="w-8 h-8 rounded-full object-cover border shadow-lg hover-scale" />
-                ) : (
-                  <div className="w-8 h-8 gradient-bg-1 text-white rounded-full flex items-center justify-center text-sm font-semibold shadow-lg hover-scale pulse-ring">
-                    {getUserInitials()}
-                  </div>
-                )}
-                <span className="hidden sm:block font-medium">{getUserDisplayName()}</span>
-              </Link>
-              <button
-                onClick={toggleUserDropdown}
-                aria-label="Open menu"
-                className="p-1 rounded hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 transition-all duration-300"
-              >
-                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${userDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {/* User Dropdown */}
-              {userDropdownOpen && (
-                <div className="absolute right-0 top-full translate-y-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] glass rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-slide-up">
-                  {/* User Card */}
-                  <div className="px-4 py-3 border-b border-gray-200">
-                    <div className="flex items-center space-x-3">
-                      {getAvatarUrl() ? (
-                        <img src={getAvatarUrl()} alt="Avatar" className="w-10 h-10 rounded-full object-cover border shadow-lg" />
-                      ) : (
-                        <div className="w-10 h-10 gradient-bg-1 text-white rounded-full flex items-center justify-center text-sm font-semibold shadow-lg">
-                          {getUserInitials()}
+                {/* Transparent bridge to button */}
+                <div className="absolute -top-2 left-0 right-0 h-2" />
+                <div className="py-1">
+                  {productsData.categories?.map((category, catIdx) => (
+                    <div
+                      key={category.id || `nav-cat-${catIdx}`}
+                      className="relative"
+                      onMouseEnter={() => handleCategoryMouseEnter(category)}
+                      onMouseLeave={handleCategoryMouseLeave}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate(`/shop?category=${encodeURIComponent(category.name)}`);
+                          setCategoriesMenuOpenDesktop(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#3b82f6] transition-colors flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-base">{category.icon || '📦'}</span>
+                          <span className="truncate">{category.name}</span>
+                        </div>
+                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-gray-400 group-hover:text-[#3b82f6]" />
+                      </button>
+
+                      {hoveredCategory?.id === category.id && category.subcategories && category.subcategories.length > 0 && (
+                        <div
+                          className="absolute left-full top-0 w-64 bg-white shadow-2xl z-[999999] rounded-xl border border-gray-100 py-2"
+                          style={{ marginLeft: '4px' }}
+                        >
+                          {/* Transparent bridge to prevent closing when moving mouse */}
+                          <div className="absolute -left-2 top-0 bottom-0 w-2" />
+
+                          <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                            <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">{category.name}</h3>
+                          </div>
+                          <div className="grid grid-cols-1 gap-0.5">
+                            {category.subcategories.map((subcategory, idx) => (
+                              <button
+                                key={`nav-sub-${idx}`}
+                                type="button"
+                                onClick={() => {
+                                  navigate(`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(subcategory)}`);
+                                  setCategoriesMenuOpenDesktop(false);
+                                  setHoveredCategory(null);
+                                }}
+                                className="text-left px-4 py-2 text-[12px] font-medium text-gray-600 hover:bg-gray-50 hover:text-[#3b82f6] transition-colors"
+                              >
+                                {subcategory}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{getUserDisplayName()}</div>
-                        <div className="text-xs text-gray-500">{user.email}</div>
-                      </div>
                     </div>
-                  </div>
-                  {/* Actions */}
-                  <Link
-                    to="/profile"
-                    onClick={() => setUserDropdownOpen(false)}
-                    className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 hover-scale-sm rounded-lg mx-2"
-                  >
-                    <User className="w-4 h-4" />
-                    <span>Profile</span>
-                  </Link>
-                  {isSeller && (
-                    <Link
-                      to="/seller-dashboard"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 hover-scale-sm rounded-lg mx-2"
-                    >
-                      <span>Seller Dashboard</span>
-                    </Link>
-                  )}
-                  {isAdmin && (
-                    <Link
-                      to="/admin"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 hover-scale-sm rounded-lg mx-2"
-                    >
-                      <span>Admin Dashboard</span>
-                    </Link>
-                  )}
-                  <Link
-                    to="/orders"
-                    onClick={() => setUserDropdownOpen(false)}
-                    className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 hover-scale-sm rounded-lg mx-2"
-                  >
-                    <span>Orders</span>
-                  </Link>
-                  <Link
-                    to="/settings"
-                    onClick={() => setUserDropdownOpen(false)}
-                    className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 hover-scale-sm rounded-lg mx-2"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span>Settings</span>
-                  </Link>
-                  <div className="border-t border-gray-200 my-1" />
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center space-x-2 w-full px-4 py-2 text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 hover-scale-sm rounded-lg mx-2"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
-                  </button>
+                  ))}
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/signup"
-                className="text-gray-700 font-medium hover:text-gradient transition-all duration-300 hover-scale-sm"
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/login"
-                className="btn-modern ripple"
-              >
-                Login
-              </Link>
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
 
-        {/* Mobile Menu Button - MOBILE-FIRST: Enhanced touch target (44x44px minimum) */}
-        <button
-          onClick={toggleMenu}
-          className="md:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-lg hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 transition-all duration-300 hover-scale ripple touch-manipulation flex-shrink-0 flex items-center justify-center"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? <X size={24} className="text-gradient" /> : <Menu size={24} />}
-        </button>
+          {/* Category links - Spread across the remaining width */}
+          <div className="flex-1 flex items-center justify-between ml-12">
+            {headerCategories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => handleHeaderCategoryClick(cat)}
+                className={`inline-flex items-center gap-1 text-[13px] font-bold transition-all whitespace-nowrap hover:opacity-80 ${cat === "Choice" ? 'text-[#ff4747]' : 'text-[#191919]'
+                  }`}
+              >
+                {cat}
+                {cat === "More" && <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Mobile Menu Backdrop */}
       {menuOpen && (
-        <div 
+        <div
           className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-fade-in"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      {/* Mobile Dropdown - MOBILE-FIRST: Enhanced with swipe gestures and better UX */}
+      {/* Mobile Dropdown */}
       {menuOpen && (
-        <div 
+        <div
           ref={mobileMenuRef}
-          className="md:hidden fixed inset-x-0 top-[70px] bottom-0 bg-white dark:bg-gray-900 shadow-2xl z-50 animate-bottom-sheet-up overflow-y-auto overflow-x-hidden"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-          style={{ 
-            paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
-            maxHeight: 'calc(100vh - 70px)'
-          }}
+          className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-2xl z-50 overflow-hidden"
         >
-          {/* Swipe indicator */}
-          <div className="flex justify-center pt-3 pb-2">
-            <div className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-            <SearchSuggestions onSearch={(q) => { navigate(`/shop?search=${encodeURIComponent(q)}`); setMenuOpen(false); }} />
-          </div>
-
-          {/* Navigation Links - MOBILE-FIRST: Enhanced touch targets */}
-          <div className="py-2">
-            {publicLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setMenuOpen(false)}
-                className="block min-h-[44px] px-4 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-          
-          {/* User Section */}
-          {user ? (
-            <>
-              <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+          <div className="flex flex-col">
+            {/* User Profile Section (Mobile) */}
+            {user && (
+              <div className="px-4 py-4 bg-gray-50 border-b border-gray-100">
                 <div className="flex items-center space-x-3">
-                  {getAvatarUrl() ? (
-                    <img src={getAvatarUrl()} alt="Avatar" className="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-lg" />
-                  ) : (
-                    <div className="w-12 h-12 gradient-bg-1 text-white rounded-full flex items-center justify-center text-base font-semibold shadow-lg">
-                      {getUserInitials()}
-                    </div>
-                  )}
+                  <div className="w-10 h-10 bg-[#3b82f6] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {user?.email?.[0].toUpperCase()}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-semibold text-gray-900 dark:text-white truncate">{getUserDisplayName()}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{user.email}</p>
+                    <p className="text-sm font-bold text-gray-900 truncate">{getUserDisplayName()}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                 </div>
               </div>
+            )}
 
-              {/* User Menu Items - MOBILE-FIRST: Enhanced touch targets */}
-              <div className="py-2">
+            {/* Navigation Links */}
+            <div className="py-2">
+              {publicLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#3b82f6] transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+
+            {/* User Actions */}
+            {user ? (
+              <div className="border-t border-gray-100 py-2">
                 <Link
                   to="/profile"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center space-x-3 min-h-[44px] px-4 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800"
+                  className="flex items-center space-x-2 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
-                  <User className="w-5 h-5 flex-shrink-0" />
+                  <User className="w-4 h-4" />
                   <span>Profile</span>
                 </Link>
                 {isSeller && (
                   <Link
                     to="/seller-dashboard"
                     onClick={() => setMenuOpen(false)}
-                    className="block min-h-[44px] px-4 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800"
+                    className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >
                     Seller Dashboard
-                  </Link>
-                )}
-                {isAdmin && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setMenuOpen(false)}
-                    className="block min-h-[44px] px-4 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800"
-                  >
-                    Admin Dashboard
                   </Link>
                 )}
                 <Link
                   to="/orders"
                   onClick={() => setMenuOpen(false)}
-                  className="block min-h-[44px] px-4 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800"
+                  className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                   Orders
                 </Link>
-                <Link
-                  to="/settings"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center space-x-3 min-h-[44px] px-4 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 transition-all duration-300 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800"
-                >
-                  <Settings className="w-5 h-5 flex-shrink-0" />
-                  <span>Settings</span>
-                </Link>
-              </div>
-
-              {/* Logout Button */}
-              <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setMenuOpen(false);
-                  }}
-                  className="flex items-center space-x-3 w-full min-h-[44px] px-4 py-3 text-base text-red-600 dark:text-red-400 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 dark:hover:from-red-900/20 dark:hover:to-pink-900/20 transition-all duration-300 touch-manipulation active:bg-red-100 dark:active:bg-red-900/30"
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-gray-50"
                 >
-                  <LogOut className="w-5 h-5 flex-shrink-0" />
+                  <LogOut className="w-4 h-4" />
                   <span>Logout</span>
                 </button>
               </div>
-            </>
-          ) : (
-            <div className="border-t border-gray-200 dark:border-gray-700 py-4 space-y-2">
-              <Link
-                to="/signup"
-                onClick={() => setMenuOpen(false)}
-                className="block min-h-[44px] px-4 py-3 text-center text-base text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800 rounded-lg mx-4"
-              >
-                Sign Up
-              </Link>
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="block min-h-[44px] px-4 py-3 text-center text-base font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-300 touch-manipulation active:scale-95 mx-4 shadow-lg"
-              >
-                Login
-              </Link>
-            </div>
-          )}
+            ) : (
+              <div className="border-t border-gray-100 p-4">
+                <Link
+                  to="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="block w-full py-3 text-center text-sm font-bold text-white bg-[#3b82f6] rounded-lg shadow-md active:scale-[0.98] transition-all"
+                >
+                  Sign In / Register
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </nav>
