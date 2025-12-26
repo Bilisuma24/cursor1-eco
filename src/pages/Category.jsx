@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import ProductGrid from "../components/ProductGrid";
@@ -8,6 +8,7 @@ import { supabase } from "../lib/supabaseClient";
 
 export default function Category() {
   const { categoryName } = useParams();
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const decodedCategoryName = categoryName ? decodeURIComponent(categoryName) : '';
@@ -20,14 +21,17 @@ export default function Category() {
     setLoading(true);
     try {
       let dbProducts = null;
-      
+
       try {
         // Fetch products from database filtered by category
-        const { data, error: dbError } = await supabase
-          .from('product')
-          .select('*')
-          .ilike('category', decodedCategoryName)
-          .order('created_at', { ascending: false });
+        let query = supabase.from('product').select('*');
+
+        // If specific category (not "All" or "Global"), apply filter
+        if (decodedCategoryName.toLowerCase() !== 'all' && decodedCategoryName.toLowerCase() !== 'global') {
+          query = query.ilike('category', decodedCategoryName);
+        }
+
+        const { data, error: dbError } = await query.order('created_at', { ascending: false });
 
         if (dbError) {
           console.error('Error fetching products from database:', dbError);
@@ -45,7 +49,7 @@ export default function Category() {
         if (!imagePath || typeof imagePath !== 'string') {
           return null;
         }
-        
+
         if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
           return imagePath;
         }
@@ -80,15 +84,19 @@ export default function Category() {
           stock: product.stock || 0,
           originalPrice: product.original_price || null,
           discount: product.discount || null,
+          subcategory: product.subcategory || null,
           colors: product.colors && Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : null,
           sizes: product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : null,
           isFromDatabase: true,
         };
       });
 
-      // Filter static products by category
+      // Filter static products by category (or all if "All" is selected)
       const staticProducts = (productsData.products || []).filter(
-        product => product.category && product.category.toLowerCase() === decodedCategoryName.toLowerCase()
+        product => {
+          if (decodedCategoryName.toLowerCase() === 'all' || decodedCategoryName.toLowerCase() === 'global') return true;
+          return product.category && product.category.toLowerCase() === decodedCategoryName.toLowerCase();
+        }
       );
 
       // Combine and deduplicate
@@ -118,11 +126,35 @@ export default function Category() {
     cat => cat.name.toLowerCase() === decodedCategoryName.toLowerCase()
   );
 
-  // Category-specific banner configurations
+  // 1. Calculate filtered products first
+  const searchParams = new URLSearchParams(location.search);
+  const subcategoryParam = searchParams.get('subcategory');
+  const searchQuery = searchParams.get('search') || '';
+
+  const filteredProducts = products.filter(p => {
+    // 1. Subcategory Filter
+    if (subcategoryParam && p.subcategory !== subcategoryParam) {
+      return false;
+    }
+    // 2. Search Text Filter
+    if (searchQuery) {
+      const lowerQ = searchQuery.toLowerCase();
+      const matchesSearch =
+        p.name.toLowerCase().includes(lowerQ) ||
+        (p.description && p.description.toLowerCase().includes(lowerQ)) ||
+        (p.brand && p.brand.toLowerCase().includes(lowerQ));
+
+      if (!matchesSearch) return false;
+    }
+    return true;
+  });
+
+  // 2. Determine Banner based on Filtered Results
   const getCategoryBanner = () => {
     const categoryLower = decodedCategoryName.toLowerCase();
     const banners = {
       'electronics': {
+        // ... (rest of banners object remains same until we close it)
         bgColor: 'bg-gradient-to-r from-blue-600 to-purple-600',
         title: 'Tech Innovation',
         subtitle: 'Latest gadgets and smart devices',
@@ -247,8 +279,70 @@ export default function Category() {
         subtitle: 'Transform your space',
         cta: 'Shop Home Improvement',
         icon: '🔧'
+      }, // Fixed missing comma here
+      'all': {
+        bgColor: 'bg-gradient-to-r from-blue-500 to-indigo-500',
+        title: 'All Products',
+        subtitle: 'Explore our entire collection',
+        cta: 'Shop All',
+        icon: '🛍️'
+      },
+      'global': {
+        bgColor: 'bg-gradient-to-r from-blue-500 to-indigo-500',
+        title: 'All Products',
+        subtitle: 'Explore our entire collection',
+        cta: 'Shop All',
+        icon: '🛍️'
       }
     };
+
+    // Smart Banner Override for Global Search
+    // Smart Banner Override for Global Search
+    // Check matched products (filteredProducts) instead of all products
+    if ((categoryLower === 'all' || categoryLower === 'global') && filteredProducts.length > 0) {
+      const catCount = {};
+      let maxCount = 0;
+      let dominantCat = null;
+
+      filteredProducts.forEach(p => {
+        if (p.category && p.category !== 'General') {
+          // Normalize: trim whitespace
+          const cleanCat = p.category.trim();
+          // Use the raw string for counting key to preserve casing for display later, 
+          // but we will lowercase for matching keys.
+          catCount[cleanCat] = (catCount[cleanCat] || 0) + 1;
+
+          if (catCount[cleanCat] > maxCount) {
+            maxCount = catCount[cleanCat];
+            dominantCat = cleanCat;
+          }
+        }
+      });
+
+      // Threshold: 50% dominance
+      if (dominantCat && (maxCount / filteredProducts.length >= 0.5)) {
+        const domLower = dominantCat.toLowerCase();
+
+        // 1. Try Exact Match
+        if (banners[domLower]) {
+          return {
+            ...banners[domLower],
+            title: dominantCat, // Use the actual category name (e.g. "Fashion")
+            subtitle: `Browse our ${dominantCat} collection`
+          };
+        }
+
+        // 2. Try Partial Match (e.g. "Men's Fashion" matches "fashion")
+        const partialKey = Object.keys(banners).find(key => domLower.includes(key) || key.includes(domLower));
+        if (partialKey) {
+          return {
+            ...banners[partialKey],
+            title: dominantCat,
+            subtitle: `Browse our ${dominantCat} collection`
+          };
+        }
+      }
+    }
 
     return banners[categoryLower] || {
       bgColor: 'bg-gradient-to-r from-gray-600 to-gray-800',
@@ -299,7 +393,7 @@ export default function Category() {
               {category?.icon && <span className="text-xl">{category.icon}</span>}
               <h1 className="text-lg font-bold text-gray-900">{decodedCategoryName}</h1>
             </div>
-            <span className="text-sm text-gray-500">{products.length} items</span>
+            <span className="text-sm text-gray-500">{filteredProducts.length} items</span>
           </div>
         </div>
 
@@ -311,8 +405,8 @@ export default function Category() {
                 <div key={i} className="bg-gray-200 animate-pulse rounded aspect-square" />
               ))}
             </div>
-          ) : products.length > 0 ? (
-            <ProductGrid products={products} />
+          ) : filteredProducts.length > 0 ? (
+            <ProductGrid products={filteredProducts} />
           ) : (
             <div className="p-8 text-center">
               <p className="text-gray-500 mb-4">No products found in {decodedCategoryName}</p>
@@ -325,64 +419,194 @@ export default function Category() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden md:block">
-        {/* Category Banner - Desktop */}
-        <section className="bg-white pb-4">
-          <div className={`relative overflow-hidden ${banner.bgColor} text-white min-h-[130px] shadow-xl`}>
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.45),transparent_60%)]" />
-            <div className="relative max-w-7xl mx-auto px-8 py-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-2xl">{banner.icon}</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-white/80">
-                  {decodedCategoryName}
-                </span>
+      <div className="hidden md:block bg-gray-50 min-h-screen pb-12">
+        {/* Category Banner - Compact */}
+        <section className="bg-white shadow-sm z-10 relative">
+          <div className={`${banner.bgColor} text-white`}>
+            <div className="max-w-7xl mx-auto px-6 py-8">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                  <span className="text-3xl">{banner.icon}</span>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-3xl font-bold">{decodedCategoryName}</h1>
+                    <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-medium">
+                      {filteredProducts.length} items
+                    </span>
+                  </div>
+                  <p className="text-white/90 text-sm max-w-xl">{banner.subtitle}</p>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold mb-0.5">{banner.title}</h2>
-              <p className="text-sm text-white/90 mb-2">{banner.subtitle}</p>
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="inline-flex items-center gap-1.5 bg-white text-gray-900 font-semibold px-4 py-1.5 rounded-full shadow-lg hover:bg-white/90 transition-colors text-xs"
-              >
-                Explore Collection
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
             </div>
           </div>
         </section>
 
-        {/* Header */}
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4">
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back to Home</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            {category?.icon && <span className="text-3xl">{category.icon}</span>}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{decodedCategoryName}</h1>
-              <p className="text-gray-500 mt-1">{products.length} products available</p>
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex gap-6">
+            {/* Left Sidebar Filters */}
+            <div className="w-64 flex-shrink-0">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5 sticky top-24">
+                <div className="mb-6">
+                  <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
+                    Deals & discounts
+                    <ChevronRight className="w-4 h-4 text-gray-400 -rotate-90" />
+                  </h3>
+
+                  {/* Sale / Shipping Toggles */}
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors" />
+                      <span className="text-sm text-gray-600 group-hover:text-gray-900">Sale</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors" />
+                      <span className="text-sm text-gray-600 group-hover:text-gray-900">Free shipping</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100 my-4"></div>
+
+                {/* Visual Vertical Subcategories */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-gray-900 mb-3 flex items-center justify-between">
+                    Category
+                    <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
+                  </h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {((decodedCategoryName.toLowerCase() === 'all' || decodedCategoryName.toLowerCase() === 'global')
+                      ? productsData.categories[0].subcategories
+                      : (productsData.categories?.find(c => c.name.toLowerCase() === decodedCategoryName.toLowerCase())?.subcategories || []))
+                      .map((sub, index) => {
+                        const isSelected = subcategoryParam === sub;
+                        const icons = ['🎧', '⌚', '📷', '🔒', '💻', '📱'];
+                        const icon = icons[index % icons.length];
+
+                        return (
+                          <Link
+                            key={sub}
+                            to={isSelected ? `/category/${encodeURIComponent(decodedCategoryName)}` : `/category/${encodeURIComponent(decodedCategoryName)}?subcategory=${encodeURIComponent(sub)}`}
+                            className="flex flex-col items-center gap-1 group"
+                          >
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg border transition-all ${isSelected ? 'bg-orange-50 border-orange-500 text-orange-600 shadow-sm' : 'bg-gray-50 border-gray-100 text-gray-500 group-hover:bg-white group-hover:border-orange-300 group-hover:shadow-sm'}`}>
+                              {icon}
+                            </div>
+                            <span className={`text-[10px] leading-tight text-center w-full truncate px-1 ${isSelected ? 'text-orange-600 font-medium' : 'text-gray-500 group-hover:text-orange-600'}`}>
+                              {sub}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100 my-4"></div>
+
+                {/* Color Filter */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-gray-900 mb-3 flex items-center justify-between">
+                    Color
+                    <ChevronRight className="w-4 h-4 text-gray-400 -rotate-90" />
+                  </h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative flex items-center justify-center">
+                        <input type="radio" name="color" className="peer w-4 h-4 border-gray-300 text-black focus:ring-black" defaultChecked />
+                        <div className="w-2 h-2 bg-black rounded-full absolute pointer-events-none hidden peer-checked:block" />
+                      </div>
+                      <span className="text-sm text-gray-600">All</span>
+                    </label>
+
+                    {[
+                      { name: 'Black', color: 'bg-black' },
+                      { name: 'Multi-Color', color: 'bg-gradient-to-br from-red-500 via-green-500 to-blue-500' },
+                      { name: 'White', color: 'bg-white border border-gray-200' },
+                      { name: 'Pink', color: 'bg-pink-300' },
+                      { name: 'Blue', color: 'bg-blue-500' },
+                      { name: 'Red', color: 'bg-red-500' }
+                    ].map((item) => (
+                      <label key={item.name} className="flex items-center gap-3 cursor-pointer group">
+                        <input type="radio" name="color" className="w-4 h-4 border-gray-300 text-black focus:ring-black" />
+                        <div className={`w-8 h-8 ${item.color} rounded shadow-sm`} />
+                        <span className="text-sm text-gray-600 group-hover:text-gray-900">{item.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              {/* BrandDay Banner */}
+              <div className="bg-[#007aff] text-white p-3 flex items-center justify-center gap-4 mb-4 rounded-sm">
+                <div className="flex items-baseline gap-1">
+                  <span className="font-bold italic text-lg text-yellow-300">BrandDay</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <span>Ends :</span>
+                  <div className="flex items-center gap-1">
+                    <span className="bg-white text-black px-1.5 py-0.5 rounded-sm font-bold min-w-[24px] text-center">13</span>
+                    <span className="font-bold">:</span>
+                    <span className="bg-white text-black px-1.5 py-0.5 rounded-sm font-bold min-w-[24px] text-center">36</span>
+                    <span className="font-bold">:</span>
+                    <span className="bg-white text-black px-1.5 py-0.5 rounded-sm font-bold min-w-[24px] text-center">56</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sort Bar */}
+              <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-100 mb-4 flex items-center justify-between">
+                <div className="text-sm text-gray-500">
+                  Showing <span className="font-bold text-gray-900">{filteredProducts.length}</span> results
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-500">Sort by:</span>
+                  <div className="flex items-center gap-1 text-sm font-medium">
+                    <button className="px-3 py-1.5 border border-gray-300 bg-white text-gray-900 rounded hover:bg-gray-50 transition-colors font-semibold">Best Match</button>
+                    <button className="px-3 py-1.5 text-gray-600 hover:bg-gray-50 rounded transition-colors">Orders</button>
+                    <button className="px-3 py-1.5 text-gray-600 hover:bg-gray-50 rounded transition-colors flex items-center gap-1">
+                      Price 1L
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Grid */}
+              <div className="min-h-[400px]">
+                {loading ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="bg-gray-100 animate-pulse rounded-xl aspect-[3/4]" />
+                    ))}
+                  </div>
+                ) : filteredProducts.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {filteredProducts.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-lg p-12 text-center border border-dashed border-gray-200">
+                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-3xl">🔍</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">No products found</h3>
+                    <p className="text-gray-500 mb-6">
+                      {subcategoryParam
+                        ? `No products found in "${subcategoryParam}".`
+                        : "Try adjusting your filters or browse other categories."}
+                    </p>
+                    <Link to="/shop" className="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm">
+                      View All Products
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Products Grid */}
-        <div className="max-w-7xl mx-auto px-8 pb-6">
-          {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className="bg-gray-200 animate-pulse rounded aspect-square" />
-              ))}
-            </div>
-          ) : products.length > 0 ? (
-            <ProductGrid products={products} />
-          ) : (
-            <div className="p-12 text-center">
-              <p className="text-gray-500 text-lg mb-4">No products found in {decodedCategoryName}</p>
-              <Link to="/shop" className="text-[#3b82f6] font-medium hover:underline">
-                Browse all products
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </div>

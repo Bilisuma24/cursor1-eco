@@ -8,6 +8,7 @@ const products = [
     description:
       "Premium wireless earbuds with ANC, 30-hour battery life and crystal clear sound.",
     category: "Electronics",
+    subcategory: "Audio",
     brand: "SoundTech",
     price: 89.99,
     originalPrice: 149.99,
@@ -52,6 +53,7 @@ const products = [
     description:
       "Advanced fitness tracking with HR monitor, GPS, sleep tracking, 7-day battery.",
     category: "Electronics",
+    subcategory: "Wearables",
     brand: "FitTech",
     price: 199.99,
     originalPrice: 299.99,
@@ -84,6 +86,7 @@ const products = [
     name: "Premium Leather Handbag",
     description: "Handcrafted genuine leather handbag with multiple compartments.",
     category: "Fashion",
+    subcategory: "Bags",
     brand: "Luxury Leather Co.",
     price: 159.99,
     originalPrice: 249.99,

@@ -136,6 +136,68 @@ const Navbar = () => {
     }
   };
 
+  const handleGlobalSearch = (query) => {
+    if (!query) return;
+    const lowerQuery = query.toLowerCase();
+
+    // 1. Direct Category Name Match
+    const categoryMatch = productsData.categories.find(cat =>
+      cat.name.toLowerCase() === lowerQuery
+    );
+
+    if (categoryMatch) {
+      navigate(`/category/${encodeURIComponent(categoryMatch.name)}`);
+      return;
+    }
+
+    // 2. Direct Subcategory Name Match
+    for (const cat of productsData.categories) {
+      const sub = cat.subcategories?.find(sub => sub.toLowerCase() === lowerQuery);
+      if (sub) {
+        navigate(`/category/${encodeURIComponent(cat.name)}?subcategory=${encodeURIComponent(sub)}`);
+        return;
+      }
+    }
+
+    // 3. Infer Category/Subcategory from Product Matches
+    // Find products that match the search term
+    const matchingProducts = productsData.products.filter(p =>
+      p.name.toLowerCase().includes(lowerQuery) ||
+      (p.description && p.description.toLowerCase().includes(lowerQuery)) ||
+      (p.tags && p.tags.some(tag => tag.toLowerCase().includes(lowerQuery)))
+    );
+
+    if (matchingProducts.length > 0) {
+      // Find the most frequent Category+Subcategory pair in the results
+      const distribution = {};
+      let maxCount = 0;
+      let bestMatch = null;
+
+      matchingProducts.forEach(p => {
+        if (p.category && p.subcategory) {
+          const key = `${p.category}|||${p.subcategory}`;
+          distribution[key] = (distribution[key] || 0) + 1;
+
+          if (distribution[key] > maxCount) {
+            maxCount = distribution[key];
+            bestMatch = { category: p.category, subcategory: p.subcategory };
+          }
+        }
+      });
+
+      // If we found a dominant subcategory, redirect there
+      if (bestMatch) {
+        console.log(`Smart Search: Redirecting "${query}" to ${bestMatch.category} > ${bestMatch.subcategory}`);
+        navigate(`/category/${encodeURIComponent(bestMatch.category)}?subcategory=${encodeURIComponent(bestMatch.subcategory)}`);
+        return;
+      }
+    }
+
+    // 4. Default: Go to "Global" Category Search
+    // This ensures we ALWAYS show the "Rich Category Layout" and never the generic "Shop List"
+    navigate(`/category/Global?search=${encodeURIComponent(query)}`);
+  };
+
   return (
     <nav className="bg-white border-b border-gray-200 relative z-[9999] shadow-sm overflow-visible">
       <div className="max-w-7xl mx-auto px-4 mobile-container">
@@ -151,7 +213,7 @@ const Navbar = () => {
 
           {/* Desktop Search (Hidden on Mobile) */}
           <div className="hidden md:block flex-1 px-4 max-w-2xl">
-            <SearchSuggestions onSearch={(q) => navigate(`/shop?search=${encodeURIComponent(q)}`)} />
+            <SearchSuggestions onSearch={handleGlobalSearch} />
           </div>
 
           {/* Actions: Cart & User (Desktop) / Cart & Menu (Mobile) */}
@@ -241,7 +303,7 @@ const Navbar = () => {
         </div>
         {/* Mobile Search Bar Row - Visible only on mobile */}
         <div className="md:hidden pb-1.5 pt-0.5">
-          <SearchSuggestions onSearch={(q) => navigate(`/shop?search=${encodeURIComponent(q)}`)} />
+          <SearchSuggestions onSearch={handleGlobalSearch} />
         </div>
 
         {/* Bottom Row: Desktop category strip integrated into header */}
@@ -251,6 +313,7 @@ const Navbar = () => {
             className="relative"
             ref={categoriesMenuRefDesktop}
             onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <button
               type="button"

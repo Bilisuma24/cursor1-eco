@@ -37,18 +37,18 @@ export default function Shop() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch products from database (seller-added products)
       // IMPORTANT: Fetch ALL products without any filters so public shop can see everything
       console.log('🛒 Fetching products from database for shop...');
       console.log('Current Supabase client URL:', supabase.supabaseUrl);
-      
+
       const { data: dbProducts, error: dbError } = await supabase
         .from('product')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1000); // Limit to prevent too many results
-      
+
       console.log('Query executed. Results:', {
         hasData: !!dbProducts,
         dataLength: dbProducts?.length || 0,
@@ -62,24 +62,24 @@ export default function Shop() {
         console.error('Error code:', dbError.code);
         console.error('Error message:', dbError.message);
         console.error('Error details:', JSON.stringify(dbError, null, 2));
-        
+
         // Check if it's a network error
-        if (dbError.message?.includes('Failed to fetch') || 
-            dbError.message?.includes('ERR_INTERNET_DISCONNECTED') ||
-            dbError.message?.includes('ERR_NAME_NOT_RESOLVED') ||
-            dbError.message?.includes('NetworkError') ||
-            dbError.code === 'PGRST116') {
+        if (dbError.message?.includes('Failed to fetch') ||
+          dbError.message?.includes('ERR_INTERNET_DISCONNECTED') ||
+          dbError.message?.includes('ERR_NAME_NOT_RESOLVED') ||
+          dbError.message?.includes('NetworkError') ||
+          dbError.code === 'PGRST116') {
           console.error('🌐🌐🌐 NETWORK ERROR - Cannot fetch seller products! 🌐🌐🌐');
           console.error('Seller products are stored in Supabase but cannot be loaded due to network issues.');
           console.error('The app will show static products only until connection is restored.');
           setNetworkError(true);
         }
-        
+
         // Check if it's a permissions/RLS issue
-        if (dbError.code === '42501' || dbError.code === 'PGRST301' || 
-            dbError.message?.includes('permission') || 
-            dbError.message?.includes('policy') ||
-            dbError.message?.includes('row-level security')) {
+        if (dbError.code === '42501' || dbError.code === 'PGRST301' ||
+          dbError.message?.includes('permission') ||
+          dbError.message?.includes('policy') ||
+          dbError.message?.includes('row-level security')) {
           console.error('🚫🚫🚫 RLS POLICY BLOCKING ACCESS! 🚫🚫🚫');
           console.error('The product table is blocked from public viewing.');
           console.error('SOLUTION: Run the SQL in URGENT-FIX-PRODUCT-VISIBILITY.sql');
@@ -91,11 +91,11 @@ CREATE POLICY "public_read_products"
   TO public
   USING (true);
           `);
-          
+
           // Show alert to user
           alert('⚠️ Products cannot be viewed! RLS policy is blocking access.\n\nPlease run the SQL fix in Supabase Dashboard:\n\nCREATE POLICY "public_read_products"\n  ON "product"\n  FOR SELECT\n  TO public\n  USING (true);');
         }
-        
+
         // Still continue with static products
       } else {
         if (dbProducts && dbProducts.length > 0) {
@@ -105,7 +105,7 @@ CREATE POLICY "public_read_products"
           const adminProducts = dbProducts.filter(p => !p.seller_id);
           console.log(`  - Seller products (with seller_id): ${sellerProducts.length}`);
           console.log(`  - Admin/Other products (no seller_id): ${adminProducts.length}`);
-          
+
           if (sellerProducts.length > 0) {
             console.log('✅ Sample seller product:', {
               id: sellerProducts[0].id,
@@ -127,9 +127,9 @@ CREATE POLICY "public_read_products"
             console.error('  2. Products were created without seller_id');
             console.error('  3. seller_id column might not exist in database');
             console.error('  4. RLS policy is filtering out products with seller_id');
-            console.error('All fetched products (first 10):', dbProducts.slice(0, 10).map(p => ({ 
-              id: p.id, 
-              name: p.name, 
+            console.error('All fetched products (first 10):', dbProducts.slice(0, 10).map(p => ({
+              id: p.id,
+              name: p.name,
               has_seller_id: !!p.seller_id,
               seller_id: p.seller_id,
               created_at: p.created_at
@@ -158,22 +158,22 @@ CREATE POLICY "public_read_products"
           imagesIsArray: Array.isArray(product.images),
           imagesLength: Array.isArray(product.images) ? product.images.length : 'N/A'
         });
-        
+
         // Helper function to convert image paths to public URLs
         const convertToPublicUrl = (imagePath) => {
           if (!imagePath || typeof imagePath !== 'string') {
             return null;
           }
-          
+
           // If it's already a full URL (http/https), return as-is
           if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
             return imagePath;
           }
-          
+
           // If it's a relative path, convert to public URL
           // Remove leading slash if present
           const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-          
+
           try {
             const { data } = supabase.storage
               .from('product-images')
@@ -184,120 +184,120 @@ CREATE POLICY "public_read_products"
             return null;
           }
         };
-        
+
         return {
-        id: product.id,
-        name: product.name || 'Untitled Product',
-        description: product.description || '',
-        price: parseFloat(product.price) || 0,
-        images: (() => {
-          // Handle different image formats
-          let imageArray = [];
-          
-          // Check product.images array first
-          if (product.images) {
-            if (Array.isArray(product.images) && product.images.length > 0) {
-              imageArray = product.images.filter(img => img != null && img !== '');
-            } else if (typeof product.images === 'string' && product.images.trim()) {
-              // Handle case where images might be stored as a single string instead of array
-              try {
-                const parsed = JSON.parse(product.images);
-                if (Array.isArray(parsed)) {
-                  imageArray = parsed.filter(img => img != null && img !== '');
-                } else {
+          id: product.id,
+          name: product.name || 'Untitled Product',
+          description: product.description || '',
+          price: parseFloat(product.price) || 0,
+          images: (() => {
+            // Handle different image formats
+            let imageArray = [];
+
+            // Check product.images array first
+            if (product.images) {
+              if (Array.isArray(product.images) && product.images.length > 0) {
+                imageArray = product.images.filter(img => img != null && img !== '');
+              } else if (typeof product.images === 'string' && product.images.trim()) {
+                // Handle case where images might be stored as a single string instead of array
+                try {
+                  const parsed = JSON.parse(product.images);
+                  if (Array.isArray(parsed)) {
+                    imageArray = parsed.filter(img => img != null && img !== '');
+                  } else {
+                    imageArray = [product.images];
+                  }
+                } catch {
                   imageArray = [product.images];
                 }
-              } catch {
-                imageArray = [product.images];
               }
             }
-          }
-          
-          // Check product.image_url (could be array or string) if images is empty
-          if (imageArray.length === 0 && product.image_url) {
-            if (Array.isArray(product.image_url)) {
-              imageArray = product.image_url.filter(img => img != null && img !== '');
-            } else if (typeof product.image_url === 'string' && product.image_url.trim()) {
-              imageArray = [product.image_url];
+
+            // Check product.image_url (could be array or string) if images is empty
+            if (imageArray.length === 0 && product.image_url) {
+              if (Array.isArray(product.image_url)) {
+                imageArray = product.image_url.filter(img => img != null && img !== '');
+              } else if (typeof product.image_url === 'string' && product.image_url.trim()) {
+                imageArray = [product.image_url];
+              }
             }
-          }
-          
-          // Convert all image paths to public URLs
-          const convertedImages = imageArray
-            .map(img => {
-              if (typeof img === 'string' && img.trim()) {
-                const trimmed = img.trim();
-                // Skip ALL via.placeholder.com URLs (they don't work and cause errors)
-                if (trimmed.includes('via.placeholder.com')) {
+
+            // Convert all image paths to public URLs
+            const convertedImages = imageArray
+              .map(img => {
+                if (typeof img === 'string' && img.trim()) {
+                  const trimmed = img.trim();
+                  // Skip ALL via.placeholder.com URLs (they don't work and cause errors)
+                  if (trimmed.includes('via.placeholder.com')) {
+                    return null;
+                  }
+                  // If it's already a full URL, return it
+                  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image')) {
+                    return trimmed;
+                  }
+                  // Try to convert relative path to public URL
+                  const publicUrl = convertToPublicUrl(trimmed);
+                  // Only return if we got a valid URL back
+                  if (publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://'))) {
+                    return publicUrl;
+                  }
+                  // If conversion failed, skip it
                   return null;
                 }
-                // If it's already a full URL, return it
-                if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image')) {
-                  return trimmed;
-                }
-                // Try to convert relative path to public URL
-                const publicUrl = convertToPublicUrl(trimmed);
-                // Only return if we got a valid URL back
-                if (publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://'))) {
-                  return publicUrl;
-                }
-                // If conversion failed, skip it
                 return null;
-              }
-              return null;
-            })
-            .filter(img => {
-              // Only keep valid URLs that start with http/https or data URIs
-              if (typeof img === 'string' && img.trim().length > 0) {
-                const trimmed = img.trim();
-                return trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image');
-              }
-              return false;
-            });
-          
-          // Return converted images or placeholder
-          if (convertedImages.length > 0) {
-            console.log(`✅ Product ${product.id} has ${convertedImages.length} images:`, convertedImages);
-            return convertedImages;
-          }
-          
-          // Default placeholder - use data URI SVG to avoid external service issues
-          console.warn(`⚠️ Product ${product.id} has no images, using SVG placeholder`);
-          const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+              })
+              .filter(img => {
+                // Only keep valid URLs that start with http/https or data URIs
+                if (typeof img === 'string' && img.trim().length > 0) {
+                  const trimmed = img.trim();
+                  return trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image');
+                }
+                return false;
+              });
+
+            // Return converted images or placeholder
+            if (convertedImages.length > 0) {
+              console.log(`✅ Product ${product.id} has ${convertedImages.length} images:`, convertedImages);
+              return convertedImages;
+            }
+
+            // Default placeholder - use data URI SVG to avoid external service issues
+            console.warn(`⚠️ Product ${product.id} has no images, using SVG placeholder`);
+            const svgPlaceholder = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
             <rect width="400" height="400" fill="#f3f4f6"/>
             <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text>
           </svg>`)}`;
-          return [svgPlaceholder];
-        })(),
-        category: product.category || 'General',
-        rating: product.rating || 4.0,
-        reviewCount: product.review_count || 0,
-        sold: product.sold || 0,
-        stock: product.stock || 0,
-        brand: product.brand || '',
-        subcategory: product.subcategory || '',
-        seller: {
-          name: 'Seller',
-          verified: product.seller_id ? true : false,
-        },
-        shipping: {
-          free: product.free_shipping || false,
-          express: product.express_shipping || false,
-        },
-        features: product.features || [],
-        originalPrice: product.original_price || null,
-        discount: product.discount || null,
-        colors: product.colors && Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : null,
-        sizes: product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : null,
-        gender: product.gender || null,
-        isFromDatabase: true, // Flag to identify database products
-        seller_id: product.seller_id || null, // Preserve seller_id to identify seller products
-        isSellerProduct: !!product.seller_id, // Explicit flag for seller products
-      };
+            return [svgPlaceholder];
+          })(),
+          category: product.category || 'General',
+          rating: product.rating || 4.0,
+          reviewCount: product.review_count || 0,
+          sold: product.sold || 0,
+          stock: product.stock || 0,
+          brand: product.brand || '',
+          subcategory: product.subcategory || '',
+          seller: {
+            name: 'Seller',
+            verified: product.seller_id ? true : false,
+          },
+          shipping: {
+            free: product.free_shipping || false,
+            express: product.express_shipping || false,
+          },
+          features: product.features || [],
+          originalPrice: product.original_price || null,
+          discount: product.discount || null,
+          colors: product.colors && Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : null,
+          sizes: product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : null,
+          gender: product.gender || null,
+          isFromDatabase: true, // Flag to identify database products
+          seller_id: product.seller_id || null, // Preserve seller_id to identify seller products
+          isSellerProduct: !!product.seller_id, // Explicit flag for seller products
+        };
       });
 
       console.log(`✅ Transformed ${transformedDbProducts.length} database products`);
-      
+
       // Detailed logging for seller products
       const sellerProductsInTransformed = transformedDbProducts.filter(p => p.seller_id || p.isSellerProduct);
       console.log(`🔍 DETAILED SELLER PRODUCT CHECK:`);
@@ -307,9 +307,9 @@ CREATE POLICY "public_read_products"
         console.log(`   - Seller product IDs:`, sellerProductsInTransformed.map(p => ({ id: p.id, name: p.name, seller_id: p.seller_id })));
       } else {
         console.warn(`   ⚠️ NO SELLER PRODUCTS FOUND IN TRANSFORMED PRODUCTS!`);
-        console.warn(`   - All transformed products:`, transformedDbProducts.map(p => ({ 
-          id: p.id, 
-          name: p.name, 
+        console.warn(`   - All transformed products:`, transformedDbProducts.map(p => ({
+          id: p.id,
+          name: p.name,
           has_seller_id: !!p.seller_id,
           seller_id: p.seller_id,
           isSellerProduct: p.isSellerProduct,
@@ -321,11 +321,11 @@ CREATE POLICY "public_read_products"
       // Database products will take precedence (avoid duplicates by ID)
       const staticProducts = productsData.products || [];
       console.log(`📦 Using ${staticProducts.length} static products`);
-      
+
       // Prioritize database products (seller products) over static
       // IMPORTANT: Include ALL database products, even if they have seller_id
       const combinedProducts = [...transformedDbProducts, ...staticProducts];
-      
+
       // Remove duplicates based on ID (database products first)
       // This ensures seller products are included
       const uniqueProducts = combinedProducts.reduce((acc, product) => {
@@ -334,7 +334,7 @@ CREATE POLICY "public_read_products"
         }
         return acc;
       }, []);
-      
+
       // CRITICAL: Ensure seller products are NOT filtered out
       // Log all products to verify seller products are included
       const sellerProductsInFinal = uniqueProducts.filter(p => p.seller_id || p.isSellerProduct);
@@ -342,30 +342,30 @@ CREATE POLICY "public_read_products"
       console.log(`   - Total products in final list: ${uniqueProducts.length}`);
       console.log(`   - Seller products in final list: ${sellerProductsInFinal.length}`);
       if (sellerProductsInFinal.length > 0) {
-        console.log(`✅ Seller products ARE in final list:`, sellerProductsInFinal.map(p => ({ 
-          id: p.id, 
-          name: p.name, 
-          seller_id: p.seller_id 
+        console.log(`✅ Seller products ARE in final list:`, sellerProductsInFinal.map(p => ({
+          id: p.id,
+          name: p.name,
+          seller_id: p.seller_id
         })));
       } else {
         console.error(`❌ NO SELLER PRODUCTS IN FINAL LIST!`);
-        console.error(`   - All products:`, uniqueProducts.map(p => ({ 
-          id: p.id, 
-          name: p.name, 
+        console.error(`   - All products:`, uniqueProducts.map(p => ({
+          id: p.id,
+          name: p.name,
           has_seller_id: !!p.seller_id,
-          seller_id: p.seller_id 
+          seller_id: p.seller_id
         })));
       }
 
       const sellerProductCount = transformedDbProducts.filter(p => p.seller_id || p.isSellerProduct).length;
       const totalCount = uniqueProducts.length;
-      
+
       console.log(`📊 Product Summary:`);
       console.log(`   - Seller/Database products (total): ${transformedDbProducts.length}`);
       console.log(`   - Seller products (with seller_id): ${sellerProductCount}`);
       console.log(`   - Static products: ${staticProducts.length}`);
       console.log(`   - Total unique products: ${totalCount}`);
-      
+
       // Final check - verify seller products are in the final list
       const finalSellerProducts = uniqueProducts.filter(p => p.seller_id || p.isSellerProduct);
       console.log(`🔍 FINAL CHECK - Seller products in display list: ${finalSellerProducts.length}`);
@@ -375,7 +375,7 @@ CREATE POLICY "public_read_products"
         console.error(`❌❌❌ NO SELLER PRODUCTS IN FINAL DISPLAY LIST! ❌❌❌`);
         console.error(`This means seller products are being filtered out or not included.`);
       }
-      
+
       if (sellerProductCount === 0 && dbProducts && dbProducts.length === 0) {
         console.warn('⚠️ No products found in database. Products may be blocked by RLS policies.');
       } else if (dbError && dbError.code === '42501') {
@@ -384,11 +384,11 @@ CREATE POLICY "public_read_products"
       } else if (sellerProductCount === 0 && dbProducts && dbProducts.length > 0) {
         console.error('❌❌❌ CRITICAL: Products fetched but NONE have seller_id! ❌❌❌');
         console.error('This means products in database were created without seller_id.');
-        console.error('All fetched products:', dbProducts.map(p => ({ 
-          id: p.id, 
-          name: p.name, 
+        console.error('All fetched products:', dbProducts.map(p => ({
+          id: p.id,
+          name: p.name,
           seller_id: p.seller_id,
-          has_seller_id: !!p.seller_id 
+          has_seller_id: !!p.seller_id
         })));
       }
 
@@ -398,10 +398,10 @@ CREATE POLICY "public_read_products"
     } catch (error) {
       console.error('Error fetching products:', error);
       // Check if it's a network error
-      if (error?.message?.includes('Failed to fetch') || 
-          error?.message?.includes('ERR_INTERNET_DISCONNECTED') ||
-          error?.name === 'TypeError' ||
-          error?.name === 'NetworkError') {
+      if (error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('ERR_INTERNET_DISCONNECTED') ||
+        error?.name === 'TypeError' ||
+        error?.name === 'NetworkError') {
         setNetworkError(true);
         console.error('🌐 Network error: Seller products cannot be loaded');
       }
@@ -419,11 +419,11 @@ CREATE POLICY "public_read_products"
     const q = params.get('search') || '';
     const cat = params.get('category') || '';
     const subcat = params.get('subcategory') || '';
-    
+
     // Only apply filters if they exist in the URL
     // If no category in URL, explicitly show all products (no category filter)
     setSearchTerm(q);
-    
+
     // If there's a category in the URL, use it; otherwise set to 'All' to show all products
     if (cat) {
       setSelectedCategory(cat);
@@ -528,6 +528,93 @@ CREATE POLICY "public_read_products"
     }
 
     setFilteredProducts(filtered);
+
+    // Smart Redirect Logic
+    // If we have a Search Term AND results, check if we should redirect to a Category page
+    // This provides the "Rich Category View" the user requested instead of the "White Space" generic view
+    if (searchTerm && filtered.length > 0 && !filters.category) {
+      // Analyze category distribution in results
+      const catCount = {};
+      let maxCount = 0;
+      let dominantCategory = null;
+
+      filtered.forEach(p => {
+        if (p.category) {
+          catCount[p.category] = (catCount[p.category] || 0) + 1;
+          if (catCount[p.category] > maxCount) {
+            maxCount = catCount[p.category];
+            dominantCategory = p.category;
+          }
+        }
+      });
+
+      // If dominant category exists
+      // We can redirect to show the product IN context
+      // Redirect if > 50% of results are in this category OR if there's only 1result (direct hit)
+      if (dominantCategory && (maxCount === filtered.length || maxCount / filtered.length > 0.6)) {
+        const lowerDominant = dominantCategory.toLowerCase();
+
+        // 1. Check if it's a known Top-Level Category
+        const validCategory = productsData.categories.find(c => c.name.toLowerCase() === lowerDominant);
+
+        if (validCategory) {
+          console.log(`REDIRECT: Found dominant category "${validCategory.name}" for search "${searchTerm}". Redirecting...`);
+
+          // Check for dominant subcategory within this category
+          const subCount = {};
+          let maxSubCount = 0;
+          let dominantSub = null;
+
+          filtered.filter(p => p.category === dominantCategory).forEach(p => {
+            if (p.subcategory) {
+              subCount[p.subcategory] = (subCount[p.subcategory] || 0) + 1;
+              if (subCount[p.subcategory] > maxSubCount) {
+                maxSubCount = subCount[p.subcategory];
+                dominantSub = p.subcategory;
+              }
+            }
+          });
+
+          let url = `/category/${encodeURIComponent(validCategory.name)}?search=${encodeURIComponent(searchTerm)}`;
+          if (dominantSub && maxSubCount > 0) {
+            url += `&subcategory=${encodeURIComponent(dominantSub)}`;
+          }
+
+          navigate(url, { replace: true });
+          return;
+        }
+
+        // 2. Check if the "Category" is actually a known "Subcategory" (common data error)
+        let parentCategoryForSub = null;
+        let matchedSubName = null;
+
+        for (const cat of productsData.categories) {
+          const sub = cat.subcategories?.find(s => s.toLowerCase() === lowerDominant);
+          if (sub) {
+            parentCategoryForSub = cat;
+            matchedSubName = sub;
+            break;
+          }
+        }
+
+
+        if (parentCategoryForSub) {
+          console.log(`REDIRECT: Dominant category "${dominantCategory}" is actually a subcategory of "${parentCategoryForSub.name}". Redirecting...`);
+          const url = `/category/${encodeURIComponent(parentCategoryForSub.name)}?subcategory=${encodeURIComponent(matchedSubName)}&search=${encodeURIComponent(searchTerm)}`;
+          navigate(url, { replace: true });
+          return;
+        }
+      }
+
+      // Fallback: If we have results but no specific matching category could be pinpointed,
+      // redirect to the "Global" category page so the user sees the Rich Layout instead of the generic list.
+      // This satisfies the user requirement to never see the white "Search results" page.
+      if (filtered.length > 0) {
+        console.log(`REDIRECT: No dominant specific category, redirecting to Global view.`);
+        navigate(`/category/Global?search=${encodeURIComponent(searchTerm)}`, { replace: true });
+        return;
+      }
+    }
   }, [products, filters, searchTerm, sortBy]);
 
   const handleSearch = (term) => {
@@ -607,7 +694,7 @@ CREATE POLICY "public_read_products"
               <span className="text-xl font-bold text-gray-900">Eco</span>
               <span className="text-xl font-bold text-orange-500">Store</span>
             </Link>
-            <button 
+            <button
               onClick={() => navigate('/shop')}
               className="p-2"
             >
@@ -628,11 +715,10 @@ CREATE POLICY "public_read_products"
                 <button
                   key={index}
                   onClick={() => handleCategorySelect(category)}
-                  className={`w-full text-left px-2 py-1.5 text-[11px] leading-tight transition-colors relative ${
-                    selectedCategory === category
-                      ? 'text-red-500 font-semibold'
-                      : 'text-gray-900'
-                  }`}
+                  className={`w-full text-left px-2 py-1.5 text-[11px] leading-tight transition-colors relative ${selectedCategory === category
+                    ? 'text-red-500 font-semibold'
+                    : 'text-gray-900'
+                    }`}
                 >
                   <span className="relative">
                     {category}
@@ -668,7 +754,7 @@ CREATE POLICY "public_read_products"
                   </div>
                 </div>
               )}
-              
+
               <h2 className="text-sm font-semibold text-gray-900 mb-3">Recommended</h2>
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-8">
@@ -744,7 +830,7 @@ CREATE POLICY "public_read_products"
               </div>
             </div>
           )}
-          
+
           {/* Results Header - Desktop Optimized */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex-1">
@@ -769,130 +855,7 @@ CREATE POLICY "public_read_products"
             </div>
 
             {/* Sort and View Controls - Desktop */}
-            <div className="flex items-center gap-4">
-              {/* Diagnostic Button - Always show for debugging */}
-              <button
-                onClick={async () => {
-                  console.log('🔍 DIAGNOSTIC: Checking database for seller products...');
-                  try {
-                    const { data: allProducts, error } = await supabase
-                      .from('product')
-                      .select('*')
-                      .order('created_at', { ascending: false });
-                    
-                    if (error) {
-                      console.error('❌ Diagnostic error:', error);
-                      alert(`Error: ${error.message}`);
-                      return;
-                    }
-                    
-                    const sellerProducts = allProducts?.filter(p => p.seller_id) || [];
-                    const allProductsCount = allProducts?.length || 0;
-                    
-                    console.log('📊 DIAGNOSTIC RESULTS:');
-                    console.log(`   - Total products in database: ${allProductsCount}`);
-                    console.log(`   - Products with seller_id: ${sellerProducts.length}`);
-                    console.log(`   - Products in current state: ${products.length}`);
-                    console.log(`   - Seller products in current state: ${products.filter(p => p.seller_id || p.isSellerProduct).length}`);
-                    
-                    if (sellerProducts.length > 0) {
-                      console.log('✅ Seller products found in database:', sellerProducts.map(p => ({ 
-                        id: p.id, 
-                        name: p.name, 
-                        seller_id: p.seller_id 
-                      })));
-                      alert(`✅ Found ${sellerProducts.length} seller products in database!\n\nCheck console for details.`);
-                    } else {
-                      console.warn('⚠️ No seller products in database!');
-                      alert(`⚠️ No seller products found in database.\n\nTotal products: ${allProductsCount}\n\nCheck console for details.`);
-                    }
-                  } catch (err) {
-                    console.error('Diagnostic failed:', err);
-                    alert(`Error: ${err.message}`);
-                  }
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200"
-                title="Check database for seller products"
-              >
-                <span>🔍</span>
-                <span>Check DB</span>
-              </button>
-              
-              {/* Seller Products Filter Toggle */}
-              {products.some(p => p.isSellerProduct || (p.isFromDatabase && p.seller_id)) && (
-                <button
-                  onClick={() => setFilters(prev => ({ ...prev, sellerOnly: !prev.sellerOnly }))}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    filters.sellerOnly
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <span>🏪</span>
-                  <span>Seller Products</span>
-                  {filters.sellerOnly && (
-                    <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                      {products.filter(p => p.isSellerProduct || (p.isFromDatabase && p.seller_id)).length}
-                    </span>
-                  )}
-                </button>
-              )}
-              
-              <div className="flex items-center space-x-2">
-                <SortAsc className="w-5 h-5 text-gray-500" />
-                <select
-                  value={sortBy}
-                  onChange={handleSortChange}
-                  className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
-                >
-                  <option value="">Sort by</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Customer Rating</option>
-                  <option value="bestselling">Best Selling</option>
-                  <option value="newest">Newest</option>
-                </select>
-              </div>
-                  
-              {/* View Mode Toggle */}
-              <div className="flex items-center border border-gray-300 rounded-lg bg-white shadow-sm">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`flex items-center justify-center p-2.5 rounded-l-lg transition-colors ${
-                    viewMode === 'grid' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                  aria-label="Grid view"
-                >
-                  <Grid className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`flex items-center justify-center p-2.5 rounded-r-lg transition-colors ${
-                    viewMode === 'list' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                  aria-label="List view"
-                >
-                  <List className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Refresh Button */}
-              <button
-                onClick={() => {
-                  setLoading(true);
-                  fetchProducts();
-                }}
-                disabled={loading}
-                className="px-4 py-2.5 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                title="Refresh products"
-              >
-                {loading ? 'Refreshing...' : '🔄 Refresh'}
-              </button>
-            </div>
+            {/* Shop Controls Removed */}
           </div>
 
           {/* Products Grid/List - Desktop Optimized */}
