@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, ChevronDown, ShoppingCart } from "lucide-react";
-import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
+import { useAuth } from "../contexts/SupabaseAuthContext";
 import SearchSuggestions from "./SearchSuggestions";
 import { useUserRole } from "../hooks/useUserRole";
 import { useCart } from "../contexts/CartContext";
@@ -11,7 +11,7 @@ import productsData from "../data/products.js";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const { user, signOut, loading: authLoading } = useSupabaseAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -54,7 +54,7 @@ const Navbar = () => {
 
   // Header category labels (AliExpress-style row under search)
   const headerCategories = [
-    "Dollar Express",
+    "Vehicles",
     "Local shipping",
     "Home & Furniture",
     "Weekly deals",
@@ -285,7 +285,7 @@ const Navbar = () => {
             <Link to="/cart" className="relative p-1.5 text-gray-700 hover:text-[#ff4747] transition-colors">
               <ShoppingCart className="w-6 h-6" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-[#ff4747] text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white">
+                <span className="absolute -top-1 -right-1 bg-[#ff4747] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
                   {cartCount}
                 </span>
               )}

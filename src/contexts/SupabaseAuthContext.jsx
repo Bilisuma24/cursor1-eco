@@ -11,7 +11,7 @@ export function SupabaseAuthProvider({ children }) {
   useEffect(() => {
     // Get initial session with aggressive timeout
     let mounted = true;
-    
+
     const initSession = async () => {
       try {
         const timeoutId = setTimeout(() => {
@@ -22,11 +22,11 @@ export function SupabaseAuthProvider({ children }) {
             }
             setLoading(false);
           }
-        }, 3000); // 3 second timeout
+        }, 8000); // 8 second timeout to prevent premature 'no user' state on slow networks
 
         const { data: { session }, error } = await supabase.auth.getSession();
         clearTimeout(timeoutId);
-        
+
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
@@ -53,7 +53,7 @@ export function SupabaseAuthProvider({ children }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false); // Ensure loading ends on any auth event
-        
+
         // If user signed out, clear everything
         if (_event === 'SIGNED_OUT' || !session) {
           setUser(null);
@@ -77,14 +77,14 @@ export function SupabaseAuthProvider({ children }) {
       setUser(null);
       setSession(null);
       setLoading(false);
-      
+
       // Then sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('[Auth Context] Sign out error:', error);
         // Continue anyway - we already cleared local state
       }
-      
+
       // Clear any localStorage items
       try {
         localStorage.removeItem('user_profile');
@@ -94,7 +94,7 @@ export function SupabaseAuthProvider({ children }) {
       } catch (e) {
         console.warn('[Auth Context] Error clearing localStorage:', e);
       }
-      
+
       return { success: true };
     } catch (error) {
       console.error('[Auth Context] Sign out error:', error);
@@ -102,14 +102,14 @@ export function SupabaseAuthProvider({ children }) {
       setUser(null);
       setSession(null);
       setLoading(false);
-      
+
       // Still try to clear localStorage
       try {
         localStorage.clear();
       } catch (e) {
         // Ignore localStorage errors
       }
-      
+
       return { success: true }; // Return success anyway since we cleared state
     }
   };
@@ -120,9 +120,9 @@ export function SupabaseAuthProvider({ children }) {
         email,
         password,
       });
-      
+
       if (error) throw error;
-      
+
       // User will be set via onAuthStateChange
       return { user: data.user };
     } catch (error) {
@@ -140,15 +140,15 @@ export function SupabaseAuthProvider({ children }) {
           data: userData, // Additional user metadata (name, user_type, etc.)
         },
       });
-      
+
       if (error) throw error;
-      
+
       // User will be set via onAuthStateChange after email confirmation
       // But for auto-login, we can set it immediately if session exists
       if (data.user) {
         setUser(data.user);
       }
-      
+
       return { user: data.user, session: data.session };
     } catch (error) {
       console.error('[Auth Context] Sign up error:', error);
@@ -161,7 +161,7 @@ export function SupabaseAuthProvider({ children }) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      
+
       if (error) throw error;
       return { success: true };
     } catch (error) {
@@ -175,7 +175,7 @@ export function SupabaseAuthProvider({ children }) {
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
-      
+
       if (error) throw error;
       return { success: true };
     } catch (error) {
@@ -189,14 +189,14 @@ export function SupabaseAuthProvider({ children }) {
       const { data, error } = await supabase.auth.updateUser({
         data: metadata,
       });
-      
+
       if (error) throw error;
-      
+
       // Update local user state
       if (data.user) {
         setUser(data.user);
       }
-      
+
       return { user: data.user };
     } catch (error) {
       console.error('[Auth Context] Update user metadata error:', error);
@@ -210,7 +210,7 @@ export function SupabaseAuthProvider({ children }) {
         type: 'signup',
         email: email,
       });
-      
+
       if (error) throw error;
       return { success: true };
     } catch (error) {
@@ -222,7 +222,7 @@ export function SupabaseAuthProvider({ children }) {
   const signInWithOAuth = async (provider) => {
     try {
       const redirectUrl = `${window.location.origin}/auth/callback`;
-      
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -230,12 +230,12 @@ export function SupabaseAuthProvider({ children }) {
           // Remove queryParams that might cause issues
         },
       });
-      
+
       if (error) {
         console.error('[Auth Context] OAuth sign in error:', error);
         throw new Error(error.message || `Failed to sign in with ${provider}. Please check your Supabase configuration.`);
       }
-      
+
       // OAuth will redirect, so we don't need to return anything
       return data;
     } catch (error) {

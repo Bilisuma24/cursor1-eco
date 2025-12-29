@@ -5,7 +5,7 @@ import { useCart } from '../contexts/CartContext';
 
 export default function BottomNavigation() {
   const location = useLocation();
-  const { getCartItemsCount } = useCart();
+  const { cartCount } = useCart();
 
   const isActive = (path) => {
     if (path === '/') {
@@ -22,61 +22,51 @@ export default function BottomNavigation() {
           className="flex flex-col items-center gap-1"
         >
           <div className="w-6 h-6 flex items-center justify-center">
-            <div className={`w-5 h-5 border-2 rounded-sm flex items-center justify-center ${
-              isActive('/') ? 'border-red-500' : 'border-gray-300'
-            }`}>
-              <div className={`w-2 h-2 rounded-sm ${
-                isActive('/') ? 'bg-red-500' : 'bg-gray-300'
-              }`}></div>
+            <div className={`w-5 h-5 border-2 rounded-sm flex items-center justify-center ${isActive('/') ? 'border-red-500' : 'border-gray-300'
+              }`}>
+              <div className={`w-2 h-2 rounded-sm ${isActive('/') ? 'bg-red-500' : 'bg-gray-300'
+                }`}></div>
             </div>
           </div>
-          <span className={`text-xs font-medium ${
-            isActive('/') ? 'text-red-500' : 'text-gray-600'
-          }`}>Home</span>
+          <span className={`text-xs font-medium ${isActive('/') ? 'text-red-500' : 'text-gray-600'
+            }`}>Home</span>
         </Link>
         <Link
           to="/shop"
           className="flex flex-col items-center gap-1"
         >
           <div className="w-6 h-6 flex items-center justify-center">
-            <div className={`w-5 h-5 border-2 rounded-sm flex items-center justify-center ${
-              isActive('/shop') ? 'border-red-500' : 'border-gray-300'
-            }`}>
-              <div className={`w-2 h-2 rounded-sm ${
-                isActive('/shop') ? 'bg-red-500' : 'bg-gray-300'
-              }`}></div>
+            <div className={`w-5 h-5 border-2 rounded-sm flex items-center justify-center ${isActive('/shop') ? 'border-red-500' : 'border-gray-300'
+              }`}>
+              <div className={`w-2 h-2 rounded-sm ${isActive('/shop') ? 'bg-red-500' : 'bg-gray-300'
+                }`}></div>
             </div>
           </div>
-          <span className={`text-xs font-medium ${
-            isActive('/shop') ? 'text-red-500' : 'text-gray-600'
-          }`}>Category</span>
+          <span className={`text-xs font-medium ${isActive('/shop') ? 'text-red-500' : 'text-gray-600'
+            }`}>Category</span>
         </Link>
         <Link
           to="/cart"
           className="flex flex-col items-center gap-1 relative"
         >
-          <ShoppingCart className={`w-6 h-6 ${
-            isActive('/cart') ? 'text-red-500' : 'text-gray-600'
-          }`} />
-          {getCartItemsCount() > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {getCartItemsCount()}
+          <ShoppingCart className={`w-6 h-6 ${isActive('/cart') ? 'text-red-500' : 'text-gray-600'
+            }`} />
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-[#ff4747] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+              {cartCount}
             </span>
           )}
-          <span className={`text-xs font-medium ${
-            isActive('/cart') ? 'text-red-500' : 'text-gray-600'
-          }`}>Cart</span>
+          <span className={`text-xs font-medium ${isActive('/cart') ? 'text-red-500' : 'text-gray-600'
+            }`}>Cart</span>
         </Link>
         <Link
           to="/account"
           className="flex flex-col items-center gap-1"
         >
-          <User className={`w-6 h-6 ${
-            isActive('/account') || isActive('/profile') ? 'text-red-500' : 'text-gray-600'
-          }`} />
-          <span className={`text-xs font-medium ${
-            isActive('/account') || isActive('/profile') ? 'text-red-500' : 'text-gray-600'
-          }`}>Account</span>
+          <User className={`w-6 h-6 ${isActive('/account') || isActive('/profile') ? 'text-red-500' : 'text-gray-600'
+            }`} />
+          <span className={`text-xs font-medium ${isActive('/account') || isActive('/profile') ? 'text-red-500' : 'text-gray-600'
+            }`}>Account</span>
         </Link>
       </div>
     </div>

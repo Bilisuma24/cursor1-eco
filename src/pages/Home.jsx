@@ -258,8 +258,8 @@ export default function Home() {
     }
   ];
 
-  // Get top 3 deal products for the boxes
-  const topDealProducts = trendingProducts.slice(0, 4);
+  // Get top 10 products for the recommended sections
+  const topDealProducts = trendingProducts.slice(0, 10);
 
   const defaultHeroDeals = [
     {
@@ -569,19 +569,27 @@ export default function Home() {
 
           {/* Featured Sections */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Flash deals section */}
+            {/* Recommended for you */}
             <section className="bg-white md:bg-transparent rounded-2xl md:rounded-none border border-gray-200 md:border-0 shadow-sm md:shadow-none px-6 md:px-0 py-6 md:py-0">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">Recommended for you</h2>
                 </div>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 p-2 md:p-0">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 p-2 md:p-0">
                 {topDealProducts.map((product, index) => (
                   <ProductCard key={product.id || index} product={product} />
                 ))}
               </div>
             </section>
+
+            {/* Promo Banner Ad Section - Moved between Recommended and Choice */}
+            <div className="my-8">
+              <CategoryPromoBanner
+                products={allProducts.filter(p => (p.isSuperDeal || (p.isFromDatabase && p.discount && p.discount > 0)) && (p.images?.[0] || p.image))}
+                title="SuperDeals"
+              />
+            </div>
 
             {/* Choice picks */}
             <section className="bg-white md:bg-transparent rounded-2xl md:rounded-none border border-gray-200 md:border-0 shadow-sm md:shadow-none px-6 md:px-0 py-6 md:py-0">
@@ -595,20 +603,12 @@ export default function Home() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 p-2 md:p-0">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 p-2 md:p-0">
                 {trendingProducts.slice(0, 10).map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             </section>
-
-            {/* Promo Banner Ad Section */}
-            <div className="my-8">
-              <CategoryPromoBanner
-                products={allProducts.filter(p => (p.isSuperDeal || (p.isFromDatabase && p.discount && p.discount > 0)) && (p.images?.[0] || p.image))}
-                title="SuperDeals"
-              />
-            </div>
 
             {/* Recommended products */}
             <section className="bg-white md:bg-transparent rounded-2xl md:rounded-none border border-gray-200 md:border-0 shadow-sm md:shadow-none px-6 md:px-0 py-6 md:py-0">
@@ -619,7 +619,7 @@ export default function Home() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 p-2 md:p-0">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 p-2 md:p-0">
                 {featuredProducts.slice(0, 12).map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

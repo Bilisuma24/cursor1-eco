@@ -455,14 +455,20 @@ CREATE POLICY "public_read_products"
       );
     }
 
-    // Apply category filter
-    if (filters.category) {
-      filtered = filtered.filter(product => product.category === filters.category);
+    // Apply category filter (case-insensitive for robustness)
+    if (filters.category && filters.category !== 'All') {
+      filtered = filtered.filter(product =>
+        product.category &&
+        product.category.toLowerCase() === filters.category.toLowerCase()
+      );
     }
 
-    // Apply subcategory filter
+    // Apply subcategory filter (case-insensitive)
     if (filters.subcategory) {
-      filtered = filtered.filter(product => product.subcategory === filters.subcategory);
+      filtered = filtered.filter(product =>
+        product.subcategory &&
+        product.subcategory.toLowerCase() === filters.subcategory.toLowerCase()
+      );
     }
 
     // Apply brand filter

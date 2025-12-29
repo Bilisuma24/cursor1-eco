@@ -62,7 +62,7 @@ export function useUserRole() {
           setUserRole(null);
           setLoading(false);
         }
-      }, 5000); // 5 second timeout
+      }, 8000); // 8 second timeout to prevent hanging on slow network or 401s
 
       try {
         const { data, error } = await supabase

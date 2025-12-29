@@ -13,11 +13,18 @@ if (typeof window !== 'undefined') {
   const testConnection = async () => {
     try {
       const testUrl = supabaseUrl.replace('/rest/v1', '');
-      const response = await fetch(`${testUrl}/rest/v1/`, { 
+      const response = await fetch(`${testUrl}/rest/v1/`, {
         method: 'HEAD',
+        headers: {
+          'apikey': supabaseKey
+        },
         signal: AbortSignal.timeout(5000) // 5 second timeout
       });
-      console.log('✅ Supabase connection test: SUCCESS');
+      if (response.ok || response.status === 401) {
+        console.log('✅ Supabase connection test: SUCCESS' + (response.status === 401 ? ' (Service reachable)' : ''));
+      } else {
+        throw new Error(`HTTP ${response.status}`);
+      }
     } catch (error) {
       console.error('❌ Supabase connection test: FAILED');
       console.error('Error:', error.message);
@@ -31,7 +38,7 @@ if (typeof window !== 'undefined') {
       }
     }
   };
-  
+
   // Run connection test after a short delay
   setTimeout(testConnection, 1000);
 }

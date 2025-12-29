@@ -167,133 +167,152 @@ export default function Category() {
         title: 'Tech Innovation',
         subtitle: 'Latest gadgets and smart devices',
         cta: 'Shop Electronics',
-        icon: '📱'
+        icon: '📱',
+        image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=600'
       },
       'fashion': {
         bgColor: 'bg-gradient-to-r from-pink-500 to-rose-500',
         title: 'Style & Trends',
         subtitle: 'Discover your perfect look',
         cta: 'Shop Fashion',
-        icon: '👕'
+        icon: '👕',
+        image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=600'
       },
       'home & garden': {
         bgColor: 'bg-gradient-to-r from-amber-500 to-orange-500',
         title: 'Home Essentials',
         subtitle: 'Transform your living space',
         cta: 'Shop Home & Garden',
-        icon: '🏠'
+        icon: '🏠',
+        image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=600'
       },
       'sports & outdoors': {
         bgColor: 'bg-gradient-to-r from-green-500 to-emerald-600',
         title: 'Active Lifestyle',
         subtitle: 'Gear up for your next adventure',
         cta: 'Shop Sports & Outdoors',
-        icon: '⚽'
+        icon: '⚽',
+        image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=600'
       },
       'health & beauty': {
         bgColor: 'bg-gradient-to-r from-purple-500 to-pink-500',
         title: 'Beauty & Care',
         subtitle: 'Look and feel your best',
         cta: 'Shop Health & Beauty',
-        icon: '💄'
+        icon: '💄',
+        image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=600'
       },
       'automotive': {
         bgColor: 'bg-gradient-to-r from-gray-700 to-gray-900',
         title: 'Auto Parts',
         subtitle: 'Everything for your vehicle',
         cta: 'Shop Automotive',
-        icon: '🚗'
+        icon: '🚗',
+        image: 'https://images.unsplash.com/photo-1492144537053-5798941288b7?auto=format&fit=crop&q=80&w=600'
       },
       'toys & games': {
         bgColor: 'bg-gradient-to-r from-yellow-400 to-orange-400',
         title: 'Fun & Games',
         subtitle: 'Bring joy to every moment',
         cta: 'Shop Toys & Games',
-        icon: '🎮'
+        icon: '🎮',
+        image: 'https://images.unsplash.com/photo-1531303435785-3853ba035bc4?auto=format&fit=crop&q=80&w=600'
       },
       'books & media': {
         bgColor: 'bg-gradient-to-r from-indigo-500 to-blue-600',
         title: 'Knowledge Hub',
         subtitle: 'Expand your mind',
         cta: 'Shop Books & Media',
-        icon: '📚'
+        icon: '📚',
+        image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600'
       },
       'pet supplies': {
         bgColor: 'bg-gradient-to-r from-teal-500 to-cyan-500',
         title: 'Pet Care',
         subtitle: 'Love your furry friends',
         cta: 'Shop Pet Supplies',
-        icon: '🐾'
+        icon: '🐾',
+        image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=600'
       },
       'baby & kids': {
         bgColor: 'bg-gradient-to-r from-rose-400 to-pink-400',
         title: 'Little Ones',
         subtitle: 'Everything for your child',
         cta: 'Shop Baby & Kids',
-        icon: '👶'
+        icon: '👶',
+        image: 'https://images.unsplash.com/photo-1515488764276-3d760b01e2ec?auto=format&fit=crop&q=80&w=600'
       },
       'food & beverages': {
         bgColor: 'bg-gradient-to-r from-red-500 to-orange-500',
         title: 'Tasty Treats',
         subtitle: 'Delicious flavors await',
         cta: 'Shop Food & Beverages',
-        icon: '🍔'
+        icon: '🍔',
+        image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600'
       },
       'office supplies': {
         bgColor: 'bg-gradient-to-r from-blue-500 to-indigo-600',
         title: 'Work & Study',
         subtitle: 'Stay organized and productive',
         cta: 'Shop Office Supplies',
-        icon: '📎'
+        icon: '📎',
+        image: 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&q=80&w=600'
       },
       'jewelry & watches': {
         bgColor: 'bg-gradient-to-r from-amber-400 to-yellow-400',
         title: 'Elegant Accessories',
         subtitle: 'Sparkle and shine',
         cta: 'Shop Jewelry & Watches',
-        icon: '💍'
+        icon: '💍',
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600'
       },
       'musical instruments': {
         bgColor: 'bg-gradient-to-r from-violet-500 to-purple-600',
         title: 'Music & Sound',
         subtitle: 'Create beautiful melodies',
         cta: 'Shop Musical Instruments',
-        icon: '🎸'
+        icon: '🎸',
+        image: 'https://images.unsplash.com/photo-1469442232813-3f3934f33d31?auto=format&fit=crop&q=80&w=600'
       },
       'art & crafts': {
         bgColor: 'bg-gradient-to-r from-cyan-500 to-teal-500',
         title: 'Creative Expression',
         subtitle: 'Unleash your creativity',
         cta: 'Shop Art & Crafts',
-        icon: '🎨'
+        icon: '🎨',
+        image: 'https://images.unsplash.com/photo-1459908316208-229612111e75?auto=format&fit=crop&q=80&w=600'
       },
       'luggage & travel': {
         bgColor: 'bg-gradient-to-r from-sky-500 to-blue-500',
         title: 'Adventure Awaits',
         subtitle: 'Pack for your next journey',
         cta: 'Shop Luggage & Travel',
-        icon: '🧳'
+        icon: '🧳',
+        image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=600'
       },
       'industrial & scientific': {
         bgColor: 'bg-gradient-to-r from-slate-600 to-gray-700',
         title: 'Professional Tools',
         subtitle: 'Precision and quality',
         cta: 'Shop Industrial & Scientific',
-        icon: '🔬'
+        icon: '🔬',
+        image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=600'
       },
       'home improvement': {
         bgColor: 'bg-gradient-to-r from-orange-600 to-red-600',
         title: 'Renovate & Upgrade',
         subtitle: 'Transform your space',
         cta: 'Shop Home Improvement',
-        icon: '🔧'
+        icon: '🔧',
+        image: 'https://images.unsplash.com/photo-1581141849291-1125c7b692b5?auto=format&fit=crop&q=80&w=600'
       }, // Fixed missing comma here
       'all': {
         bgColor: 'bg-gradient-to-r from-blue-500 to-indigo-500',
         title: 'All Products',
         subtitle: 'Explore our entire collection',
         cta: 'Shop All',
-        icon: '🛍️'
+        icon: '🛍️',
+        image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=600'
       },
       'global': {
         bgColor: 'bg-gradient-to-r from-blue-500 to-indigo-500',
@@ -432,19 +451,30 @@ export default function Category() {
         <section className="bg-white shadow-sm z-10 relative">
           <div className={`${banner.bgColor} text-white`}>
             <div className="max-w-7xl mx-auto px-6 py-8">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                  <span className="text-3xl">{banner.icon}</span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-3xl font-bold">{decodedCategoryName}</h1>
-                    <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-medium">
-                      {filteredProducts.length} items
-                    </span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                    <span className="text-3xl">{banner.icon}</span>
                   </div>
-                  <p className="text-white/90 text-sm max-w-xl">{banner.subtitle}</p>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h1 className="text-3xl font-bold">{decodedCategoryName}</h1>
+                      <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-medium">
+                        {filteredProducts.length} items
+                      </span>
+                    </div>
+                    <p className="text-white/90 text-sm max-w-xl">{banner.subtitle}</p>
+                  </div>
                 </div>
+                {banner.image && (
+                  <div className="hidden lg:block relative group">
+                    <div className="w-48 h-32 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/30 transform rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                      <img src={banner.image} alt={banner.title} className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-500" />
+                    </div>
+                    {/* Decorative background element */}
+                    <div className="absolute -inset-2 bg-white/10 rounded-2xl blur-xl -z-10 group-hover:bg-white/20 transition-colors" />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -548,6 +578,38 @@ export default function Category() {
 
             {/* Main Content */}
             <div className="flex-1 min-w-0">
+              {/* Brand Navigation (Specific to Vehicles) */}
+              {decodedCategoryName.toLowerCase() === 'vehicles' && (
+                <div className="mb-6 grid grid-cols-3 sm:grid-cols-6 gap-3">
+                  {[
+                    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
+                    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
+                    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' },
+                    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
+                    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
+                    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' }
+                  ].map((brand) => (
+                    <div
+                      key={brand.name}
+                      className="flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group py-2"
+                    >
+                      <div className="h-10 w-full flex items-center justify-center">
+                        <img
+                          src={brand.logo}
+                          alt={brand.name}
+                          className="max-h-full max-w-full object-contain transition-all duration-300 group-hover:scale-110"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                      <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider transition-colors group-hover:text-gray-900">{brand.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* BrandDay Banner */}
               <div className="bg-[#007aff] text-white p-3 flex items-center justify-center gap-4 mb-4 rounded-sm">
                 <div className="flex items-baseline gap-1">

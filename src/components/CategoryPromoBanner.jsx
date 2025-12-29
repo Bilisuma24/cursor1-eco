@@ -76,7 +76,7 @@ export default function CategoryPromoBanner({ products, title = "SuperDeals" }) 
                 </div>
 
                 {/* Right Column - Products */}
-                <div className="w-full md:w-3/4">
+                <div className="w-full md:w-3/4 flex justify-end">
                     <div className="relative">
                         {/* Left Arrow */}
                         <button
@@ -88,7 +88,7 @@ export default function CategoryPromoBanner({ products, title = "SuperDeals" }) 
                             </svg>
                         </button>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl ml-auto">
                             {visibleProducts.map((product) => (
                                 <Link
                                     key={product.id}
@@ -109,26 +109,30 @@ export default function CategoryPromoBanner({ products, title = "SuperDeals" }) 
                                                 e.target.src = `data:image/svg+xml;base64,${btoa(`<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#9ca3af" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>`)}`;
                                             }}
                                         />
-                                        {product.discount && (
-                                            <span className="absolute top-1 left-1 bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">
-                                                -{product.discount}%
-                                            </span>
-                                        )}
                                     </div>
-                                    <div className="p-1.5">
-                                        <h4 className="text-[10px] font-medium text-gray-900 line-clamp-1 mb-0.5">
-                                            {product.category || 'General'}
+                                    <div className="p-2 flex flex-col gap-0.5">
+                                        <h4 className="text-sm font-semibold text-gray-800 line-clamp-1">
+                                            {product.name}
                                         </h4>
-                                        <div className="flex items-baseline gap-0.5">
-                                            <span className="text-xs font-bold text-gray-900">
-                                                {product.currency}{product.price.toFixed(2)}
+                                        <div className="flex flex-col">
+                                            <span className="text-base sm:text-lg font-bold text-[#191919] flex items-baseline">
+                                                <span className="text-[10px] sm:text-xs mr-0.5">{product.currency}</span>
+                                                <span>{product.price.toFixed(2)}</span>
                                             </span>
                                             {product.originalPrice && (
-                                                <span className="text-[9px] text-gray-400 line-through">
-                                                    {product.currency}{product.originalPrice.toFixed(2)}
+                                                <span className="text-xs text-gray-400 line-through flex items-baseline opacity-80">
+                                                    <span className="text-[9px] sm:text-[10px] mr-1">{product.currency}</span>
+                                                    <span>{product.originalPrice.toFixed(2)}</span>
                                                 </span>
                                             )}
                                         </div>
+                                        {product.discount && (
+                                            <div className="mt-1">
+                                                <span className="bg-[#ff4747] text-white px-1.5 py-0.5 rounded-sm text-xs font-bold">
+                                                    -{product.discount}%
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </Link>
                             ))}

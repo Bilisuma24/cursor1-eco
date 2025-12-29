@@ -3,8 +3,8 @@ import { Grid, List, Filter, SortAsc, Loader } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import SearchAndFilter from "../components/SearchAndFilter";
 import { supabase } from "../lib/supabaseClient";
-import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
-import { useCart } from "../hooks/useCart";
+import { useAuth } from "../contexts/SupabaseAuthContext";
+import { useCart } from "../contexts/CartContext";
 
 export default function ShopWithSupabase() {
   const [products, setProducts] = useState([]);
@@ -14,16 +14,15 @@ export default function ShopWithSupabase() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('');
   const [loading, setLoading] = useState(true);
-  
+
   // Use Supabase auth hook
-  const { user, loading: authLoading } = useSupabaseAuth();
-  
+  const { user, loading: authLoading } = useAuth();
+
   // Use Supabase cart hook (only when user is logged in)
   const {
     addToCart: addToSupabaseCart,
     loading: cartLoading,
-    error: cartError,
-  } = useCart(user?.id);
+  } = useCart();
 
   // Fetch products from Supabase
   useEffect(() => {
