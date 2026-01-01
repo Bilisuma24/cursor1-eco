@@ -11,9 +11,9 @@ export default function AdminCategoriesTags() {
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      setCategories(saved.categories || ['Electronics','Fashion','Home & Garden','Sports & Outdoors','Health & Beauty']);
-      setTags(saved.tags || ['new','sale','featured']);
-    } catch {}
+      setCategories(saved.categories || ['Electronics', 'Fashion', 'Home & Furniture', 'Sports & Outdoors', 'Health & Beauty']);
+      setTags(saved.tags || ['new', 'sale', 'featured']);
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function AdminCategoriesTags() {
             <input
               className="border border-gray-300 rounded-lg px-4 py-2 flex-1 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={input.category}
-              onChange={(e)=>setInput({...input,category:e.target.value})}
+              onChange={(e) => setInput({ ...input, category: e.target.value })}
               onKeyPress={(e) => handleKeyPress(e, 'category')}
               placeholder="Add a new category..."
             />
@@ -107,7 +107,7 @@ export default function AdminCategoriesTags() {
                   {c}
                   <button
                     className="hover:bg-purple-200 rounded-full p-0.5 transition-colors"
-                    onClick={()=>remove(categories,setCategories,c)}
+                    onClick={() => remove(categories, setCategories, c)}
                     title="Remove"
                   >
                     <X className="h-3 w-3" />
@@ -131,7 +131,7 @@ export default function AdminCategoriesTags() {
             <input
               className="border border-gray-300 rounded-lg px-4 py-2 flex-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={input.tag}
-              onChange={(e)=>setInput({...input,tag:e.target.value})}
+              onChange={(e) => setInput({ ...input, tag: e.target.value })}
               onKeyPress={(e) => handleKeyPress(e, 'tag')}
               placeholder="Add a new tag..."
             />
@@ -158,7 +158,7 @@ export default function AdminCategoriesTags() {
                   #{t}
                   <button
                     className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-                    onClick={()=>remove(tags,setTags,t)}
+                    onClick={() => remove(tags, setTags, t)}
                     title="Remove"
                   >
                     <X className="h-3 w-3" />

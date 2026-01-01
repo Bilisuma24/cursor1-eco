@@ -14,6 +14,15 @@ export default function Category() {
   const [loading, setLoading] = useState(true);
   const decodedCategoryName = categoryName ? decodeURIComponent(categoryName) : '';
 
+  // Smart detection: Is this valid top-level category or a subcategory?
+  const parentCategory = productsData.categories.find(c =>
+    c.subcategories.some(sub => sub.toLowerCase() === decodedCategoryName.toLowerCase())
+  );
+
+  // If it's a subcategory behaving like a category, we want to show its parent's structure
+  const displayCategoryName = parentCategory ? parentCategory.name : decodedCategoryName;
+  const autoSelectedSubcategory = parentCategory ? decodedCategoryName : '';
+
   useEffect(() => {
     fetchCategoryProducts();
   }, [categoryName]);
@@ -28,8 +37,13 @@ export default function Category() {
         let query = supabase.from('product').select('*');
 
         // If specific category (not "All" or "Global"), apply filter
-        if (decodedCategoryName.toLowerCase() !== 'all' && decodedCategoryName.toLowerCase() !== 'global') {
-          query = query.ilike('category', decodedCategoryName);
+        if (displayCategoryName.toLowerCase() !== 'all' && displayCategoryName.toLowerCase() !== 'global') {
+          if (displayCategoryName.toLowerCase() === 'home & furniture') {
+            // Handle alias for Home & Furniture / Home & Garden
+            query = query.or(`category.ilike.Home & Furniture,category.ilike.Home & Garden`);
+          } else {
+            query = query.ilike('category', displayCategoryName);
+          }
         }
 
         const { data, error: dbError } = await query.order('created_at', { ascending: false });
@@ -95,8 +109,8 @@ export default function Category() {
       // Filter static products by category (or all if "All" is selected)
       const staticProducts = (productsData.products || []).filter(
         product => {
-          if (decodedCategoryName.toLowerCase() === 'all' || decodedCategoryName.toLowerCase() === 'global') return true;
-          return product.category && product.category.toLowerCase() === decodedCategoryName.toLowerCase();
+          if (displayCategoryName.toLowerCase() === 'all' || displayCategoryName.toLowerCase() === 'global') return true;
+          return product.category && product.category.toLowerCase() === displayCategoryName.toLowerCase();
         }
       );
 
@@ -117,7 +131,7 @@ export default function Category() {
       console.error('Error fetching category products:', error);
       // Fallback to static products filtered by category
       const staticProducts = (productsData.products || []).filter(
-        product => product.category && product.category.toLowerCase() === decodedCategoryName.toLowerCase()
+        product => product.category && product.category.toLowerCase() === displayCategoryName.toLowerCase()
       );
       setProducts(staticProducts);
     } finally {
@@ -127,12 +141,12 @@ export default function Category() {
 
   // Find category icon
   const category = productsData.categories?.find(
-    cat => cat.name.toLowerCase() === decodedCategoryName.toLowerCase()
+    cat => cat.name.toLowerCase() === displayCategoryName.toLowerCase()
   );
 
   // 1. Calculate filtered products first
   const searchParams = new URLSearchParams(location.search);
-  const subcategoryParam = searchParams.get('subcategory');
+  const subcategoryParam = searchParams.get('subcategory') || autoSelectedSubcategory;
   const searchQuery = searchParams.get('search') || '';
 
   const filteredProducts = products.filter(p => {
@@ -159,24 +173,31 @@ export default function Category() {
 
   // 2. Determine Banner based on Filtered Results
   const getCategoryBanner = () => {
-    const categoryLower = decodedCategoryName.toLowerCase();
+    const categoryLower = displayCategoryName.toLowerCase();
     const banners = {
-      'electronics': {
-        // ... (rest of banners object remains same until we close it)
-        bgColor: 'bg-gradient-to-r from-blue-600 to-purple-600',
-        title: 'Tech Innovation',
-        subtitle: 'Latest gadgets and smart devices',
-        cta: 'Shop Electronics',
+      'mobile & tablets': {
+        bgColor: 'bg-[#2d3436]', // Dark slate
+        title: 'Mobile & Tablets',
+        subtitle: 'Latest smartphones, tablets and accessories',
+        cta: 'Shop Now',
         icon: '📱',
         image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=600'
       },
       'fashion': {
-        bgColor: 'bg-gradient-to-r from-pink-500 to-rose-500',
-        title: 'Style & Trends',
-        subtitle: 'Discover your perfect look',
+        bgColor: 'bg-[#1e272e]', // Charcoal
+        title: 'Fashion & Apparel',
+        subtitle: 'Style for every occasion',
         cta: 'Shop Fashion',
         icon: '👕',
         image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=600'
+      },
+      'home & furniture': {
+        bgColor: 'bg-[#2c3e50]', // Midnight blue/slate
+        title: 'Home Essentials',
+        subtitle: 'Transform your living space',
+        cta: 'Shop Home & Furniture',
+        icon: '🏠',
+        image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=600'
       },
       'home & garden': {
         bgColor: 'bg-gradient-to-r from-amber-500 to-orange-500',
@@ -187,18 +208,18 @@ export default function Category() {
         image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=600'
       },
       'sports & outdoors': {
-        bgColor: 'bg-gradient-to-r from-green-500 to-emerald-600',
-        title: 'Active Lifestyle',
+        bgColor: 'bg-[#130f40]', // Deep navy
+        title: 'Sports & Outdoors',
         subtitle: 'Gear up for your next adventure',
-        cta: 'Shop Sports & Outdoors',
+        cta: 'Shop Sports',
         icon: '⚽',
         image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=600'
       },
       'health & beauty': {
-        bgColor: 'bg-gradient-to-r from-purple-500 to-pink-500',
-        title: 'Beauty & Care',
-        subtitle: 'Look and feel your best',
-        cta: 'Shop Health & Beauty',
+        bgColor: 'bg-[#30336b]', // Royal purple/slate
+        title: 'Health & Beauty',
+        subtitle: 'Care for yourself inside and out',
+        cta: 'Shop Beauty',
         icon: '💄',
         image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=600'
       },
@@ -210,13 +231,21 @@ export default function Category() {
         icon: '🚗',
         image: 'https://images.unsplash.com/photo-1492144537053-5798941288b7?auto=format&fit=crop&q=80&w=600'
       },
+      'vehicles': {
+        bgColor: 'bg-[#34495e]', // Classic slate
+        title: 'Vehicles',
+        subtitle: 'Explore Vehicles products',
+        cta: 'Shop Vehicles',
+        icon: '🚗',
+        image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=600'
+      },
       'toys & games': {
-        bgColor: 'bg-gradient-to-r from-yellow-400 to-orange-400',
-        title: 'Fun & Games',
-        subtitle: 'Bring joy to every moment',
-        cta: 'Shop Toys & Games',
+        bgColor: 'bg-[#4b6584]', // Soft slate
+        title: 'Toys & Games',
+        subtitle: 'Fun and education for all ages',
+        cta: 'Shop Toys',
         icon: '🎮',
-        image: 'https://images.unsplash.com/photo-1531303435785-3853ba035bc4?auto=format&fit=crop&q=80&w=600'
+        image: 'https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&q=80&w=600'
       },
       'books & media': {
         bgColor: 'bg-gradient-to-r from-indigo-500 to-blue-600',
@@ -485,26 +514,7 @@ export default function Category() {
             {/* Left Sidebar Filters */}
             <div className="w-64 flex-shrink-0">
               <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5 sticky top-24">
-                <div className="mb-6">
-                  <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
-                    Deals & discounts
-                    <ChevronRight className="w-4 h-4 text-gray-400 -rotate-90" />
-                  </h3>
 
-                  {/* Sale / Shipping Toggles */}
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                      <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors" />
-                      <span className="text-sm text-gray-600 group-hover:text-gray-900">Sale</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                      <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors" />
-                      <span className="text-sm text-gray-600 group-hover:text-gray-900">Free shipping</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 my-4"></div>
 
                 {/* Visual Vertical Subcategories */}
                 <div className="mb-6">
@@ -513,24 +523,136 @@ export default function Category() {
                     <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
                   </h4>
                   <div className="grid grid-cols-3 gap-2">
-                    {((decodedCategoryName.toLowerCase() === 'all' || decodedCategoryName.toLowerCase() === 'global')
+                    {((displayCategoryName.toLowerCase() === 'all' || displayCategoryName.toLowerCase() === 'global')
                       ? productsData.categories[0].subcategories
-                      : (productsData.categories?.find(c => c.name.toLowerCase() === decodedCategoryName.toLowerCase())?.subcategories || []))
+                      : (productsData.categories?.find(c => c.name.toLowerCase() === displayCategoryName.toLowerCase())?.subcategories || []))
                       .map((sub, index) => {
                         const isSelected = subcategoryParam === sub;
-                        const icons = ['🎧', '⌚', '📷', '🔒', '💻', '📱'];
-                        const icon = icons[index % icons.length];
+
+                        // Sprite mapping for "Mobile & Tablets"
+                        const mobileSpritePositions = {
+                          'phones': { x: '0%', y: '5%' },
+                          'tablets': { x: '25%', y: '5%' },
+                          'accessories': { x: '50%', y: '5%' },
+                          'smart watches': { x: '75%', y: '5%' },
+                          'headphones': { x: '100%', y: '5%' }
+                        };
+
+                        // Sprite mapping for "Home & Furniture"
+                        const homeSpritePositions = {
+                          'furniture': { x: '0%', y: '2%' },
+                          'decor': { x: '50%', y: '2%' },
+                          'kitchen': { x: '100%', y: '2%' },
+                          'bathroom': { x: '0%', y: '58%' },
+                          'garden': { x: '50%', y: '58%' },
+                          'tools': { x: '100%', y: '58%' }
+                        };
+
+                        // Dynamic Icon based on subcategory name
+                        const getSubIcon = (name) => {
+                          const lower = name.toLowerCase();
+                          const isVehicles = displayCategoryName.toLowerCase() === 'vehicles';
+
+                          // Specific override for "Cars" in Vehicles
+                          if (lower === 'cars' && isVehicles) {
+                            return (
+                              <div
+                                className="w-full h-full rounded-full bg-no-repeat bg-white"
+                                style={{
+                                  backgroundImage: 'url(/assets/car_icon_red.jpg)',
+                                  backgroundPosition: 'center',
+                                  backgroundSize: '110%', // Zoom slightly to fill
+                                }}
+                                title={name}
+                              />
+                            );
+                          }
+
+                          // Specific override for Car Parts & Accessories in Vehicles
+                          if (isVehicles && (lower === 'vehicle parts & accessories' || lower === 'car parts' || lower === 'accessories')) {
+                            return (
+                              <div
+                                className="w-full h-full rounded-full bg-no-repeat bg-white"
+                                style={{
+                                  backgroundImage: 'url(/assets/car_parts_icon.png)',
+                                  backgroundPosition: 'center',
+                                  backgroundSize: '100%',
+                                }}
+                                title={name}
+                              />
+                            );
+                          }
+
+                          // Specific override for "Motorcycles & Scooters" in Vehicles
+                          if (lower === 'motorcycles & scooters' && isVehicles) {
+                            return (
+                              <div
+                                className="w-full h-full rounded-full bg-no-repeat bg-white"
+                                style={{
+                                  backgroundImage: 'url(/assets/motorcycle_icon.png)',
+                                  backgroundPosition: 'center',
+                                  backgroundSize: '110%',
+                                }}
+                                title={name}
+                              />
+                            );
+                          }
+
+                          // Check for Mobile sprite mapping
+                          // Important: Ensure we don't accidentally pick up 'accessories' from mobile map if we are in vehicles (handled above by order, but safer to check category if names collide)
+                          if (mobileSpritePositions[lower] && !isVehicles) {
+                            return (
+                              <div
+                                className="w-full h-full rounded-full bg-no-repeat bg-white"
+                                style={{
+                                  backgroundImage: 'url(/assets/mobile_electronics_sprite.png)',
+                                  backgroundPosition: `${mobileSpritePositions[lower].x} ${mobileSpritePositions[lower].y}`,
+                                  backgroundSize: '525% 150%', // Zoomed to crop text at bottom
+                                }}
+                                title={name}
+                              />
+                            );
+                          }
+
+                          // Check for Home & Furniture sprite mapping
+                          if (homeSpritePositions[lower]) {
+                            return (
+                              <div
+                                className="w-full h-full rounded-full bg-no-repeat bg-white"
+                                style={{
+                                  backgroundImage: 'url(/assets/home_furniture_sprite.png)',
+                                  backgroundPosition: `${homeSpritePositions[lower].x} ${homeSpritePositions[lower].y}`,
+                                  backgroundSize: '320% 260%', // Zoomed to crop text
+                                }}
+                                title={name}
+                              />
+                            );
+                          }
+
+                          // Fallbacks
+                          if (lower === 'motorcycles & scooters') return '🏍️';
+
+                          if (lower.includes('part') || lower.includes('accessor')) return '⚙️';
+                          if (lower.includes('car') && !lower.includes('parts')) return '🚗';
+                          if (lower.includes('motorcycle') || lower.includes('scooter') || lower.includes('bike')) return '🏍️';
+                          if (lower.includes('maintenance') || lower.includes('tool')) return '🔧';
+                          if (lower.includes('tire')) return '🛞';
+                          if (lower.includes('elect')) return '🔌';
+
+                          const fallbackIcons = ['🎧', '⌚', '📷', '🔒', '💻', '📱'];
+                          return fallbackIcons[index % fallbackIcons.length];
+                        };
 
                         return (
                           <Link
                             key={sub}
-                            to={isSelected ? `/category/${encodeURIComponent(decodedCategoryName)}` : `/category/${encodeURIComponent(decodedCategoryName)}?subcategory=${encodeURIComponent(sub)}`}
+                            to={isSelected ? `/category/${encodeURIComponent(displayCategoryName)}` : `/category/${encodeURIComponent(displayCategoryName)}?subcategory=${encodeURIComponent(sub)}`}
                             className="flex flex-col items-center gap-1 group"
                           >
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg border transition-all ${isSelected ? 'bg-orange-50 border-orange-500 text-orange-600 shadow-sm' : 'bg-gray-50 border-gray-100 text-gray-500 group-hover:bg-white group-hover:border-orange-300 group-hover:shadow-sm'}`}>
-                              {icon}
+                            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-lg border transition-all ${isSelected ? 'bg-orange-50 border-orange-500 text-orange-600 shadow-sm' : 'bg-gray-50 border-gray-100 text-gray-500 group-hover:bg-white group-hover:border-orange-300 group-hover:shadow-sm'}`}>
+                              {getSubIcon(sub)}
                             </div>
-                            <span className={`text-[10px] leading-tight text-center w-full truncate px-1 ${isSelected ? 'text-orange-600 font-medium' : 'text-gray-500 group-hover:text-orange-600'}`}>
+                            <span className={`text-[10px] leading-[1.1] text-center w-full px-0.5 font-bold mt-1 ${isSelected ? 'text-orange-600' : 'text-gray-900 group-hover:text-orange-600'}`}>
                               {sub}
                             </span>
                           </Link>
@@ -578,37 +700,216 @@ export default function Category() {
 
             {/* Main Content */}
             <div className="flex-1 min-w-0">
-              {/* Brand Navigation (Specific to Vehicles) */}
-              {decodedCategoryName.toLowerCase() === 'vehicles' && (
-                <div className="mb-6 grid grid-cols-3 sm:grid-cols-6 gap-3">
-                  {[
+              {/* Dynamic Brand/Model Navigation */}
+              {(() => {
+                const brandMap = {
+                  'mobile & tablets': [
+                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+                    { name: 'Xiaomi', logo: 'https://www.logo.wine/a/logo/Xiaomi/Xiaomi-Logo.wine.svg' },
+                    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
+                    { name: 'Microsoft', logo: 'https://www.logo.wine/a/logo/Microsoft/Microsoft-Logo.wine.svg' },
+                    { name: 'Sony', logo: 'https://www.logo.wine/a/logo/Sony/Sony-Logo.wine.svg' }
+                  ],
+                  'mobile & tablets/phones': [
+                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+                    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
+                    { name: 'Xiaomi', logo: 'https://www.logo.wine/a/logo/Xiaomi/Xiaomi-Logo.wine.svg' },
+                    { name: 'Oppo', logo: 'https://www.logo.wine/a/logo/Oppo/Oppo-Logo.wine.svg' },
+                    { name: 'Vivo', logo: 'https://www.logo.wine/a/logo/Vivo_(technology_company)/Vivo_(technology_company)-Logo.wine.svg' }
+                  ],
+                  'mobile & tablets/tablets': [
+                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+                    { name: 'Microsoft', logo: 'https://www.logo.wine/a/logo/Microsoft/Microsoft-Logo.wine.svg' },
+                    { name: 'Amazon', logo: 'https://www.logo.wine/a/logo/Amazon_(company)/Amazon_(company)-Logo.wine.svg' },
+                    { name: 'Lenovo', logo: 'https://www.logo.wine/a/logo/Lenovo/Lenovo-Logo.wine.svg' },
+                    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' }
+                  ],
+                  'mobile & tablets/smart watches': [
+                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+                    { name: 'Garmin', logo: 'https://www.logo.wine/a/logo/Garmin/Garmin-Logo.wine.svg' },
+                    { name: 'Fitbit', logo: 'https://www.logo.wine/a/logo/Fitbit/Fitbit-Logo.wine.svg' },
+                    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
+                    { name: 'Amazfit', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Amazfit_logo.svg' }
+                  ],
+                  'mobile & tablets/headphones': [
+                    { name: 'Bose', logo: 'https://www.logo.wine/a/logo/Bose_Corporation/Bose_Corporation-Logo.wine.svg' },
+                    { name: 'Sony', logo: 'https://www.logo.wine/a/logo/Sony/Sony-Logo.wine.svg' },
+                    { name: 'JBL', logo: 'https://www.logo.wine/a/logo/JBL/JBL-Logo.wine.svg' },
+                    { name: 'Sennheiser', logo: 'https://www.logo.wine/a/logo/Sennheiser/Sennheiser-Logo.wine.svg' },
+                    { name: 'Beats', logo: 'https://www.logo.wine/a/logo/Beats_Electronics/Beats_Electronics-Logo.wine.svg' },
+                    { name: 'Marshall', logo: 'https://www.logo.wine/a/logo/Marshall_Amplification/Marshall_Amplification-Logo.wine.svg' }
+                  ],
+                  'mobile & tablets/accessories': [
+                    { name: 'Anker', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Anker_Logo.svg' },
+                    { name: 'Belkin', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Belkin_logo.svg' },
+                    { name: 'Spigen', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Spigen_logo.png' },
+                    { name: 'Baseus', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e7/Baseus_logo.svg' },
+                    { name: 'OtterBox', logo: 'https://www.logo.wine/a/logo/OtterBox/OtterBox-Logo.wine.svg' }
+                  ],
+                  'fashion': [
+                    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
+                    { name: 'Adidas', logo: 'https://www.logo.wine/a/logo/Adidas/Adidas-Logo.wine.svg' },
+                    { name: 'Zara', logo: 'https://www.logo.wine/a/logo/Zara_(retailer)/Zara_(retailer)-Logo.wine.svg' },
+                    { name: 'H&M', logo: 'https://www.logo.wine/a/logo/H%26M/H%26M-Logo.wine.svg' },
+                    { name: 'Gucci', logo: 'https://www.logo.wine/a/logo/Gucci/Gucci-Logo.wine.svg' },
+                    { name: 'Prada', logo: 'https://www.logo.wine/a/logo/Prada/Prada-Logo.wine.svg' }
+                  ],
+                  'fashion/shoes': [
+                    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
+                    { name: 'Adidas', logo: 'https://www.logo.wine/a/logo/Adidas/Adidas-Logo.wine.svg' },
+                    { name: 'Puma', logo: 'https://www.logo.wine/a/logo/Puma_(brand)/Puma_(brand)-Logo.wine.svg' },
+                    { name: 'Reebok', logo: 'https://www.logo.wine/a/logo/Reebok/Reebok-Logo.wine.svg' },
+                    { name: 'Vans', logo: 'https://www.logo.wine/a/logo/Vans/Vans-Logo.wine.svg' },
+                    { name: 'Converse', logo: 'https://www.logo.wine/a/logo/Converse_(shoe_company)/Converse_(shoe_company)-Logo.wine.svg' }
+                  ],
+                  'home & furniture': [
+                    { name: 'IKEA', logo: 'https://www.logo.wine/a/logo/IKEA/IKEA-Logo.wine.svg' },
+                    { name: 'Wayfair', logo: 'https://www.logo.wine/a/logo/Wayfair/Wayfair-Logo.wine.svg' },
+                    { name: 'Pottery Barn', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e7/Pottery_Barn_logo.svg' },
+                    { name: 'West Elm', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/West_Elm_logo.svg' },
+                    { name: 'Ashley', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Ashley_HomeStore_logo.svg' },
+                    { name: 'Herman Miller', logo: 'https://www.logo.wine/a/logo/Herman_Miller/Herman_Miller-Logo.wine.svg' }
+                  ],
+                  'sports & outdoors': [
+                    { name: 'North Face', logo: 'https://www.logo.wine/a/logo/The_North_Face/The_North_Face-Logo.wine.svg' },
+                    { name: 'Columbia', logo: 'https://www.logo.wine/a/logo/Columbia_Sportswear/Columbia_Sportswear-Logo.wine.svg' },
+                    { name: 'Patagonia', logo: 'https://www.logo.wine/a/logo/Patagonia%2C_Inc./Patagonia%2C_Inc.-Logo.wine.svg' },
+                    { name: 'Under Armour', logo: 'https://www.logo.wine/a/logo/Under_Armour/Under_Armour-Logo.wine.svg' },
+                    { name: 'Wilson', logo: 'https://www.logo.wine/a/logo/Wilson_Sporting_Goods/Wilson_Sporting_Goods-Logo.wine.svg' },
+                    { name: 'Puma', logo: 'https://www.logo.wine/a/logo/Puma_(brand)/Puma_(brand)-Logo.wine.svg' }
+                  ],
+                  'health & beauty': [
+                    { name: "L'Oreal", logo: "https://www.logo.wine/a/logo/L%27Or%C3%A9al/L%27Or%C3%A9al-Logo.wine.svg" },
+                    { name: 'Estee Lauder', logo: 'https://www.logo.wine/a/logo/The_Est%C3%A9e_Lauder_Companies/The_Est%C3%A9e_Lauder_Companies-Logo.wine.svg' },
+                    { name: 'Neutrogena', logo: 'https://upload.wikimedia.org/wikipedia/commons/1/13/Neutrogena_logo.svg' },
+                    { name: 'Dove', logo: 'https://www.logo.wine/a/logo/Dove_(brand)/Dove_(brand)-Logo.wine.svg' },
+                    { name: 'Sephora', logo: 'https://www.logo.wine/a/logo/Sephora/Sephora-Logo.wine.svg' },
+                    { name: 'MAC', logo: 'https://www.logo.wine/a/logo/MAC_Cosmetics/MAC_Cosmetics-Logo.wine.svg' }
+                  ],
+                  'vehicles': [
                     { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
                     { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
                     { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' },
                     { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
                     { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
                     { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' }
-                  ].map((brand) => (
-                    <div
-                      key={brand.name}
-                      className="flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group py-2"
-                    >
-                      <div className="h-10 w-full flex items-center justify-center">
-                        <img
-                          src={brand.logo}
-                          alt={brand.name}
-                          className="max-h-full max-w-full object-contain transition-all duration-300 group-hover:scale-110"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.style.display = 'none';
-                          }}
-                        />
+                  ],
+                  'vehicles/cars': [
+                    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
+                    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
+                    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
+                    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
+                    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' },
+                    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' }
+                  ],
+                  // Explicit mapping for "Car Parts" and "Accessories" to show the specific parts categories
+                  'vehicles/vehicle parts & accessories': [
+                    { name: 'Engine & Drivetrain', spritePos: '0%' },
+                    { name: 'Exterior Accessories', spritePos: '20%' },
+                    { name: 'Oils & Fluids', spritePos: '40%' },
+                    { name: 'Safety & Security', spritePos: '60%' },
+                    { name: 'Wheels & Parts', spritePos: '80%' },
+                    { name: 'Headlights & Lighting', spritePos: '100%' }
+                  ],
+                  'vehicles/car parts': [
+                    { name: 'Engine & Drivetrain', spritePos: '0%' },
+                    { name: 'Exterior Accessories', spritePos: '20%' },
+                    { name: 'Oils & Fluids', spritePos: '40%' },
+                    { name: 'Safety & Security', spritePos: '60%' },
+                    { name: 'Wheels & Parts', spritePos: '80%' },
+                    { name: 'Headlights & Lighting', spritePos: '100%' }
+                  ],
+                  'vehicles/accessories': [
+                    { name: 'Engine & Drivetrain', spritePos: '0%' },
+                    { name: 'Exterior Accessories', spritePos: '20%' },
+                    { name: 'Oils & Fluids', spritePos: '40%' },
+                    { name: 'Safety & Security', spritePos: '60%' },
+                    { name: 'Wheels & Parts', spritePos: '80%' },
+                    { name: 'Headlights & Lighting', spritePos: '100%' }
+                  ],
+                  'vehicles/motorcycles & scooters': [
+                    { name: 'Yamaha', logo: 'https://www.logo.wine/a/logo/Yamaha_Motor_Company/Yamaha_Motor_Company-Logo.wine.svg' },
+                    { name: 'Honda', logo: 'https://www.logo.wine/a/logo/Honda/Honda-Logo.wine.svg' },
+                    { name: 'Kawasaki', logo: 'https://www.logo.wine/a/logo/Kawasaki_Heavy_Industries/Kawasaki_Heavy_Industries-Logo.wine.svg' },
+                    { name: 'Ducati', logo: 'https://www.logo.wine/a/logo/Ducati_Motor_Holding_S.p.A./Ducati_Motor_Holding_S.p.A.-Logo.wine.svg' },
+                    { name: 'Harley-Davidson', logo: 'https://www.logo.wine/a/logo/Harley-Davidson/Harley-Davidson-Logo.wine.svg' },
+                    { name: 'Suzuki', logo: 'https://www.logo.wine/a/logo/Suzuki/Suzuki-Logo.wine.svg' }
+                  ],
+                  'toys & games': [
+                    { name: 'LEGO', logo: 'https://www.logo.wine/a/logo/Lego/Lego-Logo.wine.svg' },
+                    { name: 'Nintendo', logo: 'https://www.logo.wine/a/logo/Nintendo/Nintendo-Logo.wine.svg' },
+                    { name: 'PlayStation', logo: 'https://www.logo.wine/a/logo/PlayStation/PlayStation-Logo.wine.svg' },
+                    { name: 'Xbox', logo: 'https://www.logo.wine/a/logo/Xbox/Xbox-Logo.wine.svg' },
+                    { name: 'Hasbro', logo: 'https://www.logo.wine/a/logo/Hasbro/Hasbro-Logo.wine.svg' },
+                    { name: 'Mattel', logo: 'https://www.logo.wine/a/logo/Mattel/Mattel-Logo.wine.svg' }
+                  ],
+                  'automotive': [
+                    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
+                    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
+                    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' },
+                    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
+                    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
+                    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' }
+                  ],
+                  'global': [
+                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+                    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
+                    { name: 'Amazon', logo: 'https://www.logo.wine/a/logo/Amazon_(company)/Amazon_(company)-Logo.wine.svg' },
+                    { name: 'IKEA', logo: 'https://www.logo.wine/a/logo/IKEA/IKEA-Logo.wine.svg' },
+                    { name: 'Sony', logo: 'https://www.logo.wine/a/logo/Sony/Sony-Logo.wine.svg' }
+                  ]
+                };
+
+                const categoryKey = displayCategoryName.toLowerCase();
+                const subcategoryKey = subcategoryParam ? `${categoryKey}/${subcategoryParam.toLowerCase()}` : null;
+                const currentBrands = brandMap[subcategoryKey] || brandMap[categoryKey] || brandMap['global'];
+
+                if (!currentBrands) return null;
+
+                return (
+                  <div className="mb-6 grid grid-cols-3 sm:grid-cols-6 gap-3">
+                    {currentBrands.map((brand) => (
+                      <div
+                        key={brand.name}
+                        onClick={() => {
+                          const url = `/category/${encodeURIComponent(decodedCategoryName)}?search=${encodeURIComponent(brand.name)}`;
+                          navigate(url);
+                        }}
+                        className="flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group py-2"
+                      >
+                        <div className="h-10 w-full flex items-center justify-center">
+                          {brand.spritePos ? (
+                            <div
+                              className="w-12 h-12 rounded-full bg-no-repeat bg-white shadow-sm border border-gray-100"
+                              style={{
+                                backgroundImage: 'url(/assets/car_parts_sprite.png)',
+                                backgroundPosition: `${brand.spritePos} 12%`, // Match sidebar logic to center the icon part
+                                backgroundSize: '600% auto', // 6 items horizontal
+                              }}
+                            />
+                          ) : (
+                            <img
+                              src={brand.logo}
+                              alt={brand.name}
+                              className="max-h-full max-w-full object-contain transition-all duration-300 group-hover:scale-110"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          )}
+                        </div>
+                        <span className="text-[10px] sm:text-[11px] font-black text-gray-700 uppercase tracking-wider transition-colors group-hover:text-gray-900 text-center leading-tight">{brand.name}</span>
                       </div>
-                      <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider transition-colors group-hover:text-gray-900">{brand.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                );
+              })()}
 
               {/* BrandDay Banner */}
               <div className="bg-[#007aff] text-white p-3 flex items-center justify-center gap-4 mb-4 rounded-sm">

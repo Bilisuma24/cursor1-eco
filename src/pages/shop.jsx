@@ -24,6 +24,22 @@ export default function Shop() {
     fetchProducts();
   }, []);
 
+  // Redirect Desktop users to Home (Shop is mobile-only)
+  useEffect(() => {
+    const checkDesktop = () => {
+      if (window.innerWidth >= 768) {
+        navigate('/', { replace: true });
+      }
+    };
+
+    // Check on mount
+    checkDesktop();
+
+    // Check on resize
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, [navigate]);
+
   // Refresh products when navigating to shop page
   useEffect(() => {
     const handleFocus = () => {
@@ -457,10 +473,17 @@ CREATE POLICY "public_read_products"
 
     // Apply category filter (case-insensitive for robustness)
     if (filters.category && filters.category !== 'All') {
-      filtered = filtered.filter(product =>
-        product.category &&
-        product.category.toLowerCase() === filters.category.toLowerCase()
-      );
+      filtered = filtered.filter(product => {
+        if (!product.category) return false;
+        const prodCat = product.category.toLowerCase();
+        const filtCat = filters.category.toLowerCase();
+
+        if (filtCat === 'home & furniture' || filtCat === 'home & garden') {
+          return prodCat === 'home & furniture' || prodCat === 'home & garden';
+        }
+
+        return prodCat === filtCat;
+      });
     }
 
     // Apply subcategory filter (case-insensitive)

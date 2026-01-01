@@ -54,7 +54,6 @@ function FooterContent() {
             <h3 className="text-[8px] font-semibold text-white mb-0.5">Quick Links</h3>
             <ul className="space-y-0">
               <li><Link to="/" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Home</Link></li>
-              <li><Link to="/shop" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Shop</Link></li>
               <li><Link to="/about" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">About</Link></li>
               <li><Link to="/contact" className="text-[8px] text-gray-400 hover:text-white transition-colors leading-tight">Contact</Link></li>
             </ul>

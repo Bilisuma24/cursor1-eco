@@ -118,7 +118,7 @@ export default function Cart() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
           <p className="text-gray-500 mb-8">Items remain in your cart for 60 minutes.</p>
-          <Link to="/shop" className="inline-flex items-center gap-2 bg-[#3b82f6] text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-md">
+          <Link to="/" className="inline-flex items-center gap-2 bg-[#3b82f6] text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-md">
             Go Shopping <ArrowRight className="w-5 h-5" />
           </Link>
         </div>

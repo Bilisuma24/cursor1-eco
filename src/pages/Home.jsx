@@ -226,7 +226,7 @@ export default function Home() {
 
   const handleCategoryClick = (categoryName, menuType = 'all') => {
     if (categoryName) {
-      navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+      navigate(`/category/${encodeURIComponent(categoryName)}`);
     } else {
       navigate('/shop');
     }
@@ -248,13 +248,13 @@ export default function Home() {
       title: "Global Shopping Festival",
       subtitle: "Up to 60% off electronics",
       image: productsData.products?.[1]?.images?.[0],
-      cta: { label: "Shop Electronics", to: "/shop?category=Electronics" }
+      cta: { label: "Shop Electronics", to: "/category/Electronics" }
     },
     {
       title: "Fashion Week Deals",
       subtitle: "Trending styles and accessories",
       image: productsData.products?.[4]?.images?.[0],
-      cta: { label: "Shop Fashion", to: "/shop?category=Fashion" }
+      cta: { label: "Shop Fashion", to: "/category/Fashion" }
     }
   ];
 
@@ -304,13 +304,13 @@ export default function Home() {
 
   const heroNavLinks = [
     { label: 'Dollar Express', to: '/shop?tag=dollar-express' },
-    { label: 'Local shipping', to: '/shop?tag=local-shipping' },
-    { label: 'Home & Furniture', to: '/shop?category=Home%20%26%20Furniture' },
-    { label: 'Weekly deals', to: '/shop?tag=weekly-deals' },
+    { label: 'Mobile & Tablets', to: '/category/Mobile%20%26%20Tablets' },
+    { label: 'Home & Furniture', to: '/category/Home%20%26%20Furniture' },
+    { label: 'Headphones', to: '/category/Mobile%20%26%20Tablets?subcategory=Headphones' },
     { label: 'Top Brands', to: '/shop?tag=top-brands' },
     { label: 'Choice', to: '/shop?tag=choice' },
     { label: 'FunTime', to: '/shop?tag=funtime' },
-    { label: 'More', to: '/shop' }
+    { label: 'More', to: '/categories' } // Changed to categories list if it exists, or keep as shop
   ];
 
   const HeroDealCard = ({

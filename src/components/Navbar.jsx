@@ -55,9 +55,9 @@ const Navbar = () => {
   // Header category labels (AliExpress-style row under search)
   const headerCategories = [
     "Vehicles",
-    "Local shipping",
+    "Mobile & Tablets",
     "Home & Furniture",
-    "Weekly deals",
+    "Headphones",
     "Top Brands",
     "Choice",
     "FunTime",
@@ -130,15 +130,24 @@ const Navbar = () => {
   const handleHeaderCategoryClick = (category) => {
     if (category === "All Categories") {
       navigate("/shop");
+    } else if (category === "Headphones") {
+      // Route specifically to subcategory within the new Mobile & Tablets parent
+      navigate(`/category/Mobile%20%26%20Tablets?subcategory=Headphones`);
     } else {
-      // Navigate to shop with category filter
-      navigate(`/shop?category=${encodeURIComponent(category)}`);
+      // Navigate to specialized rich category page directly (Works for 'Mobile & Tablets' and others)
+      navigate(`/category/${encodeURIComponent(category)}`);
     }
   };
 
   const handleGlobalSearch = (query) => {
     if (!query) return;
     const lowerQuery = query.toLowerCase();
+
+    // Special Redirects for Vehicles
+    if (lowerQuery === 'cars' || lowerQuery === 'car' || lowerQuery === 'vehicles' || lowerQuery === 'vehicle' || lowerQuery === 'motorcycles' || lowerQuery === 'motorcycle') {
+      navigate(`/category/Vehicles`);
+      return;
+    }
 
     // 1. Direct Category Name Match
     const categoryMatch = productsData.categories.find(cat =>
@@ -342,7 +351,7 @@ const Navbar = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          navigate(`/shop?category=${encodeURIComponent(category.name)}`);
+                          navigate(`/category/${encodeURIComponent(category.name)}`);
                           setCategoriesMenuOpenDesktop(false);
                         }}
                         className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#3b82f6] transition-colors flex items-center justify-between group"
@@ -371,7 +380,7 @@ const Navbar = () => {
                                 key={`nav-sub-${idx}`}
                                 type="button"
                                 onClick={() => {
-                                  navigate(`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(subcategory)}`);
+                                  navigate(`/category/${encodeURIComponent(category.name)}?subcategory=${encodeURIComponent(subcategory)}`);
                                   setCategoriesMenuOpenDesktop(false);
                                   setHoveredCategory(null);
                                 }}

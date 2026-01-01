@@ -74,7 +74,7 @@ const ProductForm = () => {
       setCategories([
         { name: 'Electronics', subcategories: ['Audio', 'Wearables', 'Photography'] },
         { name: 'Fashion', subcategories: ['Clothing', 'Bags', 'Shoes'] },
-        { name: 'Home & Garden', subcategories: ['Furniture', 'Decor', 'Kitchen'] }
+        { name: 'Home & Furniture', subcategories: ['Furniture', 'Decor', 'Kitchen'] }
       ]);
     }
   };
@@ -84,12 +84,12 @@ const ProductForm = () => {
       setError('User not authenticated');
       return;
     }
-    
+
     try {
       setLoading(true);
       const products = await productService.fetchSellerProducts(user.id);
       const product = products.find(p => p.id === id);
-      
+
       if (!product) {
         setError('Product not found');
         return;
@@ -138,7 +138,7 @@ const ProductForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // When category changes, update available subcategories and reset subcategory selection
     if (name === 'category') {
       const selectedCategoryObj = categories.find(cat => cat.name === value);
@@ -171,6 +171,7 @@ const ProductForm = () => {
       'Health & Beauty': { colors: false, sizes: false, gender: true },
       'Beauty': { colors: false, sizes: false, gender: true },
       'Electronics': { colors: false, sizes: false, gender: false },
+      'Home & Furniture': { colors: false, sizes: false, gender: false },
       'Home & Garden': { colors: false, sizes: false, gender: false },
       'Home': { colors: false, sizes: false, gender: false },
       'Home Improvement': { colors: false, sizes: false, gender: false },
@@ -187,14 +188,14 @@ const ProductForm = () => {
       'Luggage & Travel': { colors: true, sizes: false, gender: false },
       'Industrial & Scientific': { colors: false, sizes: false, gender: false }
     };
-    
+
     // Try to match category (case-insensitive, partial match)
     for (const [key, value] of Object.entries(requirements)) {
       if (category.toLowerCase().includes(key.toLowerCase())) {
         return value;
       }
     }
-    
+
     // Default: all optional
     return { colors: false, sizes: false, gender: false };
   };
@@ -283,7 +284,7 @@ const ProductForm = () => {
     setTestMode(true);
     setError('');
     setUploadProgress('Testing direct insert...');
-    
+
     try {
       const testData = {
         name: 'Test Product',
@@ -293,16 +294,16 @@ const ProductForm = () => {
         category: 'Electronics'
         // No seller_id - let it fail gracefully
       };
-      
+
       console.log('Testing with minimal data (no seller_id):', testData);
-      
+
       // Direct Supabase call
       const { data, error } = await supabase
         .from('product')
         .insert([testData])
         .select()
         .single();
-      
+
       if (error) {
         console.log('Expected error (no seller_id):', error.message);
         if (error.code === '42501') {
@@ -357,7 +358,7 @@ const ProductForm = () => {
     try {
       setSaving(true);
       setUploadProgress('Checking connectivity...');
-      
+
       // Quick connectivity test
       try {
         const testResponse = await fetch('https://azvslusinlvnjymaufhw.supabase.co/rest/v1/', {
@@ -368,7 +369,7 @@ const ProductForm = () => {
       } catch (connError) {
         throw new Error('Cannot reach Supabase service. Please check your internet connection.');
       }
-      
+
       setUploadProgress('Uploading images...');
       setProgress(20);
 
@@ -379,10 +380,10 @@ const ProductForm = () => {
           // Separate existing images (already uploaded) from new files
           const existingImages = images.filter(img => img.isExisting && img.preview).map(img => img.preview);
           const newFiles = images.filter(img => !img.isExisting && img.file);
-          
+
           console.log('Existing images:', existingImages);
           console.log('New files to upload:', newFiles);
-          
+
           // Upload new files if any
           if (newFiles.length > 0) {
             setUploadProgress(`Uploading ${newFiles.length} image(s)...`);
@@ -437,7 +438,7 @@ const ProductForm = () => {
         // Create new product
         result = await productService.createProduct(productData);
         console.log('Product created successfully:', result);
-        
+
         // Verify product was actually created
         if (result?.data?.id) {
           console.log('✅ Product verified in database with ID:', result.data.id);
@@ -445,7 +446,7 @@ const ProductForm = () => {
         } else {
           console.warn('⚠️ Product creation returned but no ID found');
           setUploadProgress('Product created (verifying...)');
-          
+
           // Wait a moment and verify the product exists
           await new Promise(resolve => setTimeout(resolve, 500));
           try {
@@ -457,7 +458,7 @@ const ProductForm = () => {
               .order('created_at', { ascending: false })
               .limit(1)
               .single();
-            
+
             if (verifyError || !verifyData) {
               console.error('❌ Product verification failed:', verifyError);
               throw new Error('Product was not saved to database. Please try again.');
@@ -473,7 +474,7 @@ const ProductForm = () => {
 
       setProgress(100);
       setSuccess(true);
-      
+
       setTimeout(() => {
         navigate('/seller-dashboard/products');
       }, 2000);
@@ -775,12 +776,12 @@ const ProductForm = () => {
                   {/* Quick size selection */}
                   {(() => {
                     const category = formData.category?.toLowerCase() || '';
-                    const sizeList = category.includes('shoe') || category.includes('footwear') 
-                      ? commonSizes.Shoes 
+                    const sizeList = category.includes('shoe') || category.includes('footwear')
+                      ? commonSizes.Shoes
                       : category.includes('clothing') || category.includes('fashion') || category.includes('apparel')
-                      ? commonSizes.Clothing
-                      : commonSizes.General;
-                    
+                        ? commonSizes.Clothing
+                        : commonSizes.General;
+
                     return (
                       <div className="flex flex-wrap gap-2 mb-2">
                         {sizeList.map(size => (
@@ -855,7 +856,7 @@ const ProductForm = () => {
             {/* Shipping Options */}
             <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Shipping & Delivery</h3>
-              
+
               {/* Free Shipping */}
               <div className="flex items-center space-x-3">
                 <input
@@ -955,19 +956,19 @@ const ProductForm = () => {
               disabled={saving}
               className="btn-modern flex items-center space-x-2 px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed hover-scale ripple"
             >
-            {saving ? (
-              <>
-                <LoadingSpinner size="sm" color="white" />
-                <span>{uploadProgress || 'Saving...'}</span>
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                <span>{isEdit ? 'Update Product' : 'Create Product'}</span>
-              </>
-            )}
-          </button>
-        </div>
+              {saving ? (
+                <>
+                  <LoadingSpinner size="sm" color="white" />
+                  <span>{uploadProgress || 'Saving...'}</span>
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  <span>{isEdit ? 'Update Product' : 'Create Product'}</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
     </div>
