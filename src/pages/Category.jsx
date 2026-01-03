@@ -417,17 +417,17 @@ export default function Category() {
       <div className="md:hidden">
         {/* Category Banner */}
         <section className="pt-0 pb-2 bg-white">
-          <div className={`relative overflow-hidden ${banner.bgColor} text-white min-h-[85px] shadow-xl`}>
+          <div className={`relative overflow-hidden ${banner.bgColor} text-white min-h-[80px] shadow-xl`}>
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.35),transparent_55%)]" />
-            <div className="relative py-2 px-3">
+            <div className="relative py-3 px-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="text-lg">{banner.icon}</span>
-                <span className="text-[6px] font-semibold uppercase tracking-wide text-white/80">
+                <span className="text-[7px] font-bold uppercase tracking-wider text-white/90">
                   {decodedCategoryName}
                 </span>
               </div>
-              <h2 className="text-sm font-bold mb-0.5 text-white">{banner.title}</h2>
-              <p className="text-[9px] text-white/80 mb-1.5">{banner.subtitle}</p>
+              <h2 className="text-base font-bold mb-0.5 text-white !text-white">{banner.title}</h2>
+              <p className="text-[10px] text-white/80 mb-1.5 !text-white/80">{banner.subtitle}</p>
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 className="inline-flex items-center gap-0.5 bg-white text-gray-900 font-semibold px-2 py-0.5 rounded-full shadow hover:bg-white/90 transition-colors text-[8px]"
@@ -482,17 +482,17 @@ export default function Category() {
             <div className="max-w-7xl mx-auto px-6 py-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                    <span className="text-2xl">{banner.icon}</span>
+                  <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                    <span className="text-3xl">{banner.icon}</span>
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h1 className="text-3xl font-bold text-white">{decodedCategoryName}</h1>
-                      <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-semibold text-white">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h1 className="text-3xl font-bold !text-white" style={{ color: 'white' }}>{decodedCategoryName}</h1>
+                      <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-bold !text-white" style={{ color: 'white' }}>
                         {filteredProducts.length} items
                       </span>
                     </div>
-                    <p className="text-white/80 text-sm max-w-xl">{banner.subtitle}</p>
+                    <p className="text-white/90 text-sm max-w-xl !text-white/90" style={{ color: 'rgba(255,255,255,0.9)' }}>{banner.subtitle}</p>
                   </div>
                 </div>
                 {banner.image && (
