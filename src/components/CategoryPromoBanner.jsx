@@ -61,7 +61,7 @@ export default function CategoryPromoBanner({ products, title = "SuperDeals" }) 
     };
 
     return (
-        <div className="col-span-full my-4">
+        <div className="col-span-full my-2">
             <div className="bg-white border border-gray-100 rounded-lg p-4 shadow-sm flex flex-col md:flex-row gap-6 items-center">
                 {/* Left Column - Heading & Timer */}
                 <div className="w-full md:w-1/4 flex flex-col items-center text-center">

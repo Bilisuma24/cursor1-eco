@@ -110,7 +110,7 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
 
   return (
     <div className="relative w-full max-w-[800px] mx-auto z-50" ref={suggestionsRef}>
-      <div className="relative flex items-center border-2 border-black rounded-full bg-white overflow-hidden h-11">
+      <div className="relative flex items-center border-2 border-black rounded-full bg-white overflow-hidden h-10">
         {/* Search Input */}
         <div className="flex-1 relative flex items-center h-full">
           <input
@@ -121,7 +121,7 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
             onKeyPress={handleKeyPress}
             onFocus={() => setShowSuggestions(true)}
             placeholder="Browline Chromehear Glass"
-            className="w-full h-full pl-5 pr-14 bg-white text-base text-gray-900 placeholder-gray-400 focus:outline-none"
+            className="w-full h-full pl-4 pr-12 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
           />
 
           {/* Icons on the right side of input */}
@@ -134,8 +134,8 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
                 <X className="w-4 h-4" />
               </button>
             )}
-            <button className="p-1.5 text-black hover:bg-gray-100 rounded-lg transition-colors">
-              <Camera className="w-5 h-5" />
+            <button className="p-1 text-black hover:bg-gray-100 rounded-lg transition-colors">
+              <Camera className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -145,7 +145,7 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
           onClick={() => handleSearch(query)}
           className="flex items-center justify-center h-full aspect-square bg-black hover:bg-gray-800 text-white transition-all shrink-0 border-l border-black"
         >
-          <Search className="w-5 h-5" />
+          <Search className="w-4 h-4" />
         </button>
       </div>
 

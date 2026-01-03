@@ -417,7 +417,7 @@ export default function Category() {
       <div className="md:hidden">
         {/* Category Banner */}
         <section className="pt-0 pb-2 bg-white">
-          <div className={`relative overflow-hidden ${banner.bgColor} text-white min-h-[90px] shadow-xl`}>
+          <div className={`relative overflow-hidden ${banner.bgColor} text-white min-h-[85px] shadow-xl`}>
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.35),transparent_55%)]" />
             <div className="relative py-2 px-3">
               <div className="flex items-center gap-1.5 mb-1">
@@ -479,11 +479,11 @@ export default function Category() {
         {/* Category Banner - Compact */}
         <section className="bg-white shadow-sm z-10 relative">
           <div className={`${banner.bgColor} text-white`}>
-            <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="max-w-7xl mx-auto px-6 py-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                    <span className="text-3xl">{banner.icon}</span>
+                    <span className="text-2xl">{banner.icon}</span>
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -497,7 +497,7 @@ export default function Category() {
                 </div>
                 {banner.image && (
                   <div className="hidden lg:block relative group">
-                    <div className="w-48 h-32 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/30 transform rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                    <div className="w-44 h-28 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/30 transform rotate-3 group-hover:rotate-0 transition-transform duration-500">
                       <img src={banner.image} alt={banner.title} className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-500" />
                     </div>
                     {/* Decorative background element */}

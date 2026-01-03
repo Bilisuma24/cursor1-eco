@@ -422,7 +422,7 @@ export default function Home() {
       <div className="md:hidden bg-white pb-20">
         {/* Mobile Hero Banner - At Top - Spaced below header */}
         <section className="pt-0 pb-3 bg-white">
-          <div className="relative overflow-hidden bg-[#3b82f6] text-white min-h-[130px] shadow-xl">
+          <div className="relative overflow-hidden bg-[#3b82f6] text-white min-h-[120px] shadow-xl">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_55%)]" />
             <div className="relative py-3 px-3">
               <div className="flex items-center gap-1.5">
