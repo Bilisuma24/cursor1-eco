@@ -431,7 +431,7 @@ export default function Home() {
                     <span className="text-[6px] font-semibold uppercase tracking-wide text-white/70 whitespace-nowrap">
                       Welcome
                     </span>
-                    <h2 className="text-[9px] font-semibold leading-tight truncate">New shopper special</h2>
+                    <h2 className="text-[9px] font-semibold leading-tight truncate text-white">New shopper special</h2>
                   </div>
                   <button
                     onClick={() => navigate('/shop?tag=welcome-deal')}
@@ -535,7 +535,7 @@ export default function Home() {
                     <span className="text-xs font-semibold uppercase tracking-wide text-white/80">
                       Welcome deal
                     </span>
-                    <h2 className="text-xl lg:text-2xl font-bold leading-snug max-w-md">
+                    <h2 className="text-xl lg:text-2xl font-bold leading-snug max-w-md text-white">
                       Catch limited-time savings for new shoppers
                     </h2>
                     <p className="text-[11px] text-white/80 max-w-lg">

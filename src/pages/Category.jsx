@@ -426,8 +426,8 @@ export default function Category() {
                   {decodedCategoryName}
                 </span>
               </div>
-              <h2 className="text-sm font-bold mb-0.5">{banner.title}</h2>
-              <p className="text-[9px] text-white/90 mb-1.5">{banner.subtitle}</p>
+              <h2 className="text-sm font-bold mb-0.5 text-white">{banner.title}</h2>
+              <p className="text-[9px] text-white/80 mb-1.5">{banner.subtitle}</p>
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 className="inline-flex items-center gap-0.5 bg-white text-gray-900 font-semibold px-2 py-0.5 rounded-full shadow hover:bg-white/90 transition-colors text-[8px]"
@@ -487,12 +487,12 @@ export default function Category() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <h1 className="text-3xl font-bold">{decodedCategoryName}</h1>
-                      <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-medium">
+                      <h1 className="text-3xl font-bold text-white">{decodedCategoryName}</h1>
+                      <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-semibold text-white">
                         {filteredProducts.length} items
                       </span>
                     </div>
-                    <p className="text-white/90 text-sm max-w-xl">{banner.subtitle}</p>
+                    <p className="text-white/80 text-sm max-w-xl">{banner.subtitle}</p>
                   </div>
                 </div>
                 {banner.image && (
