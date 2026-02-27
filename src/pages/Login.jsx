@@ -21,7 +21,7 @@ export default function Login() {
       if (user && !roleLoading && !userRole && !creatingProfile) {
         console.log('User has no role, checking if profile exists...');
         setCreatingProfile(true);
-        
+
         try {
           // First, check if profile exists in database
           const { data: existingProfile, error: fetchError } = await supabase
@@ -46,7 +46,7 @@ export default function Login() {
           // Check localStorage for profile data (from signup)
           const localProfile = localStorage.getItem('user_profile');
           let userType = 'buyer'; // Default fallback
-          
+
           if (localProfile) {
             try {
               const parsed = JSON.parse(localProfile);
@@ -66,7 +66,7 @@ export default function Login() {
           }
 
           console.log('Creating NEW profile with user_type:', userType);
-          
+
           const profileData = {
             user_id: user.id,
             username: user.email?.split('@')[0] || 'user',
@@ -90,7 +90,7 @@ export default function Login() {
               .select('user_type, user_id')
               .eq('user_id', user.id)
               .single();
-            
+
             if (fetchErr) {
               console.error('Error fetching existing profile:', fetchErr);
             } else if (fetchedProfile) {
@@ -222,6 +222,7 @@ export default function Login() {
               <Heart className="w-5 h-5" />
               <span className="text-xs">Wishlist</span>
             </Link>
+
             <Link
               to="/settings"
               className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[60px]"

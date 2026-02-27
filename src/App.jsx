@@ -40,6 +40,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { SupabaseAuthProvider, useAuth } from "./contexts/SupabaseAuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
+import { SettingsProvider } from "./contexts/SettingsContext";
 import { useUserRole } from "./hooks/useUserRole";
 import { PublicRoute } from "./components/ProtectedRoute";
 
@@ -121,7 +122,14 @@ function AppContent() {
   const isProductDetailPage = location.pathname.startsWith('/product/');
   const isDashboardPage = location.pathname.startsWith('/seller-dashboard');
 
-  const isShopOrCategory = location.pathname.startsWith('/shop') || location.pathname.startsWith('/category');
+  const isMinimalHeader = location.pathname.startsWith('/shop') ||
+    location.pathname.startsWith('/category');
+
+  const isAccountSection = location.pathname.startsWith('/account') ||
+    location.pathname.startsWith('/profile') ||
+    location.pathname.startsWith('/orders') ||
+    location.pathname.startsWith('/wishlist') ||
+    location.pathname.startsWith('/settings');
 
   return (
     <div className="min-h-screen">
@@ -135,7 +143,7 @@ function AppContent() {
 
       {/* Spacer below fixed header */}
       {!isProductDetailPage && !isDashboardPage && (
-        <div className={`${isShopOrCategory ? 'h-[44px]' : 'h-[82px]'} md:h-[100px]`} />
+        <div className={`${isAccountSection ? 'h-[52px]' : isMinimalHeader ? 'h-[44px]' : 'h-[82px]'} md:h-[100px]`} />
       )}
 
       {/* Page Routes */}
@@ -194,13 +202,15 @@ function App() {
   return (
     <ErrorBoundary>
       <SupabaseAuthProvider>
-        <CartProvider>
-          <ToastProvider>
-            <Router>
-              <AppContent />
-            </Router>
-          </ToastProvider>
-        </CartProvider>
+        <SettingsProvider>
+          <CartProvider>
+            <ToastProvider>
+              <Router>
+                <AppContent />
+              </Router>
+            </ToastProvider>
+          </CartProvider>
+        </SettingsProvider>
       </SupabaseAuthProvider>
     </ErrorBoundary>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Bell, Menu, X, User, LogOut, ChevronDown, ShoppingCart, Truck } from "lucide-react";
+import { Bell, Menu, X, User, LogOut, ChevronDown, ShoppingCart, Truck, ArrowLeft, ShoppingBag, Settings } from "lucide-react";
 import { useAuth } from "../contexts/SupabaseAuthContext";
 import SearchSuggestions from "./SearchSuggestions";
 import { useUserRole } from "../hooks/useUserRole";
@@ -11,8 +11,21 @@ import productsData from "../data/products.js";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, signOut, loading: authLoading } = useAuth();
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const location = useLocation();
-  const isShopOrCategory = location.pathname.startsWith('/shop') || location.pathname.startsWith('/category');
+  // For Shop and Category pages: Slimmed header with search
+  const isMinimalHeader = location.pathname.startsWith('/shop') ||
+    location.pathname.startsWith('/category');
+
+  // For User Account pages: Title bar header (No search)
+  const isAccountSection = location.pathname.startsWith('/account') ||
+    location.pathname.startsWith('/profile') ||
+    location.pathname.startsWith('/orders') ||
+    location.pathname.startsWith('/wishlist') ||
+    location.pathname.startsWith('/settings');
+
+  // Unified condition for simplified mobile header (Slim Search OR Title Bar)
+  const isSimplifiedHeader = isMinimalHeader || isAccountSection;
   const { cartCount } = useCart();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -208,147 +221,184 @@ const Navbar = () => {
     navigate(`/category/Global?search=${encodeURIComponent(query)}`);
   };
 
+
+
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path.startsWith('/account') || path.startsWith('/profile')) return 'Account';
+    if (path.startsWith('/orders')) return 'My Orders';
+    if (path.startsWith('/wishlist')) return 'My Wishlist';
+    if (path.startsWith('/settings')) return 'Settings';
+    return '';
+  };
+
   return (
-    <nav className={`bg-white relative z-[9999] overflow-visible ${isShopOrCategory ? '' : 'border-b border-gray-200 shadow-sm'}`}>
+    <nav className={`bg-white relative z-[9999] overflow-visible ${isSimplifiedHeader ? '' : 'border-b border-gray-200 shadow-sm'}`}>
       <div className="max-w-7xl mx-auto px-4 mobile-container">
-        {/* Header Top Row: Logo & Desktop Search - Hidden on mobile for shop/category */}
-        {(!isShopOrCategory) && (
-          <div className="flex justify-between items-center pt-1.5 lg:pt-3 lg:flex">
-            {/* Logo & Name */}
-            <Link
-              to="/"
-              className="flex items-center gap-1.5 whitespace-nowrap"
-            >
-              <Logo className="w-8 h-8 lg:w-12 lg:h-12" />
-              <span className="text-base lg:text-2xl text-[#3b82f6] leading-none font-bold">Kush deals</span>
-            </Link>
+        {/* Header Top Row: Logo & Desktop Search - Hidden on mobile for shop/category/account */}
+        <div className={`${isSimplifiedHeader ? 'hidden lg:flex' : 'flex'} justify-between items-center pt-1.5 lg:pt-3`}>
+          {/* Logo & Name */}
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 whitespace-nowrap"
+          >
+            <Logo className="w-8 h-8 lg:w-12 lg:h-12" />
+            <span className="text-base lg:text-2xl text-[#3b82f6] leading-none font-bold">Kush deals</span>
+          </Link>
 
-            {/* Desktop Search (Hidden on Mobile) */}
-            <div className="hidden lg:block flex-1 px-4 max-w-2xl">
-              <SearchSuggestions onSearch={handleGlobalSearch} />
-            </div>
-
-            {/* Actions: Cart & User (Desktop) / Cart & Menu (Mobile) */}
-            <div className="flex items-center space-x-2 lg:space-x-6">
-              {/* Desktop User Menu (Hidden on Mobile) */}
-              {user ? (
-                <div className="hidden lg:flex relative items-center gap-2" ref={dropdownRef}>
-                  <button
-                    onClick={toggleUserDropdown}
-                    className="flex items-center space-x-2 text-gray-700 hover:text-[#ff4747] transition-all"
-                  >
-                    <div className="flex flex-col items-start">
-                      <span className="text-[11px] text-gray-500 leading-none">Hi,</span>
-                      <span className="text-sm font-semibold leading-tight">{getUserDisplayName()}</span>
-                    </div>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {/* User Dropdown */}
-                  {userDropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
-                      <Link
-                        to="/profile"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <User className="w-4 h-4" />
-                        <span>Profile</span>
-                      </Link>
-                      {isSeller && (
-                        <Link
-                          to="/seller-dashboard"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          Seller Dashboard
-                        </Link>
-                      )}
-                      <Link
-                        to="/orders"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        Orders
-                      </Link>
-                      <div className="border-t border-gray-100 my-1" />
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Logout</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="hidden lg:flex items-center space-x-4">
-                  <Link
-                    to="/login"
-                    className="text-sm font-semibold text-gray-700 hover:text-[#ff4747]"
-                  >
-                    Sign In / Register
-                  </Link>
-                </div>
-              )}
-
-              {/* Cart Icon - Visible on both Mobile and Desktop */}
-              <Link to="/cart" className="relative p-1.5 text-gray-700 hover:text-[#ff4747] transition-colors">
-                <ShoppingCart className="w-6 h-6" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#ff4747] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-
-              {/* Notification Bell - Hidden here for mobile, moved next to search */}
-              <Link
-                to="/notifications"
-                className="hidden lg:flex relative p-1.5 rounded-lg hover:bg-gray-100 transition-all items-center justify-center text-gray-700"
-                aria-label="Notifications"
-              >
-                <Bell size={22} />
-              </Link>
-            </div>
-          </div>
-        )}
-        {/* Mobile Search Bar Row - Slimmed padding for Shop/Category */}
-        <div className={`lg:hidden flex items-center gap-1 px-1 ${isShopOrCategory ? 'py-0.5' : 'pb-1 pt-1'}`}>
-          <div className="flex-1">
+          {/* Desktop Search (Hidden on Mobile) */}
+          <div className="hidden lg:block flex-1 px-4 max-w-2xl">
             <SearchSuggestions onSearch={handleGlobalSearch} />
           </div>
 
-          {/* Notification Bell next to search */}
-          <Link
-            to="/notifications"
-            className="relative px-2 py-1.5 flex items-center justify-center text-[#191919]"
-            aria-label="Notifications"
-          >
-            <Bell size={26} strokeWidth={1.5} />
-            <span className="absolute top-1.5 right-1 bg-[#ff4747] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-sm">
-              6
-            </span>
-          </Link>
-        </div>
-        {/* Mobile Category Strip - mirrors desktop strip - Hide on shop/category to match reference */}
-        {!isShopOrCategory && (
-          <div className="lg:hidden flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2 pt-0.5 px-4 -mx-4">
-            {/* Category links */}
-            {headerCategories.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => handleHeaderCategoryClick(cat)}
-                className={`flex-shrink-0 inline-flex items-center gap-0.5 text-[8.5px] font-bold transition-all whitespace-nowrap hover:opacity-75 ${cat === 'Choice' ? 'text-[#ff4747]' : 'text-gray-800'
-                  }`}
-              >
-                {cat}
-                {cat === 'More' && <ChevronDown className="w-2 h-2 opacity-60" />}
-              </button>
-            ))}
+          {/* Actions: Cart & User (Desktop) / Cart & Menu (Mobile) */}
+          <div className="flex items-center space-x-2 lg:space-x-6">
+            {/* Desktop User Menu (Hidden on Mobile) */}
+            {user ? (
+              <div className="hidden lg:flex relative items-center gap-2" ref={dropdownRef}>
+                <button
+                  onClick={toggleUserDropdown}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-[#ff4747] transition-all"
+                >
+                  <div className="flex flex-col items-start">
+                    <span className="text-[11px] text-gray-500 leading-none">Hi,</span>
+                    <span className="text-sm font-semibold leading-tight">{getUserDisplayName()}</span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* User Dropdown */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Profile</span>
+                    </Link>
+                    {isSeller && (
+                      <Link
+                        to="/seller-dashboard"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Seller Dashboard
+                      </Link>
+                    )}
+                    <Link
+                      to="/orders"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      Orders
+                    </Link>
+                    <div className="border-t border-gray-100 my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="hidden lg:flex items-center space-x-4">
+                <Link
+                  to="/login"
+                  className="text-sm font-semibold text-gray-700 hover:text-[#ff4747]"
+                >
+                  Sign In / Register
+                </Link>
+              </div>
+            )}
+
+            {/* Cart Icon - Visible on both Mobile and Desktop */}
+            <Link to="/cart" className="relative p-1.5 text-gray-700 hover:text-[#ff4747] transition-colors">
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#ff4747] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Notification Bell - Hidden here for mobile, moved next to search */}
+            <Link
+              to="/notifications"
+              className="hidden lg:flex relative p-1.5 rounded-lg hover:bg-gray-100 transition-all items-center justify-center text-gray-700"
+              aria-label="Notifications"
+            >
+              <Bell size={22} />
+            </Link>
           </div>
+        </div>
+        {isAccountSection ? (
+          <div className="lg:hidden flex items-center justify-between h-[52px] px-1 animate-in fade-in duration-300">
+            <div className="flex items-center gap-1">
+              <Link to="/" className="flex items-center gap-1.5 px-2">
+                <Logo className="w-8 h-8" />
+                <span className="text-lg font-bold text-[#3b82f6] tracking-tight whitespace-nowrap">Kush deals</span>
+              </Link>
+            </div>
+            <div className="flex items-center gap-1">
+              <Link
+                to="/notifications"
+                className="relative px-3 py-2 flex items-center justify-center text-[#191919]"
+              >
+                <Bell size={24} strokeWidth={1.5} />
+                <span className="absolute top-2 right-2 bg-[#ff4747] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-sm">6</span>
+              </Link>
+              <Link
+                to="/settings"
+                className="px-3 py-2 flex items-center justify-center text-[#191919]"
+              >
+                <Settings size={24} strokeWidth={1.5} />
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Mobile Search Bar Row - Slimmed padding for Shop/Category */}
+            <div className={`lg:hidden flex items-center gap-1 px-1 ${isMinimalHeader ? 'py-0.5' : 'pb-1 pt-1'}`}>
+              <div className="flex-1">
+                <SearchSuggestions onSearch={handleGlobalSearch} />
+              </div>
+
+              {/* Notification Bell next to search */}
+              <Link
+                to="/notifications"
+                className="relative px-2 py-1.5 flex items-center justify-center text-[#191919]"
+                aria-label="Notifications"
+              >
+                <Bell size={26} strokeWidth={1.5} />
+                <span className="absolute top-1.5 right-1 bg-[#ff4747] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-sm">
+                  6
+                </span>
+              </Link>
+            </div>
+            {/* Mobile Category Strip - mirrors desktop strip - Hide on shop/category to match reference */}
+            {!isSimplifiedHeader && (
+              <div className="lg:hidden flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2 pt-0.5 px-4 -mx-4">
+                {/* Category links */}
+                {headerCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => handleHeaderCategoryClick(cat)}
+                    className={`flex-shrink-0 inline-flex items-center gap-0.5 text-[8.5px] font-bold transition-all whitespace-nowrap hover:opacity-75 ${cat === 'Choice' ? 'text-[#ff4747]' : 'text-gray-800'
+                      }`}
+                  >
+                    {cat}
+                    {cat === 'More' && <ChevronDown className="w-2 h-2 opacity-60" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {/* Bottom Row: Desktop category strip integrated into header */}

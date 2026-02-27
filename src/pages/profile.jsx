@@ -41,7 +41,7 @@ export default function Profile() {
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef(null);
-  
+
   // New features state
   const [shippingAddresses, setShippingAddresses] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -251,7 +251,7 @@ export default function Profile() {
           .from('order')
           .select('status')
           .eq('user_id', user.id);
-        
+
         if (orders) {
           setOrderStats({
             total: orders.length,
@@ -392,13 +392,13 @@ export default function Profile() {
     try {
       // Add loading state
       setLoading(true);
-      
+
       // Sign out
       await signOut();
-      
+
       // Small delay to ensure state clears
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Force full page reload to clear all React state
       window.location.replace("/");
     } catch (err) {
@@ -539,44 +539,40 @@ export default function Profile() {
                   <div className="space-y-2">
                     <Link
                       to="/profile"
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                        location.pathname === '/profile'
-                          ? 'bg-orange-50 text-orange-600 font-medium'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
+                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === '/profile'
+                        ? 'bg-orange-50 text-orange-600 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                        }`}
                     >
                       <User className="w-5 h-5" />
                       <span>Profile</span>
                     </Link>
                     <Link
                       to="/orders"
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                        location.pathname === '/orders'
-                          ? 'bg-orange-50 text-orange-600 font-medium'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
+                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === '/orders'
+                        ? 'bg-orange-50 text-orange-600 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                        }`}
                     >
                       <ShoppingBag className="w-5 h-5" />
                       <span>Orders</span>
                     </Link>
                     <Link
                       to="/wishlist"
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                        location.pathname === '/wishlist'
-                          ? 'bg-orange-50 text-orange-600 font-medium'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
+                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === '/wishlist'
+                        ? 'bg-orange-50 text-orange-600 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                        }`}
                     >
                       <Heart className="w-5 h-5" />
                       <span>Wishlist</span>
                     </Link>
                     <Link
                       to="/price-alerts"
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                        location.pathname === '/price-alerts'
-                          ? 'bg-orange-50 text-orange-600 font-medium'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
+                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === '/price-alerts'
+                        ? 'bg-orange-50 text-orange-600 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                        }`}
                     >
                       <BellRing className="w-5 h-5" />
                       <span>Price Alerts</span>
@@ -584,11 +580,10 @@ export default function Profile() {
                     {(isSeller || profileData?.user_type === 'seller') && (
                       <Link
                         to="/seller-dashboard"
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                          location.pathname?.startsWith('/seller-dashboard')
-                            ? 'bg-orange-50 text-orange-600 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname?.startsWith('/seller-dashboard')
+                          ? 'bg-orange-50 text-orange-600 font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                          }`}
                       >
                         <Package className="w-5 h-5" />
                         <span>Seller Dashboard</span>
@@ -597,11 +592,10 @@ export default function Profile() {
                     {isAdmin && (
                       <Link
                         to="/admin"
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                          location.pathname?.startsWith('/admin')
-                            ? 'bg-orange-50 text-orange-600 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname?.startsWith('/admin')
+                          ? 'bg-orange-50 text-orange-600 font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                          }`}
                       >
                         <Settings className="w-5 h-5" />
                         <span>Admin Dashboard</span>
@@ -609,11 +603,10 @@ export default function Profile() {
                     )}
                     <Link
                       to="/settings"
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                        location.pathname === '/settings'
-                          ? 'bg-orange-50 text-orange-600 font-medium'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
+                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === '/settings'
+                        ? 'bg-orange-50 text-orange-600 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                        }`}
                     >
                       <Settings className="w-5 h-5" />
                       <span>Settings</span>
@@ -658,18 +651,17 @@ export default function Profile() {
                         <div className="mt-2 flex items-center gap-2 flex-wrap">
                           {(userRole || profileData?.user_type) && (
                             <span
-                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                                (isSeller || profileData?.user_type === 'seller')
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-blue-100 text-blue-800"
-                              }`}
+                              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${(isSeller || profileData?.user_type === 'seller')
+                                ? "bg-green-100 text-green-800"
+                                : "bg-blue-100 text-blue-800"
+                                }`}
                             >
                               {(isSeller || profileData?.user_type === 'seller') ? "🏪 Seller" : "👤 Buyer"}
                             </span>
                           )}
                           {level && (
                             <LevelBadge
-                              levelName={level?.badge?.split('/')?.pop()?.replace('.svg','')}
+                              levelName={level?.badge?.split('/')?.pop()?.replace('.svg', '')}
                               badge={level?.badge}
                             />
                           )}
@@ -729,7 +721,7 @@ export default function Profile() {
                   {/* Achievements section */}
                   <div className="mb-8">
                     <div className="flex items-center justify-between">
-                      <LevelBadge levelName={level?.badge?.split('/').pop()?.replace('.svg','')} badge={level?.badge} />
+                      <LevelBadge levelName={level?.badge?.split('/').pop()?.replace('.svg', '')} badge={level?.badge} />
                     </div>
                     <div className="mt-3">
                       <LevelProgress xp={level?.xp || 0} next={level?.next_level_xp || 100} />
@@ -765,11 +757,10 @@ export default function Profile() {
                               name="full_name"
                               value={formData.full_name}
                               onChange={handleChange}
-                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                                validationErrors.full_name
-                                  ? "border-red-300 focus:ring-red-500"
-                                  : "border-gray-300 focus:ring-blue-500"
-                              }`}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${validationErrors.full_name
+                                ? "border-red-300 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                               required
                             />
                             {validationErrors.full_name && (
@@ -786,11 +777,10 @@ export default function Profile() {
                               name="username"
                               value={formData.username}
                               onChange={handleChange}
-                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                                validationErrors.username
-                                  ? "border-red-300 focus:ring-red-500"
-                                  : "border-gray-300 focus:ring-blue-500"
-                              }`}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${validationErrors.username
+                                ? "border-red-300 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                               required
                             />
                             {validationErrors.username && (
@@ -898,9 +888,8 @@ export default function Profile() {
                         <div className="flex justify-between">
                           <span className="text-gray-600">Email verified</span>
                           <span
-                            className={`font-medium ${
-                              user?.email_confirmed_at ? "text-green-600" : "text-red-600"
-                            }`}
+                            className={`font-medium ${user?.email_confirmed_at ? "text-green-600" : "text-red-600"
+                              }`}
                           >
                             {user?.email_confirmed_at ? "Yes" : "No"}
                           </span>
@@ -938,11 +927,10 @@ export default function Profile() {
                               name="currentPassword"
                               value={passwordData.currentPassword}
                               onChange={handlePasswordChange}
-                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                                validationErrors.currentPassword
-                                  ? "border-red-300 focus:ring-red-500"
-                                  : "border-gray-300 focus:ring-blue-500"
-                              }`}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${validationErrors.currentPassword
+                                ? "border-red-300 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             />
                             {validationErrors.currentPassword && (
                               <p className="mt-1 text-sm text-red-600">
@@ -960,11 +948,10 @@ export default function Profile() {
                               name="newPassword"
                               value={passwordData.newPassword}
                               onChange={handlePasswordChange}
-                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                                validationErrors.newPassword
-                                  ? "border-red-300 focus:ring-red-500"
-                                  : "border-gray-300 focus:ring-blue-500"
-                              }`}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${validationErrors.newPassword
+                                ? "border-red-300 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             />
                             {validationErrors.newPassword && (
                               <p className="mt-1 text-sm text-red-600">{validationErrors.newPassword}</p>
@@ -980,11 +967,10 @@ export default function Profile() {
                               name="confirmPassword"
                               value={passwordData.confirmPassword}
                               onChange={handlePasswordChange}
-                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                                validationErrors.confirmPassword
-                                  ? "border-red-300 focus:ring-red-500"
-                                  : "border-gray-300 focus:ring-blue-500"
-                              }`}
+                              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${validationErrors.confirmPassword
+                                ? "border-red-300 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                                }`}
                             />
                             {validationErrors.confirmPassword && (
                               <p className="mt-1 text-sm text-red-600">
@@ -1065,13 +1051,13 @@ export default function Profile() {
                           type="text"
                           placeholder="Full Name"
                           value={newAddress.name}
-                          onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
+                          onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         />
                         <textarea
                           placeholder="Street Address"
                           value={newAddress.address}
-                          onChange={(e) => setNewAddress({...newAddress, address: e.target.value})}
+                          onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2"
                           rows={2}
                         />
@@ -1080,14 +1066,14 @@ export default function Profile() {
                             type="text"
                             placeholder="City"
                             value={newAddress.city}
-                            onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                            onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
                             className="border border-gray-300 rounded-lg px-3 py-2"
                           />
                           <input
                             type="text"
                             placeholder="ZIP Code"
                             value={newAddress.zip}
-                            onChange={(e) => setNewAddress({...newAddress, zip: e.target.value})}
+                            onChange={(e) => setNewAddress({ ...newAddress, zip: e.target.value })}
                             className="border border-gray-300 rounded-lg px-3 py-2"
                           />
                         </div>
@@ -1095,7 +1081,7 @@ export default function Profile() {
                           <input
                             type="checkbox"
                             checked={newAddress.isDefault}
-                            onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
+                            onChange={(e) => setNewAddress({ ...newAddress, isDefault: e.target.checked })}
                             className="rounded"
                           />
                           <label className="text-sm text-gray-700">Set as default address</label>
@@ -1104,7 +1090,7 @@ export default function Profile() {
                           <button
                             onClick={() => {
                               if (newAddress.name && newAddress.address) {
-                                setShippingAddresses([...shippingAddresses, {...newAddress, id: Date.now()}]);
+                                setShippingAddresses([...shippingAddresses, { ...newAddress, id: Date.now() }]);
                                 setNewAddress({ name: '', address: '', city: '', zip: '', country: '', phone: '', isDefault: false });
                                 setShowAddAddress(false);
                                 setSuccess('Address added successfully!');
@@ -1137,7 +1123,7 @@ export default function Profile() {
                               {addr.city && <div className="text-sm text-gray-600">{addr.city}, {addr.zip}</div>}
                               {addr.isDefault && <span className="inline-block mt-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Default</span>}
                             </div>
-                            <button 
+                            <button
                               onClick={() => handleDeleteAddress(addr.id)}
                               className="text-red-600 hover:text-red-700"
                             >
@@ -1170,14 +1156,14 @@ export default function Profile() {
                           type="text"
                           placeholder="Cardholder Name"
                           value={newPayment.name}
-                          onChange={(e) => setNewPayment({...newPayment, name: e.target.value})}
+                          onChange={(e) => setNewPayment({ ...newPayment, name: e.target.value })}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         />
                         <input
                           type="text"
                           placeholder="Card Number"
                           value={newPayment.cardNumber}
-                          onChange={(e) => setNewPayment({...newPayment, cardNumber: e.target.value})}
+                          onChange={(e) => setNewPayment({ ...newPayment, cardNumber: e.target.value })}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2"
                           maxLength={19}
                         />
@@ -1186,14 +1172,14 @@ export default function Profile() {
                             type="text"
                             placeholder="MM/YY"
                             value={newPayment.expiryDate}
-                            onChange={(e) => setNewPayment({...newPayment, expiryDate: e.target.value})}
+                            onChange={(e) => setNewPayment({ ...newPayment, expiryDate: e.target.value })}
                             className="border border-gray-300 rounded-lg px-3 py-2"
                           />
                           <input
                             type="text"
                             placeholder="CVV"
                             value={newPayment.cvv}
-                            onChange={(e) => setNewPayment({...newPayment, cvv: e.target.value})}
+                            onChange={(e) => setNewPayment({ ...newPayment, cvv: e.target.value })}
                             className="border border-gray-300 rounded-lg px-3 py-2"
                             maxLength={4}
                           />
@@ -1202,7 +1188,7 @@ export default function Profile() {
                           <input
                             type="checkbox"
                             checked={newPayment.isDefault}
-                            onChange={(e) => setNewPayment({...newPayment, isDefault: e.target.checked})}
+                            onChange={(e) => setNewPayment({ ...newPayment, isDefault: e.target.checked })}
                             className="rounded"
                           />
                           <label className="text-sm text-gray-700">Set as default payment method</label>
@@ -1211,7 +1197,7 @@ export default function Profile() {
                           <button
                             onClick={() => {
                               if (newPayment.name && newPayment.cardNumber) {
-                                setPaymentMethods([...paymentMethods, {...newPayment, id: Date.now()}]);
+                                setPaymentMethods([...paymentMethods, { ...newPayment, id: Date.now() }]);
                                 setNewPayment({ cardNumber: '', expiryDate: '', cvv: '', name: '', isDefault: false });
                                 setShowAddPayment(false);
                                 setSuccess('Payment method added successfully!');
@@ -1246,7 +1232,7 @@ export default function Profile() {
                                 {method.isDefault && <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Default</span>}
                               </div>
                             </div>
-                            <button 
+                            <button
                               onClick={() => handleDeletePayment(method.id)}
                               className="text-red-600 hover:text-red-700"
                             >
@@ -1271,7 +1257,7 @@ export default function Profile() {
                           <div className="text-sm text-gray-600">Receive updates via email</div>
                         </div>
                         <button
-                          onClick={() => setNotifications({...notifications, email: !notifications.email})}
+                          onClick={() => setNotifications({ ...notifications, email: !notifications.email })}
                           className={`relative w-12 h-6 rounded-full transition-colors ${notifications.email ? 'bg-blue-600' : 'bg-gray-300'}`}
                         >
                           <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.email ? 'translate-x-6' : ''}`}></div>
@@ -1283,7 +1269,7 @@ export default function Profile() {
                           <div className="text-sm text-gray-600">Receive updates via SMS</div>
                         </div>
                         <button
-                          onClick={() => setNotifications({...notifications, sms: !notifications.sms})}
+                          onClick={() => setNotifications({ ...notifications, sms: !notifications.sms })}
                           className={`relative w-12 h-6 rounded-full transition-colors ${notifications.sms ? 'bg-blue-600' : 'bg-gray-300'}`}
                         >
                           <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.sms ? 'translate-x-6' : ''}`}></div>
@@ -1295,7 +1281,7 @@ export default function Profile() {
                           <div className="text-sm text-gray-600">Get notified about order status changes</div>
                         </div>
                         <button
-                          onClick={() => setNotifications({...notifications, orderUpdates: !notifications.orderUpdates})}
+                          onClick={() => setNotifications({ ...notifications, orderUpdates: !notifications.orderUpdates })}
                           className={`relative w-12 h-6 rounded-full transition-colors ${notifications.orderUpdates ? 'bg-blue-600' : 'bg-gray-300'}`}
                         >
                           <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.orderUpdates ? 'translate-x-6' : ''}`}></div>
@@ -1307,7 +1293,7 @@ export default function Profile() {
                           <div className="text-sm text-gray-600">Receive special offers and discounts</div>
                         </div>
                         <button
-                          onClick={() => setNotifications({...notifications, promotions: !notifications.promotions})}
+                          onClick={() => setNotifications({ ...notifications, promotions: !notifications.promotions })}
                           className={`relative w-12 h-6 rounded-full transition-colors ${notifications.promotions ? 'bg-blue-600' : 'bg-gray-300'}`}
                         >
                           <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.promotions ? 'translate-x-6' : ''}`}></div>
@@ -1319,7 +1305,7 @@ export default function Profile() {
                           <div className="text-sm text-gray-600">Subscribe to our monthly newsletter</div>
                         </div>
                         <button
-                          onClick={() => setNotifications({...notifications, newsletters: !notifications.newsletters})}
+                          onClick={() => setNotifications({ ...notifications, newsletters: !notifications.newsletters })}
                           className={`relative w-12 h-6 rounded-full transition-colors ${notifications.newsletters ? 'bg-blue-600' : 'bg-gray-300'}`}
                         >
                           <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${notifications.newsletters ? 'translate-x-6' : ''}`}></div>
@@ -1339,7 +1325,7 @@ export default function Profile() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
                         <select
                           value={preferences.language}
-                          onChange={(e) => setPreferences({...preferences, language: e.target.value})}
+                          onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         >
                           <option value="en">English</option>
@@ -1352,7 +1338,7 @@ export default function Profile() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
                         <select
                           value={preferences.currency}
-                          onChange={(e) => setPreferences({...preferences, currency: e.target.value})}
+                          onChange={(e) => setPreferences({ ...preferences, currency: e.target.value })}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         >
                           <option value="ETB">ETB - Ethiopian Birr</option>
@@ -1364,7 +1350,7 @@ export default function Profile() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
                         <select
                           value={preferences.theme}
-                          onChange={(e) => setPreferences({...preferences, theme: e.target.value})}
+                          onChange={(e) => setPreferences({ ...preferences, theme: e.target.value })}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         >
                           <option value="light">Light</option>
