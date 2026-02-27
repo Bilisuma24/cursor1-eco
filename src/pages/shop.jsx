@@ -24,22 +24,6 @@ export default function Shop() {
     fetchProducts();
   }, []);
 
-  // Redirect Desktop users to Home (Shop is mobile-only)
-  useEffect(() => {
-    const checkDesktop = () => {
-      if (window.innerWidth >= 768) {
-        navigate('/', { replace: true });
-      }
-    };
-
-    // Check on mount
-    checkDesktop();
-
-    // Check on resize
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
-  }, [navigate]);
-
   // Refresh products when navigating to shop page
   useEffect(() => {
     const handleFocus = () => {

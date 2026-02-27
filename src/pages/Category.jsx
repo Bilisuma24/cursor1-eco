@@ -203,6 +203,9 @@ export default function Category() {
           if (displayCategoryName.toLowerCase() === 'home & furniture') {
             // Handle alias for Home & Furniture / Home & Garden
             query = query.or(`category.ilike.Home & Furniture,category.ilike.Home & Garden`);
+          } else if (displayCategoryName.toLowerCase() === 'mobile & tablets') {
+            // Map Mobile & Tablets to Electronics and Mobile for legacy/database consistency
+            query = query.or(`category.ilike."Mobile & Tablets",category.ilike.Electronics,category.ilike.Mobile`);
           } else {
             query = query.ilike('category', displayCategoryName);
           }
@@ -312,9 +315,23 @@ export default function Category() {
   const searchQuery = searchParams.get('search') || '';
 
   const filteredProducts = products.filter(p => {
-    // 1. Subcategory Filter
-    if (subcategoryParam && p.subcategory !== subcategoryParam) {
-      return false;
+    // 1. Subcategory Filter with mapping for inconsistent naming
+    if (subcategoryParam) {
+      const targetSub = subcategoryParam.toLowerCase();
+      const productSub = p.subcategory?.toLowerCase();
+
+      // Map new UI subcategories to legacy/database naming
+      const subMap = {
+        'headphones': ['audio', 'headphones'],
+        'smart watches': ['wearables', 'smart watches', 'watches', 'wearable'],
+        'phones': ['mobile', 'phones', 'smartphones'],
+        'tablets': ['tablets', 'tablet', 'ipad']
+      };
+
+      const allowedSubs = subMap[targetSub] || [targetSub];
+      if (!allowedSubs.includes(productSub)) {
+        return false;
+      }
     }
     // 2. Search Text Filter
     if (searchQuery) {
@@ -628,6 +645,26 @@ export default function Category() {
             );
           })()}
         </div>
+
+        {/* Mobile Subcategory Navigation */}
+        <div className="bg-white px-4 py-2 border-b border-gray-100 overflow-x-auto scrollbar-hide flex gap-2">
+          <button
+            onClick={() => navigate(`/category/${encodeURIComponent(decodedCategoryName)}`)}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${!subcategoryParam ? 'bg-[#3b82f6] text-white shadow-sm' : 'bg-gray-100 text-gray-600'}`}
+          >
+            All
+          </button>
+          {productsData.categories?.find(c => c.name.toLowerCase() === displayCategoryName.toLowerCase())?.subcategories?.map(sub => (
+            <button
+              key={sub}
+              onClick={() => navigate(`/category/${encodeURIComponent(decodedCategoryName)}?subcategory=${encodeURIComponent(sub)}`)}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${subcategoryParam === sub ? 'bg-[#3b82f6] text-white shadow-sm' : 'bg-gray-100 text-gray-600'}`}
+            >
+              {sub}
+            </button>
+          ))}
+        </div>
+
 
         {/* Header */}
         <div className="sticky top-[44px] z-40 bg-white border-b border-gray-200 px-4 py-3">
