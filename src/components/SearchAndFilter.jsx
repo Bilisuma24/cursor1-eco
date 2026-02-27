@@ -235,7 +235,7 @@ export default function SearchAndFilter({
                                 {icon}
                               </div>
                             </div>
-                            <span className={`text-[11px] text-[#191919] text-center leading-tight font-bold max-w-[90px] transition-colors ${isSelected ? 'text-orange-600' : 'group-hover:text-orange-500'
+                            <span className={`text-[9.5px] text-[#191919] text-center leading-tight font-bold max-w-[85px] transition-colors ${isSelected ? 'text-orange-600' : 'group-hover:text-orange-500'
                               }`}>
                               {subcategory}
                             </span>
@@ -281,7 +281,7 @@ export default function SearchAndFilter({
                                 </div>
                               )}
                             </div>
-                            <span className={`text-[10px] text-center font-bold max-w-[80px] ${isSelected ? 'text-orange-600' : 'text-gray-700'}`}>
+                            <span className={`text-[9px] text-center font-bold max-w-[75px] leading-tight ${isSelected ? 'text-orange-600' : 'text-gray-700'}`}>
                               {subcategory}
                             </span>
                           </button>

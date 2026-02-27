@@ -109,10 +109,17 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
   };
 
   return (
-    <div className="relative w-full max-w-[800px] mx-auto z-50" ref={suggestionsRef}>
-      <div className="relative flex items-center border-2 border-black rounded-full bg-white overflow-hidden h-10">
+    <div className="relative w-full z-50 px-2" ref={suggestionsRef}>
+      <div className="relative flex items-center border border-black rounded-full bg-white overflow-hidden h-10">
+        {/* Camera Icon - AliExpress style on the left */}
+        <div className="pl-3 pr-2 border-r border-gray-100 h-full flex items-center">
+          <button className="p-1 text-gray-700 hover:text-black transition-colors">
+            <Camera className="w-5 h-5" />
+          </button>
+        </div>
+
         {/* Search Input */}
-        <div className="flex-1 relative flex items-center h-full">
+        <div className="flex-1 relative h-full">
           <input
             ref={inputRef}
             type="text"
@@ -120,32 +127,26 @@ const SearchSuggestions = ({ onSearch, placeholder = "Search products..." }) => 
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             onFocus={() => setShowSuggestions(true)}
-            placeholder="Browline Chromehear Glass"
-            className="w-full h-full pl-4 pr-12 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
+            placeholder="Clubmaster Glasses Man"
+            className="w-full h-full pl-2 pr-10 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none font-medium italic"
           />
 
-          {/* Icons on the right side of input */}
-          <div className="absolute right-2 flex items-center gap-2">
-            {query && (
-              <button
-                onClick={() => setQuery('')}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-            <button className="p-1 text-black hover:bg-gray-100 rounded-lg transition-colors">
-              <Camera className="w-4 h-4" />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-4 h-4" />
             </button>
-          </div>
+          )}
         </div>
 
-        {/* Search Button */}
+        {/* Search Button - Rectangular with rounded inner side */}
         <button
           onClick={() => handleSearch(query)}
-          className="flex items-center justify-center h-full aspect-square bg-black hover:bg-gray-800 text-white transition-all shrink-0 border-l border-black"
+          className="flex items-center justify-center h-[80%] my-auto mr-1 aspect-[1.5/1] bg-black text-white hover:bg-gray-800 transition-all rounded-full flex-shrink-0"
         >
-          <Search className="w-4 h-4" />
+          <Search className="w-4 h-4 text-white" />
         </button>
       </div>
 

@@ -76,9 +76,6 @@ const SuperDeals = () => {
                                         <span className="text-gray-400 line-through">
                                             {product.currency} {product.originalPrice}
                                         </span>
-                                        <span className="text-white bg-red-500 px-1 rounded-[2px] font-bold">
-                                            -{product.discount}%
-                                        </span>
                                     </div>
                                 )}
                             </div>

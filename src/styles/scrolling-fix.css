@@ -1,0 +1,17 @@
+/* Simple scrolling fix - make it work like a normal website */
+
+html {
+    overflow: visible;
+    height: 100%;
+}
+
+body {
+    overflow: visible;
+    height: 100%;
+    min-height: 100vh;
+}
+
+#root {
+    overflow: visible;
+    min-height: 100vh;
+}

@@ -233,7 +233,7 @@ export default function ProductCard({ product, onAddToCart, onAdd, viewMode = 'g
             <div className="flex items-center gap-0.5 text-[8px] text-gray-600 leading-tight">
               <span>{product.sold.toLocaleString()} sold</span>
               <span className="text-yellow-400">★</span>
-              <span>{product.rating.toFixed(1)}</span>
+              <span>{(product.rating || 0).toFixed(1)}</span>
             </div>
           ) : product.sold ? (
             <div className="text-[8px] text-gray-600 leading-tight">

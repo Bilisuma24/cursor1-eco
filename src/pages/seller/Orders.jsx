@@ -31,7 +31,7 @@ const Orders = () => {
       console.log('User not available yet, skipping orders load');
       return;
     }
-    
+
     try {
       setLoading(true);
       const data = await orderService.fetchSellerOrders(user.id, statusFilter || null);
@@ -104,7 +104,7 @@ const Orders = () => {
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.shipping_address?.toLowerCase().includes(searchTerm.toLowerCase());
+      order.shipping_address?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -182,7 +182,7 @@ const Orders = () => {
             {searchTerm || statusFilter ? 'No orders found' : 'No orders yet'}
           </h3>
           <p className="text-gray-600 max-w-md mx-auto">
-            {searchTerm || statusFilter 
+            {searchTerm || statusFilter
               ? 'Try adjusting your search or filter criteria'
               : 'Orders will appear here when customers purchase your products'
             }
@@ -192,7 +192,7 @@ const Orders = () => {
         <div className="space-y-5">
           {filteredOrders.map((order) => {
             const nextStatus = getNextStatus(order.status);
-            
+
             return (
               <div key={order.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-4 hover:shadow-sm transition-shadow">
                 {/* Header */}
@@ -219,7 +219,7 @@ const Orders = () => {
                     </div>
                     <div className="text-left sm:text-right">
                       <p className="text-sm font-semibold text-gray-900">
-                        ${order.sellerRevenue.toFixed(2)}
+                        ${(order.sellerRevenue || 0).toFixed(2)}
                       </p>
                       <p className="text-xs text-gray-500">Your Revenue</p>
                     </div>
@@ -247,10 +247,10 @@ const Orders = () => {
                         </div>
                         <div className="text-right">
                           <p className="text-xs font-semibold text-gray-900">
-                            ${item.total.toFixed(2)}
+                            ${(item.total || 0).toFixed(2)}
                           </p>
                           <p className="text-xs text-gray-500">
-                            ${item.price.toFixed(2)} each
+                            ${(item.price || 0).toFixed(2)} each
                           </p>
                         </div>
                       </div>
@@ -272,13 +272,13 @@ const Orders = () => {
                 <div className="px-5 py-3 bg-gray-50 border-t border-gray-200">
                   <div className="flex items-center justify-between gap-2">
                     <button
-                      onClick={() => {/* TODO: Implement order details modal */}}
+                      onClick={() => {/* TODO: Implement order details modal */ }}
                       className="flex items-center space-x-1.5 text-blue-600 hover:text-blue-700 text-xs px-3 py-1.5 rounded hover:bg-blue-50 transition-colors"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       <span>View Details</span>
                     </button>
-                    
+
                     {nextStatus && (
                       <button
                         onClick={() => handleStatusUpdate(order.id, nextStatus)}

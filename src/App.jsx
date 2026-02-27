@@ -6,7 +6,7 @@ import Logo from "./components/Logo";
 import Navbar from "./components/Navbar";
 
 import Home from "./pages/Home";
-import Shop from "./pages/Shop";
+import Shop from "./pages/shop";
 import Category from "./pages/Category";
 import SearchResults from "./pages/SearchResults";
 import About from "./pages/About";
@@ -121,8 +121,10 @@ function AppContent() {
   const isProductDetailPage = location.pathname.startsWith('/product/');
   const isDashboardPage = location.pathname.startsWith('/seller-dashboard');
 
+  const isShopOrCategory = location.pathname.startsWith('/shop') || location.pathname.startsWith('/category');
+
   return (
-    <>
+    <div className="min-h-screen">
       <ScrollToTop />
       {/* Header - fixed to remain visible while scrolling */}
       {!isDashboardPage && !isProductDetailPage && (
@@ -132,7 +134,9 @@ function AppContent() {
       )}
 
       {/* Spacer below fixed header */}
-      {!isProductDetailPage && !isDashboardPage && <div className="h-[82px] md:h-[100px]" />}
+      {!isProductDetailPage && !isDashboardPage && (
+        <div className={`${isShopOrCategory ? 'h-[44px]' : 'h-[82px]'} md:h-[100px]`} />
+      )}
 
       {/* Page Routes */}
       <main>
@@ -181,7 +185,7 @@ function AppContent() {
 
       {/* Footer - Only on home page */}
       {isHomePage && <FooterContent />}
-    </>
+    </div>
   );
 }
 

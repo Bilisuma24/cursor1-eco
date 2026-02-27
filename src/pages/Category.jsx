@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import ProductGrid from "../components/ProductGrid";
@@ -7,9 +7,171 @@ import CategoryPromoBanner from "../components/CategoryPromoBanner";
 import productsData from "../data/products.js";
 import { supabase } from "../lib/supabaseClient";
 
+// Canonical brand logos for categories and subcategories
+const brandMap = {
+  'mobile & tablets': [
+    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
+    { name: 'Xiaomi', logo: 'https://www.logo.wine/a/logo/Xiaomi/Xiaomi-Logo.wine.svg' },
+    { name: 'Oppo', logo: 'https://www.logo.wine/a/logo/Oppo/Oppo-Logo.wine.svg' },
+    { name: 'Vivo', logo: 'https://www.logo.wine/a/logo/Vivo_(technology_company)/Vivo_(technology_company)-Logo.wine.svg' }
+  ],
+  'mobile & tablets/phones': [
+    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
+    { name: 'Xiaomi', logo: 'https://www.logo.wine/a/logo/Xiaomi/Xiaomi-Logo.wine.svg' },
+    { name: 'Oppo', logo: 'https://www.logo.wine/a/logo/Oppo/Oppo-Logo.wine.svg' },
+    { name: 'Vivo', logo: 'https://www.logo.wine/a/logo/Vivo_(technology_company)/Vivo_(technology_company)-Logo.wine.svg' }
+  ],
+  'mobile & tablets/tablets': [
+    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+    { name: 'Microsoft', logo: 'https://www.logo.wine/a/logo/Microsoft/Microsoft-Logo.wine.svg' },
+    { name: 'Amazon', logo: 'https://www.logo.wine/a/logo/Amazon_(company)/Amazon_(company)-Logo.wine.svg' },
+    { name: 'Lenovo', logo: 'https://www.logo.wine/a/logo/Lenovo/Lenovo-Logo.wine.svg' },
+    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' }
+  ],
+  'mobile & tablets/smart watches': [
+    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+    { name: 'Garmin', logo: 'https://www.logo.wine/a/logo/Garmin/Garmin-Logo.wine.svg' },
+    { name: 'Fitbit', logo: 'https://www.logo.wine/a/logo/Fitbit/Fitbit-Logo.wine.svg' },
+    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
+    { name: 'Amazfit', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Amazfit_logo.svg' }
+  ],
+  'mobile & tablets/headphones': [
+    { name: 'Bose', logo: 'https://www.logo.wine/a/logo/Bose_Corporation/Bose_Corporation-Logo.wine.svg' },
+    { name: 'Sony', logo: 'https://www.logo.wine/a/logo/Sony/Sony-Logo.wine.svg' },
+    { name: 'JBL', logo: 'https://www.logo.wine/a/logo/JBL/JBL-Logo.wine.svg' },
+    { name: 'Sennheiser', logo: 'https://www.logo.wine/a/logo/Sennheiser/Sennheiser-Logo.wine.svg' },
+    { name: 'Beats', logo: 'https://www.logo.wine/a/logo/Beats_Electronics/Beats_Electronics-Logo.wine.svg' },
+    { name: 'Marshall', logo: 'https://www.logo.wine/a/logo/Marshall_Amplification/Marshall_Amplification-Logo.wine.svg' }
+  ],
+  'mobile & tablets/accessories': [
+    { name: 'Anker', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Anker_Logo.svg' },
+    { name: 'Belkin', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Belkin_logo.svg' },
+    { name: 'Spigen', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Spigen_logo.png' },
+    { name: 'Baseus', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e7/Baseus_logo.svg' },
+    { name: 'OtterBox', logo: 'https://www.logo.wine/a/logo/OtterBox/OtterBox-Logo.wine.svg' }
+  ],
+  'fashion': [
+    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
+    { name: 'Adidas', logo: 'https://www.logo.wine/a/logo/Adidas/Adidas-Logo.wine.svg' },
+    { name: 'Zara', logo: 'https://www.logo.wine/a/logo/Zara_(retailer)/Zara_(retailer)-Logo.wine.svg' },
+    { name: 'H&M', logo: 'https://www.logo.wine/a/logo/H%26M/H%26M-Logo.wine.svg' },
+    { name: 'Gucci', logo: 'https://www.logo.wine/a/logo/Gucci/Gucci-Logo.wine.svg' },
+    { name: 'Prada', logo: 'https://www.logo.wine/a/logo/Prada/Prada-Logo.wine.svg' }
+  ],
+  'fashion/shoes': [
+    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
+    { name: 'Adidas', logo: 'https://www.logo.wine/a/logo/Adidas/Adidas-Logo.wine.svg' },
+    { name: 'Puma', logo: 'https://www.logo.wine/a/logo/Puma_(brand)/Puma_(brand)-Logo.wine.svg' },
+    { name: 'Reebok', logo: 'https://www.logo.wine/a/logo/Reebok/Reebok-Logo.wine.svg' },
+    { name: 'Vans', logo: 'https://www.logo.wine/a/logo/Vans/Vans-Logo.wine.svg' },
+    { name: 'Converse', logo: 'https://www.logo.wine/a/logo/Converse_(shoe_company)/Converse_(shoe_company)-Logo.wine.svg' }
+  ],
+  'home & furniture': [
+    { name: 'IKEA', logo: 'https://www.logo.wine/a/logo/IKEA/IKEA-Logo.wine.svg' },
+    { name: 'Wayfair', logo: 'https://www.logo.wine/a/logo/Wayfair/Wayfair-Logo.wine.svg' },
+    { name: 'Ashley', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/29/Ashley_Furniture_Industries_logo.svg' },
+    { name: 'Pottery Barn', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e7/Pottery_Barn_logo.svg' },
+    { name: 'West Elm', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/West_Elm_logo.svg' }
+  ],
+  'sports & outdoors': [
+    { name: 'North Face', logo: 'https://www.logo.wine/a/logo/The_North_Face/The_North_Face-Logo.wine.svg' },
+    { name: 'Columbia', logo: 'https://www.logo.wine/a/logo/Columbia_Sportswear/Columbia_Sportswear-Logo.wine.svg' },
+    { name: 'Patagonia', logo: 'https://www.logo.wine/a/logo/Patagonia%2C_Inc./Patagonia%2C_Inc.-Logo.wine.svg' },
+    { name: 'Under Armour', logo: 'https://www.logo.wine/a/logo/Under_Armour/Under_Armour-Logo.wine.svg' },
+    { name: 'Wilson', logo: 'https://www.logo.wine/a/logo/Wilson_Sporting_Goods/Wilson_Sporting_Goods-Logo.wine.svg' },
+    { name: 'Puma', logo: 'https://www.logo.wine/a/logo/Puma_(brand)/Puma_(brand)-Logo.wine.svg' }
+  ],
+  'health & beauty': [
+    { name: "L'Oreal", logo: "https://www.logo.wine/a/logo/L%27Or%C3%A9al/L%27Or%C3%A9al-Logo.wine.svg" },
+    { name: 'Estee Lauder', logo: 'https://www.logo.wine/a/logo/The_Est%C3%A9e_Lauder_Companies/The_Est%C3%A9e_Lauder_Companies-Logo.wine.svg' },
+    { name: 'Neutrogena', logo: 'https://upload.wikimedia.org/wikipedia/commons/1/13/Neutrogena_logo.svg' },
+    { name: 'Sephora', logo: 'https://www.logo.wine/a/logo/Sephora/Sephora-Logo.wine.svg' },
+    { name: 'Dove', logo: 'https://www.logo.wine/a/logo/Dove_(brand)/Dove_(brand)-Logo.wine.svg' }
+  ],
+  'automotive': [
+    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
+    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
+    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' },
+    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
+    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
+    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' }
+  ],
+  'vehicles': [
+    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
+    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
+    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' },
+    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
+    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
+    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' }
+  ],
+  'vehicles/cars': [
+    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
+    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
+    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
+    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
+    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' },
+    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' }
+  ],
+  'vehicles/vehicle parts & accessories': [
+    { name: 'Engine & Drivetrain', spritePos: '0%' },
+    { name: 'Exterior Accessories', spritePos: '20%' },
+    { name: 'Oils & Fluids', spritePos: '40%' },
+    { name: 'Safety & Security', spritePos: '60%' },
+    { name: 'Wheels & Parts', spritePos: '80%' },
+    { name: 'Headlights & Lighting', spritePos: '100%' }
+  ],
+  'vehicles/car parts': [
+    { name: 'Engine & Drivetrain', spritePos: '0%' },
+    { name: 'Exterior Accessories', spritePos: '20%' },
+    { name: 'Oils & Fluids', spritePos: '40%' },
+    { name: 'Safety & Security', spritePos: '60%' },
+    { name: 'Wheels & Parts', spritePos: '80%' },
+    { name: 'Headlights & Lighting', spritePos: '100%' }
+  ],
+  'vehicles/accessories': [
+    { name: 'Engine & Drivetrain', spritePos: '0%' },
+    { name: 'Exterior Accessories', spritePos: '20%' },
+    { name: 'Oils & Fluids', spritePos: '40%' },
+    { name: 'Safety & Security', spritePos: '60%' },
+    { name: 'Wheels & Parts', spritePos: '80%' },
+    { name: 'Headlights & Lighting', spritePos: '100%' }
+  ],
+  'vehicles/motorcycles & scooters': [
+    { name: 'Yamaha', logo: 'https://www.logo.wine/a/logo/Yamaha_Motor_Company/Yamaha_Motor_Company-Logo.wine.svg' },
+    { name: 'Honda', logo: 'https://www.logo.wine/a/logo/Honda/Honda-Logo.wine.svg' },
+    { name: 'Kawasaki', logo: 'https://www.logo.wine/a/logo/Kawasaki_Heavy_Industries/Kawasaki_Heavy_Industries-Logo.wine.svg' },
+    { name: 'Ducati', logo: 'https://www.logo.wine/a/logo/Ducati_Motor_Holding_S.p.A./Ducati_Motor_Holding_S.p.A.-Logo.wine.svg' },
+    { name: 'Harley-Davidson', logo: 'https://www.logo.wine/a/logo/Harley-Davidson/Harley-Davidson-Logo.wine.svg' },
+    { name: 'Suzuki', logo: 'https://www.logo.wine/a/logo/Suzuki/Suzuki-Logo.wine.svg' }
+  ],
+  'toys & games': [
+    { name: 'LEGO', logo: 'https://www.logo.wine/a/logo/Lego/Lego-Logo.wine.svg' },
+    { name: 'Nintendo', logo: 'https://www.logo.wine/a/logo/Nintendo/Nintendo-Logo.wine.svg' },
+    { name: 'PlayStation', logo: 'https://www.logo.wine/a/logo/PlayStation/PlayStation-Logo.wine.svg' },
+    { name: 'Xbox', logo: 'https://www.logo.wine/a/logo/Xbox/Xbox-Logo.wine.svg' },
+    { name: 'Hasbro', logo: 'https://www.logo.wine/a/logo/Hasbro/Hasbro-Logo.wine.svg' },
+    { name: 'Mattel', logo: 'https://www.logo.wine/a/logo/Mattel/Mattel-Logo.wine.svg' }
+  ],
+  'global': [
+    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
+    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
+    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
+    { name: 'Amazon', logo: 'https://www.logo.wine/a/logo/Amazon_(company)/Amazon_(company)-Logo.wine.svg' },
+    { name: 'IKEA', logo: 'https://www.logo.wine/a/logo/IKEA/IKEA-Logo.wine.svg' },
+    { name: 'Sony', logo: 'https://www.logo.wine/a/logo/Sony/Sony-Logo.wine.svg' }
+  ]
+};
+
 export default function Category() {
   const { categoryName } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const decodedCategoryName = categoryName ? decodeURIComponent(categoryName) : '';
@@ -415,32 +577,60 @@ export default function Category() {
     <div className="min-h-screen bg-white">
       {/* Mobile Layout */}
       <div className="md:hidden">
-        {/* Category Banner */}
-        <section className="pt-0 pb-2 bg-white">
-          <div className={`relative overflow-hidden ${banner.bgColor} text-white min-h-[80px] shadow-xl`}>
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.35),transparent_55%)]" />
-            <div className="relative py-3 px-3">
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-lg">{banner.icon}</span>
-                <span className="text-[7px] font-bold uppercase tracking-wider text-white/90">
-                  {decodedCategoryName}
-                </span>
+        {/* Brands Section - Mobile (Replaces Banner) */}
+        <div className="bg-white px-4 py-4 overflow-x-auto scrollbar-hide border-b border-gray-50">
+          {(() => {
+            const categoryKey = displayCategoryName.toLowerCase();
+            const subcategoryKey = subcategoryParam ? `${categoryKey}/${subcategoryParam.toLowerCase()}` : null;
+            const currentBrands = brandMap[subcategoryKey] || brandMap[categoryKey] || brandMap['global'];
+
+            if (!currentBrands) return null;
+
+            return (
+              <div className="flex items-center gap-6 pr-4">
+                {currentBrands.map((brand) => (
+                  <div
+                    key={brand.name}
+                    onClick={() => {
+                      const url = `/category/${encodeURIComponent(decodedCategoryName)}?search=${encodeURIComponent(brand.name)}`;
+                      navigate(url);
+                    }}
+                    className="flex flex-col items-center justify-center gap-2 min-w-[70px] transition-all cursor-pointer group"
+                  >
+                    <div className="h-10 w-full flex items-center justify-center">
+                      {brand.spritePos ? (
+                        <div
+                          className="w-10 h-10 rounded-full bg-no-repeat bg-white shadow-sm border border-gray-100"
+                          style={{
+                            backgroundImage: 'url(/assets/car_parts_sprite.png)',
+                            backgroundPosition: `${brand.spritePos} 12%`,
+                            backgroundSize: '600% auto',
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src={brand.logo}
+                          alt={brand.name}
+                          className="max-h-full max-w-full object-contain transition-all duration-300 group-hover:scale-110"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      )}
+                    </div>
+                    <span className="text-[9px] font-bold text-[#3b82f6] uppercase tracking-tight text-center whitespace-nowrap group-hover:text-blue-700 transition-colors">
+                      {brand.name}
+                    </span>
+                  </div>
+                ))}
               </div>
-              <h2 className="text-base font-bold mb-0.5 text-white !text-white">{banner.title}</h2>
-              <p className="text-[10px] text-white/80 mb-1.5 !text-white/80">{banner.subtitle}</p>
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="inline-flex items-center gap-0.5 bg-white text-gray-900 font-semibold px-2 py-0.5 rounded-full shadow hover:bg-white/90 transition-colors text-[8px]"
-              >
-                Explore
-                <ChevronRight className="w-2 h-2" />
-              </button>
-            </div>
-          </div>
-        </section>
+            );
+          })()}
+        </div>
 
         {/* Header */}
-        <div className="sticky top-[56px] z-40 bg-white border-b border-gray-200 px-4 py-3">
+        <div className="sticky top-[44px] z-40 bg-white border-b border-gray-200 px-4 py-3">
           <div className="flex items-center gap-3">
             <Link to="/" className="p-1 -ml-1">
               <ArrowLeft className="w-6 h-6 text-gray-700" />
@@ -652,7 +842,7 @@ export default function Category() {
                             <div className={`w-14 h-14 rounded-full flex items-center justify-center text-lg border transition-all ${isSelected ? 'bg-orange-50 border-orange-500 text-orange-600 shadow-sm' : 'bg-gray-50 border-gray-100 text-gray-500 group-hover:bg-white group-hover:border-orange-300 group-hover:shadow-sm'}`}>
                               {getSubIcon(sub)}
                             </div>
-                            <span className={`text-[10px] leading-[1.1] text-center w-full px-0.5 font-bold mt-1 ${isSelected ? 'text-orange-600' : 'text-gray-900 group-hover:text-orange-600'}`}>
+                            <span className={`text-[9.5px] leading-tight text-center w-full px-0.5 font-bold mt-1 ${isSelected ? 'text-orange-600' : 'text-gray-900 group-hover:text-orange-600'}`}>
                               {sub}
                             </span>
                           </Link>
@@ -702,169 +892,6 @@ export default function Category() {
             <div className="flex-1 min-w-0">
               {/* Dynamic Brand/Model Navigation */}
               {(() => {
-                const brandMap = {
-                  'mobile & tablets': [
-                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
-                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
-                    { name: 'Xiaomi', logo: 'https://www.logo.wine/a/logo/Xiaomi/Xiaomi-Logo.wine.svg' },
-                    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
-                    { name: 'Microsoft', logo: 'https://www.logo.wine/a/logo/Microsoft/Microsoft-Logo.wine.svg' },
-                    { name: 'Sony', logo: 'https://www.logo.wine/a/logo/Sony/Sony-Logo.wine.svg' }
-                  ],
-                  'mobile & tablets/phones': [
-                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
-                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
-                    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
-                    { name: 'Xiaomi', logo: 'https://www.logo.wine/a/logo/Xiaomi/Xiaomi-Logo.wine.svg' },
-                    { name: 'Oppo', logo: 'https://www.logo.wine/a/logo/Oppo/Oppo-Logo.wine.svg' },
-                    { name: 'Vivo', logo: 'https://www.logo.wine/a/logo/Vivo_(technology_company)/Vivo_(technology_company)-Logo.wine.svg' }
-                  ],
-                  'mobile & tablets/tablets': [
-                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
-                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
-                    { name: 'Microsoft', logo: 'https://www.logo.wine/a/logo/Microsoft/Microsoft-Logo.wine.svg' },
-                    { name: 'Amazon', logo: 'https://www.logo.wine/a/logo/Amazon_(company)/Amazon_(company)-Logo.wine.svg' },
-                    { name: 'Lenovo', logo: 'https://www.logo.wine/a/logo/Lenovo/Lenovo-Logo.wine.svg' },
-                    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' }
-                  ],
-                  'mobile & tablets/smart watches': [
-                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
-                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
-                    { name: 'Garmin', logo: 'https://www.logo.wine/a/logo/Garmin/Garmin-Logo.wine.svg' },
-                    { name: 'Fitbit', logo: 'https://www.logo.wine/a/logo/Fitbit/Fitbit-Logo.wine.svg' },
-                    { name: 'Huawei', logo: 'https://www.logo.wine/a/logo/Huawei/Huawei-Logo.wine.svg' },
-                    { name: 'Amazfit', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Amazfit_logo.svg' }
-                  ],
-                  'mobile & tablets/headphones': [
-                    { name: 'Bose', logo: 'https://www.logo.wine/a/logo/Bose_Corporation/Bose_Corporation-Logo.wine.svg' },
-                    { name: 'Sony', logo: 'https://www.logo.wine/a/logo/Sony/Sony-Logo.wine.svg' },
-                    { name: 'JBL', logo: 'https://www.logo.wine/a/logo/JBL/JBL-Logo.wine.svg' },
-                    { name: 'Sennheiser', logo: 'https://www.logo.wine/a/logo/Sennheiser/Sennheiser-Logo.wine.svg' },
-                    { name: 'Beats', logo: 'https://www.logo.wine/a/logo/Beats_Electronics/Beats_Electronics-Logo.wine.svg' },
-                    { name: 'Marshall', logo: 'https://www.logo.wine/a/logo/Marshall_Amplification/Marshall_Amplification-Logo.wine.svg' }
-                  ],
-                  'mobile & tablets/accessories': [
-                    { name: 'Anker', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Anker_Logo.svg' },
-                    { name: 'Belkin', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Belkin_logo.svg' },
-                    { name: 'Spigen', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0a/Spigen_logo.png' },
-                    { name: 'Baseus', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e7/Baseus_logo.svg' },
-                    { name: 'OtterBox', logo: 'https://www.logo.wine/a/logo/OtterBox/OtterBox-Logo.wine.svg' }
-                  ],
-                  'fashion': [
-                    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
-                    { name: 'Adidas', logo: 'https://www.logo.wine/a/logo/Adidas/Adidas-Logo.wine.svg' },
-                    { name: 'Zara', logo: 'https://www.logo.wine/a/logo/Zara_(retailer)/Zara_(retailer)-Logo.wine.svg' },
-                    { name: 'H&M', logo: 'https://www.logo.wine/a/logo/H%26M/H%26M-Logo.wine.svg' },
-                    { name: 'Gucci', logo: 'https://www.logo.wine/a/logo/Gucci/Gucci-Logo.wine.svg' },
-                    { name: 'Prada', logo: 'https://www.logo.wine/a/logo/Prada/Prada-Logo.wine.svg' }
-                  ],
-                  'fashion/shoes': [
-                    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
-                    { name: 'Adidas', logo: 'https://www.logo.wine/a/logo/Adidas/Adidas-Logo.wine.svg' },
-                    { name: 'Puma', logo: 'https://www.logo.wine/a/logo/Puma_(brand)/Puma_(brand)-Logo.wine.svg' },
-                    { name: 'Reebok', logo: 'https://www.logo.wine/a/logo/Reebok/Reebok-Logo.wine.svg' },
-                    { name: 'Vans', logo: 'https://www.logo.wine/a/logo/Vans/Vans-Logo.wine.svg' },
-                    { name: 'Converse', logo: 'https://www.logo.wine/a/logo/Converse_(shoe_company)/Converse_(shoe_company)-Logo.wine.svg' }
-                  ],
-                  'home & furniture': [
-                    { name: 'IKEA', logo: 'https://www.logo.wine/a/logo/IKEA/IKEA-Logo.wine.svg' },
-                    { name: 'Wayfair', logo: 'https://www.logo.wine/a/logo/Wayfair/Wayfair-Logo.wine.svg' },
-                    { name: 'Pottery Barn', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e7/Pottery_Barn_logo.svg' },
-                    { name: 'West Elm', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/West_Elm_logo.svg' },
-                    { name: 'Ashley', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Ashley_HomeStore_logo.svg' },
-                    { name: 'Herman Miller', logo: 'https://www.logo.wine/a/logo/Herman_Miller/Herman_Miller-Logo.wine.svg' }
-                  ],
-                  'sports & outdoors': [
-                    { name: 'North Face', logo: 'https://www.logo.wine/a/logo/The_North_Face/The_North_Face-Logo.wine.svg' },
-                    { name: 'Columbia', logo: 'https://www.logo.wine/a/logo/Columbia_Sportswear/Columbia_Sportswear-Logo.wine.svg' },
-                    { name: 'Patagonia', logo: 'https://www.logo.wine/a/logo/Patagonia%2C_Inc./Patagonia%2C_Inc.-Logo.wine.svg' },
-                    { name: 'Under Armour', logo: 'https://www.logo.wine/a/logo/Under_Armour/Under_Armour-Logo.wine.svg' },
-                    { name: 'Wilson', logo: 'https://www.logo.wine/a/logo/Wilson_Sporting_Goods/Wilson_Sporting_Goods-Logo.wine.svg' },
-                    { name: 'Puma', logo: 'https://www.logo.wine/a/logo/Puma_(brand)/Puma_(brand)-Logo.wine.svg' }
-                  ],
-                  'health & beauty': [
-                    { name: "L'Oreal", logo: "https://www.logo.wine/a/logo/L%27Or%C3%A9al/L%27Or%C3%A9al-Logo.wine.svg" },
-                    { name: 'Estee Lauder', logo: 'https://www.logo.wine/a/logo/The_Est%C3%A9e_Lauder_Companies/The_Est%C3%A9e_Lauder_Companies-Logo.wine.svg' },
-                    { name: 'Neutrogena', logo: 'https://upload.wikimedia.org/wikipedia/commons/1/13/Neutrogena_logo.svg' },
-                    { name: 'Dove', logo: 'https://www.logo.wine/a/logo/Dove_(brand)/Dove_(brand)-Logo.wine.svg' },
-                    { name: 'Sephora', logo: 'https://www.logo.wine/a/logo/Sephora/Sephora-Logo.wine.svg' },
-                    { name: 'MAC', logo: 'https://www.logo.wine/a/logo/MAC_Cosmetics/MAC_Cosmetics-Logo.wine.svg' }
-                  ],
-                  'vehicles': [
-                    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
-                    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
-                    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' },
-                    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
-                    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
-                    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' }
-                  ],
-                  'vehicles/cars': [
-                    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
-                    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
-                    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
-                    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
-                    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' },
-                    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' }
-                  ],
-                  // Explicit mapping for "Car Parts" and "Accessories" to show the specific parts categories
-                  'vehicles/vehicle parts & accessories': [
-                    { name: 'Engine & Drivetrain', spritePos: '0%' },
-                    { name: 'Exterior Accessories', spritePos: '20%' },
-                    { name: 'Oils & Fluids', spritePos: '40%' },
-                    { name: 'Safety & Security', spritePos: '60%' },
-                    { name: 'Wheels & Parts', spritePos: '80%' },
-                    { name: 'Headlights & Lighting', spritePos: '100%' }
-                  ],
-                  'vehicles/car parts': [
-                    { name: 'Engine & Drivetrain', spritePos: '0%' },
-                    { name: 'Exterior Accessories', spritePos: '20%' },
-                    { name: 'Oils & Fluids', spritePos: '40%' },
-                    { name: 'Safety & Security', spritePos: '60%' },
-                    { name: 'Wheels & Parts', spritePos: '80%' },
-                    { name: 'Headlights & Lighting', spritePos: '100%' }
-                  ],
-                  'vehicles/accessories': [
-                    { name: 'Engine & Drivetrain', spritePos: '0%' },
-                    { name: 'Exterior Accessories', spritePos: '20%' },
-                    { name: 'Oils & Fluids', spritePos: '40%' },
-                    { name: 'Safety & Security', spritePos: '60%' },
-                    { name: 'Wheels & Parts', spritePos: '80%' },
-                    { name: 'Headlights & Lighting', spritePos: '100%' }
-                  ],
-                  'vehicles/motorcycles & scooters': [
-                    { name: 'Yamaha', logo: 'https://www.logo.wine/a/logo/Yamaha_Motor_Company/Yamaha_Motor_Company-Logo.wine.svg' },
-                    { name: 'Honda', logo: 'https://www.logo.wine/a/logo/Honda/Honda-Logo.wine.svg' },
-                    { name: 'Kawasaki', logo: 'https://www.logo.wine/a/logo/Kawasaki_Heavy_Industries/Kawasaki_Heavy_Industries-Logo.wine.svg' },
-                    { name: 'Ducati', logo: 'https://www.logo.wine/a/logo/Ducati_Motor_Holding_S.p.A./Ducati_Motor_Holding_S.p.A.-Logo.wine.svg' },
-                    { name: 'Harley-Davidson', logo: 'https://www.logo.wine/a/logo/Harley-Davidson/Harley-Davidson-Logo.wine.svg' },
-                    { name: 'Suzuki', logo: 'https://www.logo.wine/a/logo/Suzuki/Suzuki-Logo.wine.svg' }
-                  ],
-                  'toys & games': [
-                    { name: 'LEGO', logo: 'https://www.logo.wine/a/logo/Lego/Lego-Logo.wine.svg' },
-                    { name: 'Nintendo', logo: 'https://www.logo.wine/a/logo/Nintendo/Nintendo-Logo.wine.svg' },
-                    { name: 'PlayStation', logo: 'https://www.logo.wine/a/logo/PlayStation/PlayStation-Logo.wine.svg' },
-                    { name: 'Xbox', logo: 'https://www.logo.wine/a/logo/Xbox/Xbox-Logo.wine.svg' },
-                    { name: 'Hasbro', logo: 'https://www.logo.wine/a/logo/Hasbro/Hasbro-Logo.wine.svg' },
-                    { name: 'Mattel', logo: 'https://www.logo.wine/a/logo/Mattel/Mattel-Logo.wine.svg' }
-                  ],
-                  'automotive': [
-                    { name: 'Audi', logo: 'https://www.logo.wine/a/logo/Audi/Audi-Logo.wine.svg' },
-                    { name: 'BMW', logo: 'https://www.logo.wine/a/logo/BMW/BMW-Logo.wine.svg' },
-                    { name: 'Ford', logo: 'https://www.logo.wine/a/logo/Ford_Motor_Company/Ford_Motor_Company-Logo.wine.svg' },
-                    { name: 'Mercedes Benz', logo: 'https://www.logo.wine/a/logo/Mercedes-Benz/Mercedes-Benz-Logo.wine.svg' },
-                    { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/300px-Volkswagen_logo_2019.svg.png' },
-                    { name: 'Toyota', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/300px-Toyota_EU.svg.png' }
-                  ],
-                  'global': [
-                    { name: 'Apple', logo: 'https://www.logo.wine/a/logo/Apple_Inc./Apple_Inc.-Logo.wine.svg' },
-                    { name: 'Samsung', logo: 'https://www.logo.wine/a/logo/Samsung/Samsung-Logo.wine.svg' },
-                    { name: 'Nike', logo: 'https://www.logo.wine/a/logo/Nike%2C_Inc./Nike%2C_Inc.-Logo.wine.svg' },
-                    { name: 'Amazon', logo: 'https://www.logo.wine/a/logo/Amazon_(company)/Amazon_(company)-Logo.wine.svg' },
-                    { name: 'IKEA', logo: 'https://www.logo.wine/a/logo/IKEA/IKEA-Logo.wine.svg' },
-                    { name: 'Sony', logo: 'https://www.logo.wine/a/logo/Sony/Sony-Logo.wine.svg' }
-                  ]
-                };
-
                 const categoryKey = displayCategoryName.toLowerCase();
                 const subcategoryKey = subcategoryParam ? `${categoryKey}/${subcategoryParam.toLowerCase()}` : null;
                 const currentBrands = brandMap[subcategoryKey] || brandMap[categoryKey] || brandMap['global'];
@@ -888,8 +915,8 @@ export default function Category() {
                               className="w-12 h-12 rounded-full bg-no-repeat bg-white shadow-sm border border-gray-100"
                               style={{
                                 backgroundImage: 'url(/assets/car_parts_sprite.png)',
-                                backgroundPosition: `${brand.spritePos} 12%`, // Match sidebar logic to center the icon part
-                                backgroundSize: '600% auto', // 6 items horizontal
+                                backgroundPosition: `${brand.spritePos} 12%`,
+                                backgroundSize: '600% auto',
                               }}
                             />
                           ) : (
@@ -989,7 +1016,7 @@ export default function Category() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

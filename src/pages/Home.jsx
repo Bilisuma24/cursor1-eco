@@ -331,13 +331,7 @@ export default function Home() {
         >
           {deal.priceLabel}
         </span>
-        <span
-          className={`absolute right-2 bg-[#ff4747] text-white ${micro ? 'text-[6.5px]' : ultraCompact ? 'text-[7.5px]' : isUltra ? 'text-[9px]' : 'text-[11px]'
-            } font-semibold px-1.5 py-[2px] rounded-full ${micro ? 'top-1' : ultraCompact ? 'top-1.5' : isUltra ? 'top-2' : 'top-3'
-            }`}
-        >
-          -{deal.discount}%
-        </span>
+
         <div className={`w-full ${micro ? 'mt-2' : ultraCompact ? 'mt-2.5' : compact ? 'mt-4' : 'mt-8'}`}>
           <div
             className={`mx-auto aspect-video md:aspect-square ${micro
@@ -442,17 +436,7 @@ export default function Home() {
                   </button>
                 </div>
 
-                <div className="flex gap-1.5 overflow-x-auto">
-                  {heroDeals.slice(0, 2).map((deal, index) => (
-                    <HeroDealCard
-                      key={deal.id || index}
-                      deal={deal}
-                      ultraCompact
-                      micro
-                      className="min-w-[40px] flex-shrink-0"
-                    />
-                  ))}
-                </div>
+
               </div>
             </div>
           </div>
@@ -461,19 +445,21 @@ export default function Home() {
         {/* Mobile Categories - Under Banner */}
         <div className="px-3 py-3 bg-gray-50 border-b border-gray-200">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
-            <span className="flex-shrink-0 text-xs font-semibold uppercase tracking-wide text-gray-700">
-              Recommendations
+            <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              Pick for you
             </span>
             {/* Real category pills (inline with heading) - Redirect to category page */}
             {(productsData.categories || []).slice(0, 12).map((category, idx) => (
               <Link
                 key={category.id || `${category.name}-${idx}`}
                 to={`/category/${encodeURIComponent(category.name)}`}
-                className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-gray-700 border-2 border-gray-200 rounded-full font-semibold text-xs uppercase tracking-wide shadow-sm hover:border-gray-400 hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all whitespace-nowrap"
+                className="flex-shrink-0 inline-flex flex-col items-center gap-1 px-3 py-2 bg-white text-gray-700 border border-gray-100 rounded-lg shadow-sm active:bg-gray-50 active:scale-95 transition-all whitespace-nowrap min-w-[70px]"
                 title={`Browse ${category.name}`}
               >
-                {category.icon ? <span className="text-sm">{category.icon}</span> : null}
-                <span>{category.name}</span>
+                <span className="text-lg">{category.icon || '📦'}</span>
+                <span className="text-[8px] font-bold uppercase tracking-tight text-center max-w-[65px] truncate">
+                  {category.name}
+                </span>
               </Link>
             ))}
             <Link
@@ -492,8 +478,8 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 gap-2 p-2">
             {featuredProducts && featuredProducts.length > 0 ? (
-              featuredProducts.slice(0, 20).map((product) => (
-                <ProductCard key={product.id} product={product} />
+              featuredProducts.slice(0, 20).map((product, index) => (
+                <ProductCard key={`featured-${product.id}-${index}`} product={product} />
               ))
             ) : (
               <div className="col-span-2 p-4 text-center text-gray-500 text-sm">
@@ -510,8 +496,8 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 gap-2 px-2">
             {featuredProducts && featuredProducts.length > 0 ? (
-              featuredProducts.slice(0, 10).map((product) => (
-                <ProductCard key={product.id} product={product} />
+              featuredProducts.slice(0, 10).map((product, index) => (
+                <ProductCard key={`more-love-${product.id}-${index}`} product={product} />
               ))
             ) : (
               <div className="col-span-2 p-4 text-center text-gray-500 text-sm">
@@ -550,18 +536,11 @@ export default function Home() {
                         <ChevronRight className="w-5 h-5" />
                       </button>
                       <div className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wide">
-                        <span className="bg-white text-[#3b82f6] rounded-full px-2.5 py-1">
-                          -{heroDeals[0]?.discount || 80}%
-                        </span>
                         <span>exclusive welcome deal</span>
                       </div>
                     </div>
                   </div>
-                  {heroDeals[0] && (
-                    <div className="hidden lg:block">
-                      <HeroDealCard deal={heroDeals[0]} ultraCompact micro className="w-32 h-32 p-2.5" />
-                    </div>
-                  )}
+
                 </div>
               </div>
             </div>
@@ -578,7 +557,7 @@ export default function Home() {
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 p-2 md:p-0">
                 {topDealProducts.map((product, index) => (
-                  <ProductCard key={product.id || index} product={product} />
+                  <ProductCard key={`top-deal-${product.id}-${index}`} product={product} />
                 ))}
               </div>
             </section>
@@ -604,8 +583,8 @@ export default function Home() {
                 </Link>
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 p-2 md:p-0">
-                {trendingProducts.slice(0, 10).map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {trendingProducts.slice(0, 10).map((product, index) => (
+                  <ProductCard key={`trending-${product.id}-${index}`} product={product} />
                 ))}
               </div>
             </section>
@@ -620,8 +599,8 @@ export default function Home() {
                 </Link>
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 p-2 md:p-0">
-                {featuredProducts.slice(0, 12).map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {featuredProducts.slice(0, 12).map((product, index) => (
+                  <ProductCard key={`recommended-${product.id}-${index}`} product={product} />
                 ))}
               </div>
             </section>

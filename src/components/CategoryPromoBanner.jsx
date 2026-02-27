@@ -117,22 +117,16 @@ export default function CategoryPromoBanner({ products, title = "SuperDeals" }) 
                                         <div className="flex flex-col">
                                             <span className="text-base sm:text-lg font-bold text-[#191919] flex items-baseline">
                                                 <span className="text-[10px] sm:text-xs mr-0.5">{product.currency}</span>
-                                                <span>{product.price.toFixed(2)}</span>
+                                                <span>{(product.price || 0).toFixed(2)}</span>
                                             </span>
                                             {product.originalPrice && (
                                                 <span className="text-xs text-gray-400 line-through flex items-baseline opacity-80">
                                                     <span className="text-[9px] sm:text-[10px] mr-1">{product.currency}</span>
-                                                    <span>{product.originalPrice.toFixed(2)}</span>
+                                                    <span>{(product.originalPrice || 0).toFixed(2)}</span>
                                                 </span>
                                             )}
                                         </div>
-                                        {product.discount && (
-                                            <div className="mt-1">
-                                                <span className="bg-[#ff4747] text-white px-1.5 py-0.5 rounded-sm text-xs font-bold">
-                                                    -{product.discount}%
-                                                </span>
-                                            </div>
-                                        )}
+
                                     </div>
                                 </Link>
                             ))}

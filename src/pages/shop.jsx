@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Grid, List, Filter, SortAsc, Loader, Search, ShoppingCart, User } from "lucide-react";
+import { Grid, List, Filter, SortAsc, Loader, Search, ShoppingCart, User, ChevronUp } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import SearchAndFilter from "../components/SearchAndFilter";
 import productsData from "../data/products.js";
@@ -675,23 +675,113 @@ CREATE POLICY "public_read_products"
 
   // Get subcategories for the selected category
   const getSubcategoriesForCategory = () => {
-    if (!filters.category) return [];
-    const categoryObj = categories.find(cat => cat.name === filters.category);
+    if (!selectedCategory || selectedCategory === 'All' || selectedCategory === 'For you') return [];
+    const categoryObj = categories.find(cat => cat.name === selectedCategory);
     return categoryObj?.subcategories || [];
   };
 
   const availableSubcategories = getSubcategoriesForCategory();
 
+  // Sprite mapping for "Mobile & Tablets"
+  const mobileSpritePositions = {
+    'phones': { x: '0%', y: '5%' },
+    'tablets': { x: '25%', y: '5%' },
+    'accessories': { x: '50%', y: '5%' },
+    'smart watches': { x: '75%', y: '5%' },
+    'headphones': { x: '100%', y: '5%' }
+  };
+
+  // Sprite mapping for "Home & Furniture"
+  const homeSpritePositions = {
+    'furniture': { x: '0%', y: '2%' },
+    'decor': { x: '50%', y: '2%' },
+    'kitchen': { x: '100%', y: '2%' },
+    'bathroom': { x: '0%', y: '58%' },
+    'garden': { x: '50%', y: '58%' },
+    'tools': { x: '100%', y: '58%' }
+  };
+
+  // Dynamic Icon based on subcategory name
+  const getSubIcon = (name, index) => {
+    const lower = name.toLowerCase();
+    const isVehicles = selectedCategory?.toLowerCase() === 'vehicles';
+
+    // Specific override for "Cars" in Vehicles
+    if (lower === 'cars' && isVehicles) {
+      return (
+        <div
+          className="w-full h-full rounded-full bg-no-repeat bg-white"
+          style={{
+            backgroundImage: 'url(/assets/car_icon_red.jpg)',
+            backgroundPosition: 'center',
+            backgroundSize: '110%',
+          }}
+        />
+      );
+    }
+
+    // Specific override for Car Parts & Accessories in Vehicles
+    if (isVehicles && (lower === 'vehicle parts & accessories' || lower === 'car parts' || lower === 'accessories')) {
+      return (
+        <div
+          className="w-full h-full rounded-full bg-no-repeat bg-white"
+          style={{
+            backgroundImage: 'url(/assets/car_parts_icon.png)',
+            backgroundPosition: 'center',
+            backgroundSize: '100%',
+          }}
+        />
+      );
+    }
+
+    // Check for Mobile sprite mapping
+    if (mobileSpritePositions[lower] && selectedCategory?.toLowerCase() === 'mobile & tablets') {
+      return (
+        <div
+          className="w-full h-full rounded-full bg-no-repeat bg-white"
+          style={{
+            backgroundImage: 'url(/assets/mobile_electronics_sprite.png)',
+            backgroundPosition: `${mobileSpritePositions[lower].x} ${mobileSpritePositions[lower].y}`,
+            backgroundSize: '525% 150%',
+          }}
+        />
+      );
+    }
+
+    // Check for Home & Furniture sprite mapping
+    if (homeSpritePositions[lower]) {
+      return (
+        <div
+          className="w-full h-full rounded-full bg-no-repeat bg-white"
+          style={{
+            backgroundImage: 'url(/assets/home_furniture_sprite.png)',
+            backgroundPosition: `${homeSpritePositions[lower].x} ${homeSpritePositions[lower].y}`,
+            backgroundSize: '320% 260%',
+          }}
+        />
+      );
+    }
+
+    const fallbackIcons = ['🎧', '⌚', '📷', '🔒', '💻', '📱'];
+    return <span className="text-xl">{fallbackIcons[index % fallbackIcons.length]}</span>;
+  };
+
   // Handle subcategory selection
   const handleSubcategorySelect = (subcategory) => {
-    if (filters.subcategory === subcategory) {
-      // If already selected, clear subcategory filter
-      setFilters((prev) => ({ ...prev, subcategory: '' }));
-      navigate(`/shop?category=${encodeURIComponent(filters.category)}`);
+    const categoryName = filters.category || selectedCategory;
+
+    if (window.innerWidth < 768) {
+      // Mobile: Navigate to a new page (Category page) for the product list
+      navigate(`/category/${encodeURIComponent(categoryName)}?subcategory=${encodeURIComponent(subcategory)}`);
     } else {
-      // Select new subcategory
-      setFilters((prev) => ({ ...prev, subcategory }));
-      navigate(`/shop?category=${encodeURIComponent(filters.category)}&subcategory=${encodeURIComponent(subcategory)}`);
+      // Desktop: Stay on page and filter
+      if (filters.subcategory === subcategory) {
+        setFilters((prev) => ({ ...prev, subcategory: '' }));
+        navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+      } else {
+        setFilters((prev) => ({ ...prev, subcategory }));
+        navigate(`/shop?category=${encodeURIComponent(categoryName)}&subcategory=${encodeURIComponent(subcategory)}`);
+      }
     }
   };
 
@@ -716,66 +806,50 @@ CREATE POLICY "public_read_products"
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Mobile Category Layout */}
       <div className="md:hidden">
-        {/* Header (fixed on mobile to always stay visible) */}
-        <div className="fixed inset-x-0 top-0 z-40 bg-white border-b border-gray-200">
-          <div className="px-4 py-3 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900">Eco</span>
-              <span className="text-xl font-bold text-orange-500">Store</span>
-            </Link>
-            <button
-              onClick={() => navigate('/shop')}
-              className="p-2"
-            >
-              <Search className="w-6 h-6 text-gray-700" />
-            </button>
-          </div>
-        </div>
-
-        {/* Spacer to offset fixed header height */}
-        <div className="h-[56px]" />
-
         {/* Two-Panel Layout */}
-        <div className="flex h-[calc(100vh-140px)] overflow-hidden">
+        <div className="flex h-[calc(100vh-101px)] overflow-hidden">
           {/* Left Panel - Categories List */}
-          <div className="w-24 bg-white border-r border-gray-200 overflow-y-auto">
-            <div className="py-1.5">
-              {allCategories.map((category, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleCategorySelect(category)}
-                  className={`w-full text-left px-2 py-1.5 text-[11px] leading-tight transition-colors relative ${selectedCategory === category
-                    ? 'text-red-500 font-semibold'
-                    : 'text-gray-900'
-                    }`}
-                >
-                  <span className="relative">
-                    {category}
-                    {selectedCategory === category && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500"></span>
+          <div className="w-[115px] bg-[#f7f8f9] border-r border-gray-100 overflow-y-auto">
+            <div className="flex flex-col">
+              {allCategories.map((category, index) => {
+                const isSelected = selectedCategory === category;
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleCategorySelect(category)}
+                    className={`w-full text-left py-3.5 px-3 border-b border-gray-100/50 transition-all duration-200 relative ${isSelected
+                      ? 'bg-white text-[#ff4747] font-bold'
+                      : 'text-gray-600 font-medium'
+                      }`}
+                  >
+                    {isSelected && (
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#ff4747]" />
                     )}
-                  </span>
-                </button>
-              ))}
+                    <span className="block truncate leading-none text-[10px]">
+                      {category}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Right Panel - Product Grid */}
-          <div className="flex-1 overflow-y-auto bg-gray-50">
-            <div className="p-3 pb-20">
+          <div className="flex-1 bg-white overflow-y-auto pb-20">
+            <div className="p-3">
               {/* Network Error Banner - Mobile */}
               {networkError && (
-                <div className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded-lg">
+                <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg">
                   <div className="flex items-start gap-2">
                     <span className="text-red-600 text-lg">⚠️</span>
                     <div className="flex-1">
-                      <h3 className="text-red-900 font-semibold text-sm mb-1">No Internet Connection</h3>
-                      <p className="text-red-800 text-xs mb-2">
-                        Seller products require internet. Showing static products only.
+                      <p className="text-red-800 text-[10px] leading-tight mb-2">
+                        Seller products stored in Supabase require connection. Showing static products only.
                       </p>
                       <button
                         onClick={fetchProducts}
-                        className="text-xs text-red-700 hover:text-red-900 underline font-medium"
+                        className="text-[10px] text-red-700 hover:text-red-900 underline font-medium"
                       >
                         Retry Connection
                       </button>
@@ -784,7 +858,38 @@ CREATE POLICY "public_read_products"
                 </div>
               )}
 
-              <h2 className="text-sm font-semibold text-gray-900 mb-3">Recommended</h2>
+
+              {/* Subcategories Icons Grid - Mobile */}
+              {availableSubcategories.length > 0 && (
+                <div className="grid grid-cols-3 gap-y-4 mb-6">
+                  {availableSubcategories.map((sub, index) => {
+                    const isSelected = filters.subcategory === sub;
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => handleSubcategorySelect(sub)}
+                        className="flex flex-col items-center gap-1 group"
+                      >
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center p-2 mb-1 transition-all duration-200 ${isSelected ? 'bg-orange-50 border-2 border-orange-500' : 'bg-gray-50 border border-gray-100 hover:border-gray-200'
+                          }`}>
+                          <div className="w-full h-full flex items-center justify-center">
+                            {getSubIcon(sub, index)}
+                          </div>
+                        </div>
+                        <span className={`text-[10px] text-center font-medium leading-tight max-w-[65px] ${isSelected ? 'text-orange-600 font-bold' : 'text-gray-700'
+                          }`}>
+                          {sub}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between mb-4 border-t border-gray-100 pt-4">
+                <h2 className="text-sm font-bold text-gray-900 italic">Recommended</h2>
+                <ChevronUp className="w-4 h-4 text-gray-400" />
+              </div>
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500 text-sm">No products found</p>
